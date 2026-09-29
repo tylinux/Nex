@@ -933,7 +933,14 @@ function applyProviderStoreMigrations(providers: ModelProviderConfig[]): ModelPr
 /** 只读取已发布旧 config.json；更早期的独立 Provider Store 已退出所有迁移链路。 */
 export async function readLegacyNexConfigProviders(): Promise<ModelProviderConfig[]> {
   const configProviders = await readNexConfigProviders();
-  return configProviders ? filterDeletedProviderModelsForRead(configProviders) : [];
+  if (!configProviders) return [];
+  // Nex has no built-in providers: entries inherited from the ZCode config
+  // (builtin:* templates/enabled states) must not leak into the personal
+  // provider registry during migration.
+  const migrated = configProviders.filter(
+    (provider) => !provider.id.startsWith("builtin:"),
+  );
+  return filterDeletedProviderModelsForRead(migrated);
 }
 
 function filterDeletedProviderModelsForRead(
