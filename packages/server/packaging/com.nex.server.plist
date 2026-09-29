@@ -25,6 +25,8 @@
     <string>0.0.0.0</string>
     <key>NEX_SERVER_PORT</key>
     <string>3030</string>
+    <key>NEX_SERVER_AUTH_TOKEN</key>
+    <string>REPLACE_ME_TOKEN</string>
     <key>NEX_DATA_BASE_DIR</key>
     <string>/Users/REPLACE_ME/.nex/server-data</string>
   </dict>
