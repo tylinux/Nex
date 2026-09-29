@@ -1,5 +1,6 @@
 import {
   DesktopCommandIds,
+  TID_WORKSPACE_HELP_MENU_ABOUT,
   TID_WORKSPACE_HELP_MENU_RESOURCE_MANAGER,
   TID_WORKSPACE_HELP_MENU_TRIGGER,
 } from "@nex/shared";
@@ -10,6 +11,7 @@ import {
   MessageSquareIcon,
   RefreshCwIcon,
 } from "lucide-react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge.js";
 import { Button } from "@/components/ui/button.js";
 import {
@@ -25,6 +27,7 @@ import { useDesktopUpdateMenu } from "@/hooks/useDesktopUpdateMenu.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useNexIntl } from "@/i18n/IntlProvider.js";
 import { NEX_GITHUB_ISSUES_URL } from "@/lib/productLinks.js";
+import { AboutDialog } from "@/WorkspaceAboutDialog.js";
 
 export function WorkspaceHelpMenuButton({
   className,
@@ -41,12 +44,13 @@ export function WorkspaceHelpMenuButton({
   const platform = usePlatform();
   const updateMenu = useDesktopUpdateMenu(isDesktop);
   const helpMenuLabel = intl.formatMessage({ id: "workspaceHeader.help.menu" });
+  const [aboutOpen, setAboutOpen] = useState(false);
   const handleOpenResourceManager = () => {
     void platform.executeDesktopCommand(DesktopCommandIds.OpenResourceManager);
   };
 
   const handleShowAbout = () => {
-    void platform.executeDesktopCommand(DesktopCommandIds.ShowAbout);
+    setAboutOpen(true);
   };
 
   return (
@@ -117,13 +121,15 @@ export function WorkspaceHelpMenuButton({
                 )}
               </DropdownMenuItem>
             ) : null}
-            <DropdownMenuItem onSelect={handleShowAbout}>
-              <InfoIcon className="size-4" />
-              {intl.formatMessage({ id: "titleBar.menu.help.about" })}
-            </DropdownMenuItem>
           </>
         ) : null}
+        {/* 关于：跨端自绘 Dialog（Web 没有 Electron 宿主，无法弹原生 About 窗口）。 */}
+        <DropdownMenuItem data-testid={TID_WORKSPACE_HELP_MENU_ABOUT} onSelect={handleShowAbout}>
+          <InfoIcon className="size-4" />
+          {intl.formatMessage({ id: "titleBar.menu.help.about" })}
+        </DropdownMenuItem>
       </DropdownMenuContent>
+      <AboutDialog isDesktop={isDesktop} open={aboutOpen} onOpenChange={setAboutOpen} />
     </DropdownMenu>
   );
 }
