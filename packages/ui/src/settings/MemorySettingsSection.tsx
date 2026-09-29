@@ -47,11 +47,14 @@ export function MemorySettingsSection({
   memoryService,
   onMemoryEnabledChange,
   workspaceDisplayNames = [],
+  onPreviewFile,
 }: {
   memoryEnabled: boolean;
   memoryService: MemoryCatalogService;
   onMemoryEnabledChange: (enabled: boolean) => Promise<void>;
   workspaceDisplayNames?: readonly string[];
+  /** 点击文件行时的预览回调（打开 workspace side pane）；缺席时行不可点。 */
+  onPreviewFile?: (request: { workspaceId: string; fileName: string }) => void;
 }) {
   const { intl } = useNexIntl();
   const catalogRequestIdRef = useRef(0);
@@ -177,6 +180,7 @@ export function MemorySettingsSection({
           workspaces={displayWorkspaces}
           onRefresh={handleRefresh}
           onScopeKeyChange={(workspaceId) => setSelectedWorkspaceId(workspaceId)}
+          onPreviewFile={onPreviewFile}
         />
       )}
     </div>

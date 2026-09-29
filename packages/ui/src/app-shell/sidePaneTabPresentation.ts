@@ -8,6 +8,7 @@ export interface SidePaneTabPresentationLabels {
   treemappingTitle: string;
   whiteboardTitle: string;
   modelTrajectoryTitle: string;
+  memoryPreviewTitle: string;
   developerToolsTitle: string;
   terminalTitle: string;
   subagentTypeLabel: string;
@@ -60,6 +61,9 @@ export function getSidePaneTabSearchHint(tab: WorkspaceSidePaneTab): string {
   if (tab.type === "whiteboard") return `${tab.title} whiteboard canvas draw sketch`;
   if (tab.type === "model-trajectory") {
     return `${tab.title ?? ""} ${tab.taskId} model trajectory call io`;
+  }
+  if (tab.type === "memory-preview") {
+    return `${tab.fileName} ${tab.workspaceId} memory preview`;
   }
   if (tab.type === "developer-tools") {
     return "developer tools token debug network status request response headers";
@@ -116,6 +120,7 @@ export function getSidePaneTabTypeLabel(
   if (tab.type === "treemapping") return labels.treemappingTitle;
   if (tab.type === "whiteboard") return labels.whiteboardTitle;
   if (tab.type === "model-trajectory") return labels.modelTrajectoryTitle;
+  if (tab.type === "memory-preview") return labels.memoryPreviewTitle;
   if (tab.type === "developer-tools") return labels.developerToolsTitle;
   if (tab.type === "terminal" || tab.type === "bash-output") return labels.terminalTitle;
   return labels.codeViewerTitle;

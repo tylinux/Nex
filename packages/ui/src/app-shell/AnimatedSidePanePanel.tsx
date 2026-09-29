@@ -16,6 +16,7 @@ import {
 import { horizontalListSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import type { BrowserViewScreenshotSurfacePreparePayload, GitChangeSourceId } from "@nex/shared";
 import { PreviewPane } from "@/PreviewPane.js";
+import { MemoryPreviewSidePane } from "@/app-shell/MemoryPreviewSidePane.js";
 import { SidePaneTerminalPane } from "@/SidePaneTerminalPane.js";
 import { useIsOfficeMode } from "@/hooks/useInterfaceMode.js";
 import { WorkspaceSidePaneToggleButton } from "@/WorkspaceSidePaneToggleButton.js";
@@ -882,6 +883,9 @@ export function AnimatedSidePanePanel({
         modelTrajectoryTitle: intl.formatMessage({
           id: "modelTrajectory.title",
         }),
+        memoryPreviewTitle: intl.formatMessage({
+          id: "settings.memory.preview.tabType",
+        }),
         developerToolsTitle: intl.formatMessage({
           id: "developerTools.title",
         }),
@@ -1242,6 +1246,12 @@ export function AnimatedSidePanePanel({
                             title={tab.title}
                             workspacePath={workspaceAbsPath}
                             workspaceIdentity={workspaceIdentity}
+                            onClose={() => onCloseTab(tab.id)}
+                          />
+                        ) : tab.type === "memory-preview" ? (
+                          <MemoryPreviewSidePane
+                            tab={tab}
+                            memoryService={services.memoryService}
                             onClose={() => onCloseTab(tab.id)}
                           />
                         ) : tab.type === "developer-tools" ? (

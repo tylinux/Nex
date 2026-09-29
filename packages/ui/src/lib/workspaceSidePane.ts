@@ -77,6 +77,24 @@ export interface ModelTrajectorySidePaneTab {
   title?: string | null;
 }
 
+/**
+ * Memory 文件预览 tab。
+ *
+ * 触发入口在设置页 Memory 分区的文件行（桌面/Web 通用）；预览内容按需经本地
+ * Host RPC 读取（IMemoryService.readProjectMemoryFile），tab 本身只携带身份，
+ * 不缓存正文——正文权威在服务，切 tab 重新打开即重读。
+ */
+export interface MemoryPreviewSidePaneTab {
+  id: string;
+  type: "memory-preview";
+  ownerTaskId?: string | null;
+  openedAt?: number;
+  workspaceKey: string;
+  /** Memory catalog 里的 workspace id（`~/.nex/cli/memories/projects/` 子目录名）。 */
+  workspaceId: string;
+  fileName: string;
+}
+
 export interface DeveloperToolsSidePaneTab {
   id: "developer-tools";
   type: "developer-tools";
@@ -521,6 +539,7 @@ export type WorkspaceSidePaneTab =
   | TreemappingSidePaneTab
   | WhiteboardSidePaneTab
   | ModelTrajectorySidePaneTab
+  | MemoryPreviewSidePaneTab
   | DeveloperToolsSidePaneTab
   | TerminalSidePaneTab
   | BrowserUseSidePaneTab
@@ -1578,6 +1597,41 @@ export function openModelTrajectorySidePane(
   },
 ): WorkspaceSidePaneState {
   return activateSidePaneTab(current, createModelTrajectorySidePaneTab(options));
+}
+
+/**
+ * 打开（或聚焦）一个 Memory 文件预览 tab。
+ *
+ * tab id 是结构化的（`memory-preview:<workspaceKey>:<workspaceId>:<fileName>`），
+ * 同一文件重复点击复用已有 tab 并聚焦；再次点击不重置 `openedAt`（预览正文
+ * 按打开时的请求重读，无需排序语义）。
+ */
+export function openMemoryPreviewSidePane(
+  current: WorkspaceSidePaneState | null,
+  options: {
+    workspaceKey: string;
+    workspaceId: string;
+    fileName: string;
+  },
+): WorkspaceSidePaneState {
+  const id = [
+    "memory-preview",
+    encodeSidePaneTabIdPart(options.workspaceKey),
+    encodeSidePaneTabIdPart(options.workspaceId),
+    encodeSidePaneTabIdPart(options.fileName),
+  ].join(":");
+  const existing = current?.tabs.find(
+    (tab): tab is MemoryPreviewSidePaneTab => tab.type === "memory-preview" && tab.id === id,
+  );
+  const tab: MemoryPreviewSidePaneTab = existing ?? {
+    id,
+    type: "memory-preview",
+    openedAt: Date.now(),
+    workspaceKey: options.workspaceKey,
+    workspaceId: options.workspaceId,
+    fileName: options.fileName,
+  };
+  return activateSidePaneTab(current, tab);
 }
 
 export function activateDeveloperToolsSidePane(

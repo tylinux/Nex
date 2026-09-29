@@ -34,6 +34,7 @@ export function MemorySettingsViewer({
   workspaces,
   onRefresh,
   onScopeKeyChange,
+  onPreviewFile,
 }: {
   catalogError: string | null;
   catalogState: MemoryViewerLoadingState;
@@ -41,6 +42,8 @@ export function MemorySettingsViewer({
   workspaces: ProjectMemoryWorkspaceSummary[];
   onRefresh: () => Promise<void>;
   onScopeKeyChange: (workspaceId: string) => void;
+  /** 点击文件行时的预览回调（打开 workspace side pane）；缺席时行不可点。 */
+  onPreviewFile?: (request: { workspaceId: string; fileName: string }) => void;
 }) {
   const { intl, locale } = useNexIntl();
   const [searchQuery, setSearchQuery] = useState("");
@@ -155,9 +158,24 @@ export function MemorySettingsViewer({
               <Fragment key={file.name}>
                 {index > 0 ? <div className="h-px bg-border/50" aria-hidden="true" /> : null}
                 <div className="flex min-w-0 items-center hover:bg-hover">
-                  <div
+                  <button
+                    type="button"
                     data-testid={testId(TID_SETTINGS_MEMORY_FILE, file.name)}
-                    className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left"
+                    className={
+                      onPreviewFile
+                        ? "flex min-w-0 flex-1 cursor-pointer items-center gap-3 px-4 py-3 text-left"
+                        : "flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left"
+                    }
+                    onClick={
+                      onPreviewFile && selectedWorkspace
+                        ? () => {
+                            onPreviewFile({
+                              workspaceId: selectedWorkspace.id,
+                              fileName: file.name,
+                            });
+                          }
+                        : undefined
+                    }
                   >
                     <span
                       data-testid={testId(TID_SETTINGS_MEMORY_FILE_ICON, file.name)}
@@ -188,7 +206,7 @@ export function MemorySettingsViewer({
                         })}
                       </span>
                     </span>
-                  </div>
+                  </button>
                   <span
                     data-testid={testId(TID_SETTINGS_MEMORY_FILE_EDITOR_ACTIONS, file.name)}
                     className="mr-3 shrink-0"

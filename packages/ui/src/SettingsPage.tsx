@@ -58,6 +58,7 @@ import {
 } from "@/settings/SettingsHeaderBreadcrumb.js";
 import { useNexStore } from "@/store/StoreProvider.js";
 import { useTabStore } from "@/store/TabStoreProvider.js";
+import { useMemoryPreviewStore } from "@/store/memoryPreviewStore.js";
 import { isWorkspaceTab } from "@/store/tabStore.js";
 import type { Theme } from "@/useTheme.js";
 import { WindowsTopLeftLogo } from "@/WindowsTopLeftLogo.js";
@@ -267,6 +268,20 @@ export function SettingsPage({
     return [...names];
   }, [sharedSettings?.recentProjects, workspaceTabs]);
   const memoryEnabled = sharedSettings?.memoryEnabled === true;
+  // Memory 预览 tab 由目标 workspace 的 useAppPanels 经单例 store 桥接打开；
+  // 设置页在 workspace shell 之外挂载，拿不到 side pane 控制器回调。
+  const handlePreviewMemoryFile = useCallback(
+    (request: { workspaceId: string; fileName: string }) => {
+      const workspacePath = activeWorkspacePath ?? captionWorkspacePath;
+      if (!workspacePath) return;
+      useMemoryPreviewStore.getState().requestOpen({
+        workspaceId: request.workspaceId,
+        fileName: request.fileName,
+        workspaceKey: activeWorkspaceIdentity?.trim() || workspacePath,
+      });
+    },
+    [activeWorkspaceIdentity, activeWorkspacePath, captionWorkspacePath],
+  );
   const nativeSearchEnhancementsEnabled = sharedSettings?.nativeSearchEnhancementsEnabled !== false;
   const askUserQuestionAutoResolutionEnabled =
     sharedSettings?.askUserQuestionAutoResolutionEnabled !== false;
@@ -991,6 +1006,7 @@ export function SettingsPage({
                               memoryService={localHostServices.memoryService}
                               onMemoryEnabledChange={handleMemoryEnabledChange}
                               workspaceDisplayNames={memoryWorkspaceDisplayNames}
+                              onPreviewFile={handlePreviewMemoryFile}
                             />
                           </ServiceProvider>
                         ) : activeSection === "plugin" ? (
