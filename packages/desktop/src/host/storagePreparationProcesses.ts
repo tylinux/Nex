@@ -123,8 +123,31 @@ export async function prepareSessionStorage(options: {
     workspaceKey: options.cwd,
     presentationSurface: "desktop",
   });
-  if (!command?.supportsStorageStartup || !command.storagePreparationEntry)
-    throw statusError("unsupported_runtime");
+  if (!command?.supportsStorageStartup || !command.storagePreparationEntry) {
+    // A custom NEX_AGENT_SERVER_COMMAND override never carries storagePreparationEntry, so an
+    // override that survives resolution (non-dev runtime) lands here. Keep the enum kind stable
+    // for the UI error mapping; surface the likely cause through the message and a dedicated
+    // field so operators can act on it instead of seeing a bare "unsupported_runtime".
+    const customCommand = command?.command?.slice(0, 256);
+    const cause = customCommand
+      ? `custom agent command "${customCommand}" does not support storage startup`
+      : undefined;
+    throw Object.assign(
+      new Error(
+        cause
+          ? `Storage preparation failed: unsupported_runtime (${cause})`
+          : "Storage preparation failed: unsupported_runtime",
+      ),
+      {
+        kind: "unsupported_runtime" as const,
+        errcode: undefined,
+        code: undefined,
+        migrationId: undefined,
+        migrationUpdate: undefined,
+        ...(customCommand ? { customAgentCommand: customCommand } : {}),
+      },
+    );
+  }
   const entry = command.storagePreparationEntry;
   await new Promise<void>((resolve, reject) => {
     const child = new Worker(entry, {
