@@ -355,8 +355,7 @@ function resolveBundledWorkspaceNexAgentCommand(
 ): NexAgentCommand | null {
   const distEntrypoint = findUpward("apps/nex-cli/packages/cli/dist/nex.cjs");
   if (distEntrypoint) {
-    const useBytecode =
-      process.versions.electron && process.env.NEX_DESKTOP_AGENT_BYTECODE === "1";
+    const useBytecode = process.versions.electron && process.env.NEX_DESKTOP_AGENT_BYTECODE === "1";
     const entrypoint = useBytecode
       ? join(dirname(distEntrypoint), "nex.bytecode.cjs")
       : distEntrypoint;
@@ -438,8 +437,24 @@ function resolveElectronRuntimeNexAgentCommand(
 export function resolveDefaultNexAgentCommand(
   context: NexAgentCommandResolverContext,
 ): NexAgentCommand | null {
+  // Resolution order: dev-runtime monorepo bundle → env override → monorepo dev sources/dist →
+  // desktop packaged Electron Node runtime running nex.cjs → deployed native binary (remote SSH fallback).
   const command = process.env.NEX_AGENT_SERVER_COMMAND?.trim();
   if (command) {
+    // NEX_RUNTIME_ENV is injected by the app itself (desktop Main sends "development" for
+    // unpackaged runs); user shells cannot accidentally trigger it via NODE_ENV (only
+    // NEX_RUNTIME_ENV is trusted, see resolveNexRuntimeEnv). In that dev runtime the monorepo
+    // bundle wins over the env override: self-contained release binaries (SEA nex-server)
+    // export NEX_AGENT_SERVER_COMMAND = their own execPath for every child process, and that
+    // leaked override used to shadow the monorepo bundle when a desktop dev app was spawned
+    // from inside such a session — the resulting command lacks storagePreparationEntry and
+    // storage preparation failed with a bare "unsupported_runtime". Outside the dev runtime
+    // (release binaries, packaged desktop, remote hosts) the explicit env override stays the
+    // highest priority so operator configuration is always honored.
+    const devRuntimeCommand = resolveDevelopmentRuntimeMonorepoCommand(context, command);
+    if (devRuntimeCommand) {
+      return applyPresentationSurfaceToCommand(devRuntimeCommand, context.presentationSurface);
+    }
     return applyPresentationSurfaceToCommand(
       {
         command,
@@ -461,6 +476,42 @@ export function resolveDefaultNexAgentCommand(
       : resolveDeployedNexAgentBinaryCommand(context),
     context.presentationSurface,
   );
+}
+
+/**
+ * Dev-runtime escape hatch for the env override: returns the monorepo agent command when the
+ * current process is an app-injected development runtime (NEX_RUNTIME_ENV=development) AND the
+ * monorepo bundle resolves. Returns null otherwise so the env override keeps full control.
+ */
+function resolveDevelopmentRuntimeMonorepoCommand(
+  context: NexAgentCommandResolverContext,
+  envCommand: string,
+): NexAgentCommand | null {
+  if (resolveNexRuntimeEnv(process.env) !== "development") {
+    return null;
+  }
+  const monorepo = resolveBundledWorkspaceNexAgentCommand(context);
+  if (!monorepo) {
+    // No monorepo bundle around (release binary dropped into a random cwd): the env override
+    // is the only meaningful command, keep honoring it.
+    return null;
+  }
+  if (
+    monorepo.command === envCommand &&
+    (monorepo.args ?? []).join(" ") ===
+      (parseArgsJson(process.env.NEX_AGENT_SERVER_ARGS_JSON) ?? ["app-server", "--stdio"]).join(" ")
+  ) {
+    // The override already points at the same monorepo entry. Still return the monorepo
+    // command so capability fields (storagePreparationEntry / supportsStorageStartup) stay
+    // attached; the raw env-override branch never infers them and storage preparation would
+    // otherwise regress to "unsupported_runtime" for this identical command.
+    return { ...monorepo, supportsStorageStartup: true };
+  }
+  debugLog(
+    "NEX_AGENT_SERVER_COMMAND override bypassed in development runtime; using monorepo bundle",
+    { envCommand: redactAgentDiagnostic(envCommand) },
+  );
+  return { ...monorepo, supportsStorageStartup: true };
 }
 
 function applyPresentationSurfaceToCommand(
