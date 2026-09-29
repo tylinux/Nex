@@ -79,7 +79,7 @@ jobs:
         run: |
           mkdir -p bundle/packaging
           cp nex-server-${{ matrix.target }} bundle/
-          cp -r ../../../packaging/. bundle/packaging/
+          cp -r ../../packaging/. bundle/packaging/
           tar -czf nex-server-${{ matrix.target }}-alpha-${{ steps.meta.outputs.shortsha }}.tar.gz -C bundle .
 
       - name: Upload artifact
