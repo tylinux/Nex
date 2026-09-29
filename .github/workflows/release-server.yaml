@@ -58,11 +58,14 @@ jobs:
 
       - name: Build workspace packages and agent bundle
         run: |
-          # Root typecheck emits dist for repo-root packages (@nex/shared etc.);
-          # the CLI workspace turbo build emits dist for every apps/nex-cli
-          # package the SEA asset collectors scan (node-repl-host,
-          # model-option-map, ...); the CLI build produces the agent bundle.
+          # Root typecheck emits dist for repo-root packages (@nex/shared etc.)
+          # except @nex/model-option-map: it lives under packages/ too but is
+          # not in the tsc -b list, so build it explicitly. The CLI workspace
+          # turbo build emits dist for every apps/nex-cli package the SEA asset
+          # collectors scan (node-repl-host, ...); the CLI build produces the
+          # agent bundle.
           pnpm typecheck
+          pnpm --filter @nex/model-option-map build
           pnpm exec turbo --skip-infer --cwd apps/nex-cli run build --filter='!@nex/cli' --force
           pnpm -r --filter "@nex/cli..." build
 
