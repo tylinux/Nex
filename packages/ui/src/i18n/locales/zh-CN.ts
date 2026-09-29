@@ -1961,7 +1961,6 @@ const zhCN: Record<string, string> = {
   "settings.memory.preview.tooLarge":
     "记忆文件过大，无法预览。请在桌面端用编辑器打开查看。",
   "settings.memory.preview.serviceUnavailable": "记忆服务当前不可用。",
-  "settings.memory.preview.tabType": "Memory",
   "settings.memory.viewer.workspaces": "工作区",
   "settings.memory.viewer.files": "文件",
   "settings.memory.viewer.searchPlaceholder": "搜索记忆文件…",

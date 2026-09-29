@@ -2090,7 +2090,6 @@ const enUS: Record<string, string> = {
   "settings.memory.preview.tooLarge":
     "This memory file is too large to preview. Open it in an editor on the desktop app instead.",
   "settings.memory.preview.serviceUnavailable": "The memory service is currently unavailable.",
-  "settings.memory.preview.tabType": "Memory",
   "settings.memory.viewer.workspaces": "Workspaces",
   "settings.memory.viewer.files": "Files",
   "settings.memory.viewer.searchPlaceholder": "Search memory files…",

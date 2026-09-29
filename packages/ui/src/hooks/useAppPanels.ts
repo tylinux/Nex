@@ -22,7 +22,6 @@ import {
   closeCodeViewerSidePane,
   openWhiteboardSidePane,
   openModelTrajectorySidePane,
-  openMemoryPreviewSidePane,
   openTerminalSidePane,
   openSubagentSessionSidePane,
   openSubagentDirectorySidePane,
@@ -80,7 +79,6 @@ import { getPathLeaf, joinFilePath, toFileUrl } from "@/lib/path.js";
 import { shouldOpenWorkflowArtifactInBrowser } from "@/lib/workflowArtifactOpen.js";
 import { useWhiteboardStore } from "@/store/whiteboardStore.js";
 import { useModelTrajectoryOpenBridge } from "@/hooks/useModelTrajectoryOpenBridge.js";
-import { useMemoryPreviewOpenBridge } from "@/hooks/useMemoryPreviewOpenBridge.js";
 import { useServices } from "@/hooks/useServices.js";
 import { useIsOfficeMode } from "@/hooks/useInterfaceMode.js";
 import { clearSelectionSideChat } from "@/lib/selectionSideChatRuntime.js";
@@ -836,24 +834,6 @@ export function useAppPanels(options: {
     [commitOpenedSidePaneState, revealSidePaneForCurrentOwner],
   );
 
-  const handleOpenMemoryPreview = useCallback(
-    (params: { workspaceId: string; fileName: string }) => {
-      revealSidePaneForCurrentOwner();
-      commitOpenedSidePaneState((current) =>
-        openMemoryPreviewSidePane(current, {
-          workspaceKey: workspaceIdentity?.trim() || workspaceAbsPath,
-          workspaceId: params.workspaceId,
-          fileName: params.fileName,
-        }),
-      );
-      logger.info("[App] 打开右侧面板 mode=memory-preview workspace=" + workspaceAbsPath, {
-        workspaceId: params.workspaceId,
-        fileName: params.fileName,
-      });
-    },
-    [commitOpenedSidePaneState, revealSidePaneForCurrentOwner, workspaceAbsPath, workspaceIdentity],
-  );
-
   const handleOpenSubagentSession = useCallback(
     (request: OpenScopedSubagentSideTabRequest) => {
       const workspaceKey = request.workspaceIdentity?.trim() || request.workspacePath;
@@ -1243,12 +1223,6 @@ export function useAppPanels(options: {
   useModelTrajectoryOpenBridge(
     workspaceIdentity?.trim() || workspaceAbsPath,
     handleOpenModelTrajectory,
-  );
-
-  // 订阅“打开 Memory 文件预览”请求：设置页深处通过单例 store 发起，同上消费。
-  useMemoryPreviewOpenBridge(
-    workspaceIdentity?.trim() || workspaceAbsPath,
-    handleOpenMemoryPreview,
   );
 
   const handleToggleTerminal = useCallback(() => {

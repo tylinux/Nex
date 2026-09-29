@@ -1,5 +1,9 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
-import type { ProjectMemoryWorkspaceSummary } from "@nex/services";
+import type {
+  IMemoryService,
+  ProjectMemoryFileSummary,
+  ProjectMemoryWorkspaceSummary,
+} from "@nex/services";
 import {
   TID_SETTINGS_MEMORY_COUNT,
   TID_SETTINGS_MEMORY_FILE,
@@ -18,6 +22,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert.js";
 import { useNexIntl } from "@/i18n/IntlProvider.js";
 import { FileDisplayIcon, resolveFileDisplayDescriptor } from "@/lib/fileDisplay.js";
+import { MemoryPreviewDialog } from "@/settings/MemoryPreviewDialog.js";
 import { PluginScopeMenu } from "@/settings/PluginScopeMenu.js";
 import { PluginSearchEmptyState } from "@/settings/PluginInstallEmptyState.js";
 import { SettingsSearchInput } from "@/settings/SettingsSearchInput.js";
@@ -34,7 +39,7 @@ export function MemorySettingsViewer({
   workspaces,
   onRefresh,
   onScopeKeyChange,
-  onPreviewFile,
+  memoryService,
 }: {
   catalogError: string | null;
   catalogState: MemoryViewerLoadingState;
@@ -42,11 +47,16 @@ export function MemorySettingsViewer({
   workspaces: ProjectMemoryWorkspaceSummary[];
   onRefresh: () => Promise<void>;
   onScopeKeyChange: (workspaceId: string) => void;
-  /** 点击文件行时的预览回调（打开 workspace side pane）；缺席时行不可点。 */
-  onPreviewFile?: (request: { workspaceId: string; fileName: string }) => void;
+  /** 预览弹窗读取正文用的本地 Host 服务（与 catalog 同一来源）。 */
+  memoryService: Pick<IMemoryService, "readProjectMemoryFile">;
 }) {
   const { intl, locale } = useNexIntl();
   const [searchQuery, setSearchQuery] = useState("");
+  const [previewTarget, setPreviewTarget] = useState<{
+    workspaceId: string;
+    workspaceLabel: string;
+    file: ProjectMemoryFileSummary;
+  } | null>(null);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), 60_000);
@@ -161,17 +171,14 @@ export function MemorySettingsViewer({
                   <button
                     type="button"
                     data-testid={testId(TID_SETTINGS_MEMORY_FILE, file.name)}
-                    className={
-                      onPreviewFile
-                        ? "flex min-w-0 flex-1 cursor-pointer items-center gap-3 px-4 py-3 text-left"
-                        : "flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left"
-                    }
+                    className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 px-4 py-3 text-left"
                     onClick={
-                      onPreviewFile && selectedWorkspace
+                      selectedWorkspace
                         ? () => {
-                            onPreviewFile({
+                            setPreviewTarget({
                               workspaceId: selectedWorkspace.id,
-                              fileName: file.name,
+                              workspaceLabel: selectedWorkspace.label,
+                              file,
                             });
                           }
                         : undefined
@@ -219,6 +226,13 @@ export function MemorySettingsViewer({
           </div>
         </>
       )}
+      <MemoryPreviewDialog
+        memoryService={memoryService}
+        target={previewTarget}
+        onOpenChange={(open) => {
+          if (!open) setPreviewTarget(null);
+        }}
+      />
     </section>
   );
 }

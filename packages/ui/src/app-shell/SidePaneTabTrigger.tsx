@@ -340,13 +340,6 @@ export function SidePaneTabIcon({ tab }: { tab: WorkspaceSidePaneTab }) {
     return <BrowserUseTabIcon tab={tab} />;
   }
 
-  // memory-preview tab 无 source 字段（与 browser-use 同理），需在此拦截避免
-  // fallthrough 到下方 `tab.source.type` 读 undefined.type 崩溃。
-  if (tab.type === "memory-preview") {
-    const descriptor = resolveFileDisplayDescriptor(`${tab.fileName}`);
-    return <FileDisplayIcon src={descriptor.fileIconSrc} size={14} className="shrink-0" />;
-  }
-
   if (tab.source.type === "patch") {
     const fileDisplayTarget = getPatchFileDisplayTarget(tab.source);
     if (fileDisplayTarget) {
@@ -537,11 +530,6 @@ export function getSidePaneTabTitle(
 
   if (tab.type === "model-trajectory") {
     return tab.title?.trim() || formatMessage({ id: "modelTrajectory.title" });
-  }
-
-  // 标题就是文件名；类型标签在 getSidePaneTabTypeLabel（memoryPreviewTitle）里。
-  if (tab.type === "memory-preview") {
-    return tab.fileName;
   }
 
   if (tab.type === "developer-tools") {
