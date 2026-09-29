@@ -67,15 +67,51 @@ export function parseRemoteModelIds(payload: unknown): string[] {
   return [...new Set(ids)];
 }
 
+/** 网络层错误（超时/不可达/重置等）值得原样透出并重试一次。 */
+function describeFetchError(error: unknown): string {
+  const cause = (error as { cause?: { code?: string; message?: string } })?.cause;
+  const detail = cause?.code ?? cause?.message ?? (error as Error)?.message ?? String(error);
+  return `fetch failed: ${detail}`;
+}
+
+function isTransientNetworkError(error: unknown): boolean {
+  const code = (error as { cause?: { code?: string } })?.cause?.code ?? "";
+  return [
+    "ECONNRESET",
+    "ECONNREFUSED",
+    "EHOSTUNREACH",
+    "ENETUNREACH",
+    "ETIMEDOUT",
+    "EAI_AGAIN",
+    "UND_ERR_CONNECT_TIMEOUT",
+  ].includes(code);
+}
+
 export async function fetchRemoteModelList(
   config: ProviderConfigObject,
   request: typeof fetch = fetch,
 ): Promise<RemoteModelList> {
   const { url, headers } = buildRemoteModelListRequest(config);
-  const response = await request(url, {
-    headers,
-    signal: AbortSignal.timeout(REMOTE_MODEL_LIST_TIMEOUT_MS),
-  });
-  if (!response.ok) throw new Error(`Model list request failed: HTTP ${response.status}`);
-  return { ids: parseRemoteModelIds(await response.json()) };
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await request(url, {
+        headers,
+        signal: AbortSignal.timeout(REMOTE_MODEL_LIST_TIMEOUT_MS),
+      });
+      if (!response.ok) throw new Error(`Model list request failed: HTTP ${response.status}`);
+      return { ids: parseRemoteModelIds(await response.json()) };
+    } catch (error) {
+      lastError = error;
+      // HTTP 状态错误不是网络问题，没有重试价值。
+      if (error instanceof Error && error.message.startsWith("Model list request failed:")) {
+        throw error;
+      }
+      if (attempt === 0 && isTransientNetworkError(error)) {
+        continue;
+      }
+      throw new Error(describeFetchError(error), { cause: error });
+    }
+  }
+  throw new Error(describeFetchError(lastError), { cause: lastError });
 }
