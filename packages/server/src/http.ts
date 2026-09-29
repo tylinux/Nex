@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import { readFile, stat } from "node:fs/promises";
 import { basename, extname, relative, resolve, sep } from "node:path";
-import { hostname } from "node:os";
+import { hostname , homedir } from "node:os";
 import { Hono, type Context } from "hono";
 import { serve } from "@hono/node-server";
 import { createNodeWebSocket } from "@hono/node-ws";
@@ -157,7 +157,11 @@ function resolveServerWorkspaces(options: HttpServerOptions): ServerRemoteWorksp
   if (options.workspaces) {
     return options.workspaces;
   }
-  const workspacePath = readTrimmedEnv("NEX_SERVER_WORKSPACE") || process.cwd();
+  // Service managers (launchd, systemd) start daemons with cwd=/, which would
+  // surface a useless "/" workspace; fall back to the user's home there.
+  const workspacePath =
+    readTrimmedEnv("NEX_SERVER_WORKSPACE") ||
+    (process.cwd() === "/" ? homedir() : process.cwd());
   return [
     {
       path: workspacePath,
