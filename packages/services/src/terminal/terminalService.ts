@@ -7,6 +7,11 @@ import type { IPty } from "node-pty";
 import type { ISettingService } from "../setting/setting.js";
 import type { ITerminalService, TerminalWindowsPtyInfo } from "./terminal.js";
 import {
+  ensureFallbackSpawnHelperInstalled,
+  installNativePtyAddonRedirect,
+  resolveFallbackPtyModuleDir,
+} from "./terminalPtyFallback.js";
+import {
   resolveTerminalFontProfile,
   type TerminalFontFamilySource,
   type TerminalThemeProfile,
@@ -28,13 +33,36 @@ let nodePtyModulePromise: Promise<NodePtyModule> | null = null;
 
 async function loadNodePtyModule(): Promise<NodePtyModule> {
   if (!nodePtyModulePromise) {
-    nodePtyModulePromise = import("node-pty").catch((error: unknown) => {
-      nodePtyModulePromise = null;
-      const message = error instanceof Error ? error.message : String(error);
+    nodePtyModulePromise = import("node-pty").catch(async (error: unknown) => {
+      // node-pty failed to resolve its native addon. Before giving up, try
+      // the embedding-runtime fallback directory (terminalPtyFallback.ts).
       // remote server 启动时会先创建所有服务，之前这里顶层 import node-pty，
       // 只要当前平台缺少 pty.node，就会在服务注册阶段直接崩掉，整条远程连接链路都失败。
       // 改成延迟加载后，server 可以先完成握手，仅在真正创建终端时再暴露“terminal 不可用”的错误。
-      throw new Error(`node-pty is unavailable in this runtime: ${message}`);
+      const fallbackDir = resolveFallbackPtyModuleDir();
+      if (!fallbackDir) {
+        nodePtyModulePromise = null;
+        throw error;
+      }
+      const restore = installNativePtyAddonRedirect(fallbackDir);
+      try {
+        // The addon require probes build/Release first, so node-pty will look
+        // for the darwin spawn-helper there as well; stage it from the
+        // fallback dir before the retry loads node-pty's UnixTerminal.
+        ensureFallbackSpawnHelperInstalled(fallbackDir);
+        return (await import("node-pty")) as NodePtyModule;
+      } catch {
+        nodePtyModulePromise = null;
+        // Report the original failure: the retry failure is a consequence,
+        // and the original message names node-pty's searched directories.
+        throw new Error(
+          `node-pty is unavailable in this runtime (fallback dir '${fallbackDir}' did not resolve it either): ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      } finally {
+        restore();
+      }
     }) as Promise<NodePtyModule>;
   }
 
@@ -111,7 +139,10 @@ function resolveNodePtySpawnHelperPath(): string | null {
     helperPath = helperPath.replace("node_modules.asar", "node_modules.asar.unpacked");
     return helperPath;
   } catch {
-    return null;
+    // Embedded runtimes (SEA bundle) cannot require node-pty's modules from
+    // disk at all; the helper is located relative to the addon dir instead.
+    const fallbackDir = resolveFallbackPtyModuleDir();
+    return fallbackDir ? join(fallbackDir, "spawn-helper") : null;
   }
 }
 
