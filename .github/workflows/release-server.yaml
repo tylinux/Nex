@@ -59,6 +59,7 @@ jobs:
       - name: Build workspace packages and agent bundle
         run: |
           pnpm typecheck
+          pnpm --filter @nex/model-option-map build
           pnpm -r --filter "@nex/cli..." build
 
       - name: Resolve short sha
