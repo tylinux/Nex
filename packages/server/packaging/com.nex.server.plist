@@ -9,6 +9,7 @@
   Default layout:
     binary  /usr/local/bin/nex-server
     data    ~/.nex/server-data
+    web     ~/.nex/server-data/web (served via NEX_WEB_STATIC_ROOT)
     logs    ~/.nex/server.log / ~/.nex/server.err.log
 -->
 <plist version="1.0">
@@ -29,6 +30,8 @@
     <string>REPLACE_ME_TOKEN</string>
     <key>NEX_DATA_BASE_DIR</key>
     <string>/Users/REPLACE_ME/.nex/server-data</string>
+    <key>NEX_WEB_STATIC_ROOT</key>
+    <string>/Users/REPLACE_ME/.nex/server-data/web</string>
   </dict>
   <key>RunAtLoad</key>
   <true/>
