@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.js";
 import { useNexIntl } from "@/i18n/IntlProvider.js";
-import nexMarkUrl from "@/assets/N.svg";
 
 /**
  * 判断是否显示「已针对 Apple Silicon 优化」。
@@ -19,6 +18,31 @@ import nexMarkUrl from "@/assets/N.svg";
  */
 export function shouldShowAppleSiliconLine(isDesktop: boolean): boolean {
   return isDesktop && /Macintosh|Mac OS X/.test(navigator.userAgent);
+}
+
+/**
+ * Nex 品牌 N 标（实色 currentColor 版）。
+ *
+ * 与桌面端原生 About 窗口（packages/desktop/src/main/aboutWindow.ts）同一组
+ * path。assets/N.svg 是启动页空态的装饰变体（低透明度描边、无实色填充），
+ * 在深色图标块里几乎不可见，所以这里内联实色 path 并用 text-current 跟随主题。
+ */
+function NexMark() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="121"
+      height="100"
+      viewBox="0 0 436 360"
+      className="h-6 w-auto text-foreground"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path fill="currentColor" d="M88 20.5L158 20.5L88 340L18 340Z" />
+      <path fill="currentColor" d="M158 20.5L228 20.5L348 340L278 340Z" />
+      <path fill="currentColor" d="M348 20.5L418 20.5L348 340L278 340Z" />
+    </svg>
+  );
 }
 
 /**
@@ -63,10 +87,10 @@ export function AboutDialog({
               aria-hidden="true"
               className="mx-auto flex size-13 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-black to-[#151718] shadow-[0_10px_13px_-3px_rgb(0_0_0/0.2),0_4px_5px_-3px_rgb(0_0_0/0.2)]"
             >
-              <img src={nexMarkUrl} alt="" className="h-6 w-auto" />
+              <NexMark />
             </div>
             <DialogTitle className="text-[13.5px] font-bold leading-tight">
-              Nex Desktop App
+              {isDesktop ? "Nex Desktop App" : "Nex Web App"}
             </DialogTitle>
             <DialogDescription className="text-[13px] leading-tight text-foreground-subtle">
               {intl.formatMessage({ id: "workspaceHeader.about.versionLabel" })} {NEX_VERSION}
