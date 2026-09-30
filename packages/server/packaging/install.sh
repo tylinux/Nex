@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Nex server (single binary) installer: installs the binary and registers the
-# launchctl/systemd service.
+# Nex server (single binary) installer: installs the binary, deploys the
+# bundled web static assets, and registers the launchctl/systemd service.
 #
 # Usage:
 #   sudo ./install.sh --binary /path/to/nex-server-linux-x64 [--token <hex>]
@@ -8,6 +8,8 @@
 #
 # Behavior:
 #   - Binary installed to /usr/local/bin/nex-server
+#   - Web assets (./web next to this script in the tarball) deployed to the
+#     data dir and served by the server process itself via NEX_WEB_STATIC_ROOT
 #   - Linux: creates a nex-server system user, data dir /var/lib/nex-server,
 #     env file /etc/nex-server/env, systemd unit nex-server.service
 #   - macOS: data dir ~/.nex/server-data, LaunchAgent com.nex.server
@@ -19,6 +21,7 @@ BINARY=""
 TOKEN=""
 UNINSTALL=0
 DATA_DIR=""
+WEB_ASSETS_SRC=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --binary) BINARY="$2"; shift 2 ;;
@@ -38,6 +41,10 @@ else
   PLATFORM="linux"
   BIN_TARGET="/usr/local/bin/nex-server"
 fi
+
+# Web assets live in ./web next to this script inside the install tarball.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WEB_ASSETS_SRC="${WEB_ASSETS_SRC:-${SCRIPT_DIR}/web}"
 
 if [[ $UNINSTALL -eq 1 ]]; then
   if [[ "$PLATFORM" == "linux" ]]; then
@@ -60,22 +67,42 @@ fi
 
 install -m 0755 "$BINARY" "$BIN_TARGET"
 
+deploy_web_assets() {
+  # 目标目录 <data>/web。每次升级整体替换，保证 server 二进制与 UI 版本对齐；
+  # 备份上一份到 web.bak（保留一代），失败可手动回滚。
+  local target_root="$1"   # 数据目录内 .nex 的上级（DATA_DIR 本身）
+  local web_dst="${target_root}/web"
+  if [[ ! -d "$WEB_ASSETS_SRC" ]]; then
+    echo "WARNING: web assets not found at $WEB_ASSETS_SRC; serving API only." >&2
+    return 1
+  fi
+  if [[ -d "$web_dst" ]]; then
+    rm -rf "${web_dst}.bak"
+    mv "$web_dst" "${web_dst}.bak"
+  fi
+  mkdir -p "$target_root"
+  cp -R "$WEB_ASSETS_SRC" "$web_dst"
+  echo "Web assets deployed: $web_dst"
+}
+
 if [[ "$PLATFORM" == "linux" ]]; then
   DATA_DIR="${DATA_DIR:-/var/lib/${SERVICE_NAME}}"
   ENV_DIR="/etc/${SERVICE_NAME}"
   ENV_FILE="${ENV_DIR}/env"
   id "$SERVICE_NAME" &>/dev/null || useradd --system --home "$DATA_DIR" --shell /usr/sbin/nologin "$SERVICE_NAME"
   mkdir -p "$DATA_DIR" "$ENV_DIR"
+  deploy_web_assets "$DATA_DIR" || true
   chown -R "$SERVICE_NAME:$SERVICE_NAME" "$DATA_DIR"
   if [[ ! -f "$ENV_FILE" ]]; then
     TOKEN="${TOKEN:-$(openssl rand -hex 32)}"
     umask 077
-    printf 'NEX_SERVER_AUTH_TOKEN=%s\n' "$TOKEN" > "$ENV_FILE"
+    printf 'NEX_SERVER_AUTH_TOKEN=%s\nNEX_WEB_STATIC_ROOT=%s/web\n' "$TOKEN" "$DATA_DIR" > "$ENV_FILE"
     umask 022
   elif [[ -n "$TOKEN" ]]; then
     sed -i "s|^NEX_SERVER_AUTH_TOKEN=.*|NEX_SERVER_AUTH_TOKEN=${TOKEN}|" "$ENV_FILE"
+    grep -q '^NEX_WEB_STATIC_ROOT=' "$ENV_FILE" || \
+      printf 'NEX_WEB_STATIC_ROOT=%s/web\n' "$DATA_DIR" >> "$ENV_FILE"
   fi
-  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   sed "s|/var/lib/nex-server|${DATA_DIR}|" "$SCRIPT_DIR/nex-server.service" > "/etc/systemd/system/${SERVICE_NAME}.service"
   systemctl daemon-reload
   systemctl enable --now "$SERVICE_NAME"
@@ -87,29 +114,35 @@ if [[ "$PLATFORM" == "linux" ]]; then
 else
   DATA_DIR="${DATA_DIR:-$HOME/.nex/server-data}"
   mkdir -p "$DATA_DIR" "$HOME/.nex" "$HOME/Library/LaunchAgents"
+  deploy_web_assets "$DATA_DIR" || true
   ENV_FILE="$DATA_DIR/env"
   if [[ ! -f "$ENV_FILE" ]]; then
     TOKEN="${TOKEN:-$(openssl rand -hex 32)}"
-    printf 'NEX_SERVER_AUTH_TOKEN=%s\n' "$TOKEN" > "$ENV_FILE"
+    printf 'NEX_SERVER_AUTH_TOKEN=%s\nNEX_WEB_STATIC_ROOT=%s/web\n' "$TOKEN" "$DATA_DIR" > "$ENV_FILE"
     chmod 600 "$ENV_FILE"
-  fi
-  if [[ -n "$TOKEN" ]]; then
-    # Also normalize legacy env files written with an "export " prefix.
-    sed -i '' -e "s|^export NEX_SERVER_AUTH_TOKEN=.*|NEX_SERVER_AUTH_TOKEN=${TOKEN}|" \
-              -e "s|^NEX_SERVER_AUTH_TOKEN=.*|NEX_SERVER_AUTH_TOKEN=${TOKEN}|" "$ENV_FILE"
+  else
+    if [[ -n "$TOKEN" ]]; then
+      # Also normalize legacy env files written with an "export " prefix.
+      sed -i '' -e "s|^export NEX_SERVER_AUTH_TOKEN=.*|NEX_SERVER_AUTH_TOKEN=${TOKEN}|" \
+                -e "s|^NEX_SERVER_AUTH_TOKEN=.*|NEX_SERVER_AUTH_TOKEN=${TOKEN}|" "$ENV_FILE"
+    fi
+    if ! grep -qE '^(export )?NEX_WEB_STATIC_ROOT=' "$ENV_FILE"; then
+      printf 'NEX_WEB_STATIC_ROOT=%s/web\n' "$DATA_DIR" >> "$ENV_FILE"
+    fi
   fi
   TOKEN="$(grep -E '^(export )?NEX_SERVER_AUTH_TOKEN=' "$ENV_FILE" | head -1 | sed 's/^export //' | cut -d= -f2)"
   if [[ -z "$TOKEN" ]]; then
     echo "Could not read NEX_SERVER_AUTH_TOKEN from $ENV_FILE" >&2
     exit 1
   fi
-  PLIST_SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/com.nex.server.plist"
+  PLIST_SRC="$SCRIPT_DIR/com.nex.server.plist"
   PLIST_DST="$HOME/Library/LaunchAgents/com.nex.server.plist"
   # launchd does not source shell env files: the token must be injected into
   # the plist's EnvironmentVariables dict, otherwise the server runs with no
-  # auth at all.
+  # auth at all. NEX_WEB_STATIC_ROOT is injected the same way.
   sed "s|/Users/REPLACE_ME|$HOME|g; s|/usr/local/bin/nex-server|$HOME/.local/bin/nex-server|g" "$PLIST_SRC" | \
-    sed "s|<string>REPLACE_ME_TOKEN</string>|<string>${TOKEN}</string>|" > "$PLIST_DST"
+    sed "s|<string>REPLACE_ME_TOKEN</string>|<string>${TOKEN}</string>|" \
+    | sed "s|<string>REPLACE_ME_WEB_STATIC_ROOT</string>|<string>${DATA_DIR}/web</string>|" > "$PLIST_DST"
   launchctl bootout "gui/$(id -u)/com.nex.server" 2>/dev/null || true
   launchctl load -w "$PLIST_DST"
   sleep 2
