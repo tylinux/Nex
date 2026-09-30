@@ -31,6 +31,12 @@ interface TerminalInstance {
 let hasEnsuredNodePtyHelper = false;
 let nodePtyModulePromise: Promise<NodePtyModule> | null = null;
 
+function isUsableNodePtyModule(mod: unknown): mod is NodePtyModule {
+  return (
+    typeof mod === "object" && mod !== null && typeof (mod as NodePtyModule).spawn === "function"
+  );
+}
+
 async function loadNodePtyModule(): Promise<NodePtyModule> {
   if (!nodePtyModulePromise) {
     nodePtyModulePromise = import("node-pty").catch(async (error: unknown) => {
@@ -50,7 +56,20 @@ async function loadNodePtyModule(): Promise<NodePtyModule> {
         // for the darwin spawn-helper there as well; stage it from the
         // fallback dir before the retry loads node-pty's UnixTerminal.
         ensureFallbackSpawnHelperInstalled(fallbackDir);
-        return (await import("node-pty")) as NodePtyModule;
+        const retried = (await import("node-pty")) as NodePtyModule;
+        // esbuild __commonJS 半初始化陷阱：node-pty 主模块第一次执行在顶层
+        // loadNativeModule("pty") 探测 addon 失败时抛错，但 __commonJS 的
+        // mod 缓存已被赋值；fallback 重试的第二次 __require() 命中缓存直接
+        // 返回空 exports（无 spawn）。SEA 场景实测报 "nodePty.spawn is not
+        // a function"。缺 spawn 时把这次结果也当失败处理，给出指向 addon
+        // 部署的明确错误，而不是让上层拿到不可调用模块。
+        if (!isUsableNodePtyModule(retried)) {
+          nodePtyModulePromise = null;
+          throw new Error(
+            `node-pty loaded from fallback dir '${fallbackDir}' but its namespace has no spawn (half-initialized __commonJS cache after the failed first load)`,
+          );
+        }
+        return retried;
       } catch {
         nodePtyModulePromise = null;
         // Report the original failure: the retry failure is a consequence,
