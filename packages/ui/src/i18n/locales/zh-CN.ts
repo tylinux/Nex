@@ -1333,6 +1333,7 @@ const zhCN: Record<string, string> = {
   "workspaceHeader.help.issueReport": "问题上报",
   "workspaceHeader.about.versionLabel": "版本",
   "workspaceHeader.about.appleSilicon": "已针对 Apple Silicon 优化。",
+  "workspaceHeader.about.copyright": "版权所有 © {year} Nex。",
   "workspaceHeader.about.showDetails": "详细信息",
   "workspaceHeader.about.hideDetails": "收起详细信息",
   "common.ok": "确定",

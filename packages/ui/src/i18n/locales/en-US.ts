@@ -1444,6 +1444,7 @@ const enUS: Record<string, string> = {
   "workspaceHeader.help.issueReport": "Report an issue",
   "workspaceHeader.about.versionLabel": "Version",
   "workspaceHeader.about.appleSilicon": "Optimized for Apple Silicon.",
+  "workspaceHeader.about.copyright": "Copyright © {year} Nex.",
   "workspaceHeader.about.showDetails": "Show details",
   "workspaceHeader.about.hideDetails": "Hide details",
   "common.ok": "OK",
