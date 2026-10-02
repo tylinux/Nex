@@ -37,52 +37,82 @@ function isUsableNodePtyModule(mod: unknown): mod is NodePtyModule {
   );
 }
 
+/**
+ * SEA 运行时的确定性加载路径：embedding runtime（seaEntry）把自包含的
+ * node-pty 包（JS + 平台 addon，来自 @lydell 变体包）释放到磁盘并把
+ * NEX_PTY_ENTRY 指向 lib/index.js。SEA 主脚本的 require 被 loader 接管，
+ * 内联的 node-pty 无法完成 addon 探测（ERR_UNKNOWN_BUILTIN_MODULE），而
+ * createRequire 锚定在磁盘路径上的 require 走标准解析，能加载完整包。
+ */
+function loadNodePtyFromReleasedEntry(): NodePtyModule | null {
+  const entry = process.env.NEX_PTY_ENTRY?.trim();
+  if (!entry || !existsSync(entry)) {
+    return null;
+  }
+  try {
+    const loaded = createRequire(entry)(entry) as NodePtyModule;
+    if (!isUsableNodePtyModule(loaded)) {
+      throw new Error(`released node-pty at '${entry}' has no spawn function`);
+    }
+    return loaded;
+  } catch (error: unknown) {
+    // 释放副本损坏（版本切换中断等）时回退到内联 import 路径并如实报告。
+    console.warn(
+      `[terminal] released node-pty entry '${entry}' failed to load: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+    return null;
+  }
+}
+
 async function loadNodePtyModule(): Promise<NodePtyModule> {
   if (!nodePtyModulePromise) {
-    nodePtyModulePromise = import("node-pty").catch(async (error: unknown) => {
-      // node-pty failed to resolve its native addon. Before giving up, try
-      // the embedding-runtime fallback directory (terminalPtyFallback.ts).
-      // remote server 启动时会先创建所有服务，之前这里顶层 import node-pty，
-      // 只要当前平台缺少 pty.node，就会在服务注册阶段直接崩掉，整条远程连接链路都失败。
-      // 改成延迟加载后，server 可以先完成握手，仅在真正创建终端时再暴露“terminal 不可用”的错误。
+    const released = loadNodePtyFromReleasedEntry();
+    if (released) {
+      nodePtyModulePromise = Promise.resolve(released);
+      return nodePtyModulePromise;
+    }
+    nodePtyModulePromise = (async () => {
+      // The addon redirect hook must be installed BEFORE the first node-pty
+      // import: its main module probes build/Release/pty.node at the top
+      // level, and esbuild's __commonJS helper caches the (half-initialized)
+      // exports even when that probe throws. Installing the hook only in a
+      // catch-and-retry path makes the retry return an empty namespace
+      // ("nodePty.spawn is not a function") because the second __require()
+      // hits the poisoned cache instead of re-running the probes. With the
+      // hook installed up front the very first load resolves the addon from
+      // the fallback dir and node-pty initializes cleanly.
       const fallbackDir = resolveFallbackPtyModuleDir();
-      if (!fallbackDir) {
-        nodePtyModulePromise = null;
-        throw error;
-      }
-      const restore = installNativePtyAddonRedirect(fallbackDir);
+      const restore = fallbackDir ? installNativePtyAddonRedirect(fallbackDir) : null;
       try {
-        // The addon require probes build/Release first, so node-pty will look
-        // for the darwin spawn-helper there as well; stage it from the
-        // fallback dir before the retry loads node-pty's UnixTerminal.
-        ensureFallbackSpawnHelperInstalled(fallbackDir);
-        const retried = (await import("node-pty")) as NodePtyModule;
-        // esbuild __commonJS 半初始化陷阱：node-pty 主模块第一次执行在顶层
-        // loadNativeModule("pty") 探测 addon 失败时抛错，但 __commonJS 的
-        // mod 缓存已被赋值；fallback 重试的第二次 __require() 命中缓存直接
-        // 返回空 exports（无 spawn）。SEA 场景实测报 "nodePty.spawn is not
-        // a function"。缺 spawn 时把这次结果也当失败处理，给出指向 addon
-        // 部署的明确错误，而不是让上层拿到不可调用模块。
-        if (!isUsableNodePtyModule(retried)) {
-          nodePtyModulePromise = null;
+        if (fallbackDir) {
+          // The addon require probes build/Release first, so node-pty will
+          // look for the darwin spawn-helper there as well; stage it from the
+          // fallback dir before the first load reads it.
+          ensureFallbackSpawnHelperInstalled(fallbackDir);
+        }
+        const loaded = (await import("node-pty")) as NodePtyModule;
+        if (!isUsableNodePtyModule(loaded)) {
           throw new Error(
-            `node-pty loaded from fallback dir '${fallbackDir}' but its namespace has no spawn (half-initialized __commonJS cache after the failed first load)`,
+            "node-pty namespace has no spawn function (module loaded but addon initialization failed)",
           );
         }
-        return retried;
-      } catch {
+        return loaded;
+      } catch (error: unknown) {
         nodePtyModulePromise = null;
-        // Report the original failure: the retry failure is a consequence,
-        // and the original message names node-pty's searched directories.
-        throw new Error(
-          `node-pty is unavailable in this runtime (fallback dir '${fallbackDir}' did not resolve it either): ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
+        if (fallbackDir) {
+          throw new Error(
+            `node-pty is unavailable in this runtime (fallback dir '${fallbackDir}' did not resolve it either): ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          );
+        }
+        throw error;
       } finally {
-        restore();
+        restore?.();
       }
-    }) as Promise<NodePtyModule>;
+    })();
   }
 
   return nodePtyModulePromise;
@@ -145,6 +175,16 @@ function isUsableDirectory(path: string): boolean {
 
 function resolveNodePtySpawnHelperPath(): string | null {
   if (process.platform !== "darwin") return null;
+
+  // SEA 路径：released node-pty 的 prebuilds 目录自带可执行的 spawn-helper
+  //（seaEntry 释放时已 chmod 0755），直接指向那里。
+  const releasedEntry = process.env.NEX_PTY_ENTRY?.trim();
+  if (releasedEntry) {
+    const releasedDir = dirname(dirname(releasedEntry));
+    const platformArch = `darwin-${process.arch}`;
+    const prebuildHelper = join(releasedDir, "prebuilds", platformArch, "spawn-helper");
+    if (existsSync(prebuildHelper)) return prebuildHelper;
+  }
 
   try {
     const utils = require("node-pty/lib/utils") as {

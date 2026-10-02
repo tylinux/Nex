@@ -33,6 +33,7 @@ import { collectSeaRuntimeToolAssets } from "../../../apps/nex-cli/packages/cli/
 import { prepareSeaRuntimeToolAssets } from "../../../apps/nex-cli/packages/cli/scripts/sea-runtime-tool-prepare.mjs";
 import { collectSeaPlaywrightAssets } from "../../../apps/nex-cli/packages/cli/scripts/sea-playwright-assets.mjs";
 import { collectSeaProviderConfigAssets } from "../../../apps/nex-cli/packages/cli/scripts/sea-provider-config-assets.mjs";
+import { collectSeaPtyAssets } from "./sea-pty-assets.mjs";
 import { stageNodeNotices } from "../../../scripts/third-party-notices.mjs";
 import { buildHttpBundle } from "../build-http-bundle.ts";
 
@@ -147,6 +148,12 @@ const prepareSeaBlob = async (target, nodeVersion) => {
   await mkdir(agentStagingDirectory, { recursive: true });
   await copyFile(agentBundle, agentBundleStaged);
 
+  const ptyAssets = await collectSeaPtyAssets({
+    root: repositoryRoot,
+    stagingDirectory: seaAssetStagingForTarget(`${target}-pty`),
+    target,
+  });
+
   const seaConfig = seaConfigForTarget(target);
   await writeFile(
     seaConfig,
@@ -159,6 +166,7 @@ const prepareSeaBlob = async (target, nodeVersion) => {
           ...runtimeToolAssets,
           ...playwrightAssets,
           ...providerConfigAssets,
+          ...ptyAssets,
           "nex-sea-agent/nex.cjs": agentBundleStaged,
           "nex-node-license": nodeLicensePath,
         },
