@@ -180,9 +180,9 @@ export function createCustomAboutDialogHtml(input: CustomAboutDialogHtmlInput): 
               class="app-logo"
               focusable="false"
             >
-              <path fill="currentColor" d="M88 20.5L158 20.5L88 340L18 340Z" />
-              <path fill="currentColor" d="M158 20.5L228 20.5L348 340L278 340Z" />
-              <path fill="currentColor" d="M348 20.5L418 20.5L348 340L278 340Z" />
+              <path fill="currentColor" d="M51,23 L126.7,23 L49.4,338.7 L24.4,340Z" />
+              <path fill="currentColor" d="M126.7,23 L161.3,23 L332.7,338.7 L299.7,338.7Z" />
+              <path fill="currentColor" d="M394.7,20.5 L407.5,20.5 L390.6,337.5 L332.7,338.7Z" />
             </svg>
           </div>
           <h1 id="about-title" class="title">
