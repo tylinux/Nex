@@ -17,10 +17,11 @@ export function shouldShowAppleSiliconLine(isDesktop: boolean): boolean {
 /**
  * Nex 品牌 N 标（实色白色版）。
  *
- * 与桌面端原生 About 窗口（packages/desktop/src/main/aboutWindow.ts .app-icon）
- * 同一组 path 与同款深色渐变块。assets/N.svg 是启动页空态的装饰变体（低透明度
- * 描边、无实色填充），在深色图标块里几乎不可见，所以这里内联实色白色 path——
- * 原生版的图标块永远是深色渐变底 + 白标，不随主题翻转。
+ * path 从官方 app icon（packages/desktop/build/icon.png, 1024px）逐像素提取
+ * 三笔画多边形后换算到 436x360 viewBox：左笔顶部宽、底部收尖（渐细尾），
+ * 中笔为斜四边形，右笔顶部尖、向下展开——此前使用的等宽平行四边形 path
+ * 与官方 icon 不符（左竖视觉上过粗过长）。与桌面端原生 About 窗口
+ * （packages/desktop/src/main/aboutWindow.ts）同步修正。
  */
 function NexMark() {
   return (
@@ -33,9 +34,9 @@ function NexMark() {
       aria-hidden="true"
       focusable="false"
     >
-      <path fill="currentColor" d="M88 20.5L158 20.5L88 340L18 340Z" />
-      <path fill="currentColor" d="M158 20.5L228 20.5L348 340L278 340Z" />
-      <path fill="currentColor" d="M348 20.5L418 20.5L348 340L278 340Z" />
+      <path fill="currentColor" d="M51,23 L126.7,23 L49.4,338.7 L24.4,340Z" />
+      <path fill="currentColor" d="M126.7,23 L161.3,23 L332.7,338.7 L299.7,338.7Z" />
+      <path fill="currentColor" d="M394.7,20.5 L407.5,20.5 L390.6,337.5 L332.7,338.7Z" />
     </svg>
   );
 }
