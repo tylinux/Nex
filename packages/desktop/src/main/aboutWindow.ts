@@ -176,13 +176,43 @@ export function createCustomAboutDialogHtml(input: CustomAboutDialogHtmlInput): 
               width="121"
               height="100"
               fill="none"
-              viewBox="0 0 436 360"
+              viewBox="258 255 510 516"
               class="app-logo"
               focusable="false"
             >
-              <path fill="currentColor" d="M51,23 L126.7,23 L49.4,338.7 L24.4,340Z" />
-              <path fill="currentColor" d="M126.7,23 L161.3,23 L332.7,338.7 L299.7,338.7Z" />
-              <path fill="currentColor" d="M394.7,20.5 L407.5,20.5 L390.6,337.5 L332.7,338.7Z" />
+              <defs>
+                <linearGradient id="nex-left" x1="269" y1="423" x2="430" y2="720" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#A5E5CE" />
+                  <stop offset=".62" stop-color="#BEF2DC" />
+                  <stop offset="1" stop-color="#B2ECD5" />
+                </linearGradient>
+                <linearGradient id="nex-left-fold" x1="367" y1="374" x2="289" y2="444" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#236E5D" stop-opacity=".88" />
+                  <stop offset=".4" stop-color="#337E6C" stop-opacity=".65" />
+                  <stop offset="1" stop-color="#74BDA6" stop-opacity="0" />
+                </linearGradient>
+                <linearGradient id="nex-right" x1="641" y1="276" x2="787" y2="637" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#C6F7E2" />
+                  <stop offset=".55" stop-color="#B5EDD7" />
+                  <stop offset="1" stop-color="#7EC4B0" />
+                </linearGradient>
+                <linearGradient id="nex-right-fold" x1="671" y1="629" x2="742" y2="564" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#216B59" stop-opacity=".85" />
+                  <stop offset=".42" stop-color="#337F6B" stop-opacity=".58" />
+                  <stop offset="1" stop-color="#7EC4B0" stop-opacity="0" />
+                </linearGradient>
+                <linearGradient id="nex-ribbon" x1="313" y1="269" x2="750" y2="750" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#B9F0D8" />
+                  <stop offset=".28" stop-color="#C4F5DF" />
+                  <stop offset=".62" stop-color="#A6E4CE" />
+                  <stop offset="1" stop-color="#83CBB6" />
+                </linearGradient>
+              </defs>
+              <path d="M263 356C263 333 276 337 286 343C305 355 342 402 399 469V702C399 720 392 729 376 736L290 766C271 772 263 762 263 741Z" fill="url(#nex-left)" />
+              <path d="M263 356C263 333 276 337 286 343C305 355 342 402 399 469V702C399 720 392 729 376 736L290 766C271 772 263 762 263 741Z" fill="url(#nex-left-fold)" />
+              <path d="M625 528V327C625 307 632 299 649 291L728 260C750 251 763 262 763 282V645C763 671 741 659 724 638Z" fill="url(#nex-right)" />
+              <path d="M625 528V327C625 307 632 299 649 291L728 260C750 251 763 262 763 282V645C763 671 741 659 724 638Z" fill="url(#nex-right-fold)" />
+              <path d="M263 356V316C263 282 282 262 313 262H389C406 262 415 272 429 288L722 638C741 660 763 673 763 645V707C763 741 743 763 707 763H663C645 763 636 756 623 741L306 369C282 340 264 336 263 356Z" fill="url(#nex-ribbon)" />
             </svg>
           </div>
           <h1 id="about-title" class="title">
