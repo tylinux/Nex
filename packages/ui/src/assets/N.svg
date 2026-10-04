@@ -1,5 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="258 255 510 516" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="100 100 824 824" fill="none">
   <defs>
+    <linearGradient id="nex-tile" x1="175" y1="135" x2="865" y2="897" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#292B2C"/>
+      <stop offset=".5" stop-color="#1D1F20"/>
+      <stop offset="1" stop-color="#101213"/>
+    </linearGradient>
+    <radialGradient id="nex-tile-light" cx="0" cy="0" r="1" gradientTransform="translate(370 224) rotate(55) scale(720 610)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#363939" stop-opacity=".23"/>
+      <stop offset="1" stop-color="#0A0C0D" stop-opacity="0"/>
+    </radialGradient>
     <linearGradient id="nex-left" x1="269" y1="423" x2="430" y2="720" gradientUnits="userSpaceOnUse">
       <stop stop-color="#A5E5CE"/>
       <stop offset=".62" stop-color="#BEF2DC"/>
@@ -27,6 +36,8 @@
       <stop offset="1" stop-color="#83CBB6"/>
     </linearGradient>
   </defs>
+  <path d="M296 120H730C844 120 906 181 906 291V727C906 843 848 904 731 904H294C177 904 118 844 118 728V294C118 180 179 120 296 120Z" fill="url(#nex-tile)"/>
+  <path d="M296 120H730C844 120 906 181 906 291V727C906 843 848 904 731 904H294C177 904 118 844 118 728V294C118 180 179 120 296 120Z" fill="url(#nex-tile-light)"/>
   <path d="M263 356C263 333 276 337 286 343C305 355 342 402 399 469V702C399 720 392 729 376 736L290 766C271 772 263 762 263 741Z" fill="url(#nex-left)"/>
   <path d="M263 356C263 333 276 337 286 343C305 355 342 402 399 469V702C399 720 392 729 376 736L290 766C271 772 263 762 263 741Z" fill="url(#nex-left-fold)"/>
   <path d="M625 528V327C625 307 632 299 649 291L728 260C750 251 763 262 763 282V645C763 671 741 659 724 638Z" fill="url(#nex-right)"/>
