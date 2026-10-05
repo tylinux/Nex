@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "inputHashEncoding": "UTF-8 with CRLF normalized to LF; notice and source snapshot hashes remain byte-exact",
   "scope": "Production dependency union across current workspace projects, copied source/assets and native tools; not a per-installer SBOM or a certification of all licensing obligations.",
-  "noticesSha256": "2a7fba2fee2a12dd86d9771155dd02338ccccffce3cc86d9b9f8b7333614f5a7",
+  "noticesSha256": "7fdd1dd6a3dfacb6bf69c1892d881849ce635ac6c005291f858bb471ee759457",
   "inputs": {
     ".agents/skills/agent-browser/references/authentication.md": "cf08f1b50c0e01a3c9c512745d61195cc46dede5bf1171b99e743a20ac163932",
     ".agents/skills/agent-browser/references/commands.md": "3e3a7956ec476be4fddfea843ed5db2ca62f9ea5dc749d5f369a52145202645c",
@@ -224,29 +224,36 @@
     ".agents/skills/react-best-practices/rules/server-parallel-nested-fetching.md": "4d9c44e579e1286013acf5cb5f65b04297d2b68909f44f8163804656514a78ff",
     ".agents/skills/react-best-practices/rules/server-serialization.md": "4d025c42043c56e6355196a2e885d168cdb15248d0797146c9db838a57b34946",
     ".agents/skills/react-best-practices/SKILL.md": "b7d246acb440bee224ab33614979a5b8debe5fdb13d0304967aa19358eb69d9f",
-    "apps/nex-cli/package.json": "7640c31979e2ed532dd9436ebc719ce157f0818c100883c379dbc6fca5e9ce36",
-    "apps/nex-cli/packages/adapters/package.json": "3a9840859400bc874bc61a9974bf3b613baa8aa794c98e446f64d6b306a7e6ec",
-    "apps/nex-cli/packages/bootstrap/package.json": "10c17afba450e3b23f4a6b7b38f11c26da727d0bc80543981aac4d9a4f9e97be",
-    "apps/nex-cli/packages/browser-use-plugin/package.json": "603d308d5cdf136c36afaae2a2274153fe757fb246b596ea0a440270363433ce",
-    "apps/nex-cli/packages/cli/package.json": "dfedf4018c06f892bf7a590b05205175fe930fe244d02cf34baeda4582538f33",
-    "apps/nex-cli/packages/contracts/package.json": "cd683f36fbd814c16de54031434336e6aab159c1b0ffd907d78e02fd7df2ffa9",
-    "apps/nex-cli/packages/core/package.json": "03b851e8ae32e93780e769a7c90483683814b8e26303a034734b2820e2d5d6af",
+    "apps/nex-cli/package.json": "2bd058723792d609f1dc770ffd00dd08fead0d1ccc1c75ed86a210a3f233cce0",
+    "apps/nex-cli/packages/adapters/package.json": "a0943c1f8c93139e55689ca56bad844cc627c71c6d8e98e1d3524af015242a6b",
+    "apps/nex-cli/packages/bootstrap/package.json": "99fdcb40f26dcac93a1c68f6581dc4c84c049e47568eaf7b5aaca3663ad3380d",
+    "apps/nex-cli/packages/browser-use-plugin/package.json": "ec8038d784e072396629735fa5b6d4d8eb136d33ef1f1ee5c6de179587192c05",
+    "apps/nex-cli/packages/cli/package.json": "614f9ac4f456b643ea3586e3701db1d076e5dc5b2b738f0ca7f9b10650afbda1",
+    "apps/nex-cli/packages/contracts/package.json": "136fece6ac6a0285e2c60b6a71e9f733021d0caddd6824a499bcfdcf3fde5d46",
+    "apps/nex-cli/packages/core/package.json": "5517e64aefe9419064915308df036783c19f7d54c52fe7a67c4d359cc9475552",
+    "apps/nex-cli/packages/core/src/codemode/identifier.ts": "a33f99db73ede22cbe57202c0ad71a9fae644f0e1fb9713d026159f090de8092",
+    "apps/nex-cli/packages/core/src/codemode/runtime/host.ts": "006fd714021342b6562a9772909370ba8c1185bbbef2d556b6691c6de9e47bfe",
+    "apps/nex-cli/packages/core/src/codemode/runtime/prelude-source.ts": "760b2e0fa7405fa0d80f6d50514c208492f23ddecbc01418a72445bf805f520d",
+    "apps/nex-cli/packages/core/src/codemode/runtime/protocol.ts": "b4a613f4cdce816490b0c3f2d0126cd5569a0504ba22787bc3c396cef70bd889",
+    "apps/nex-cli/packages/core/src/codemode/runtime/worker.ts": "ac5b9f392bac74fbc34d61b0f9447870f4302362f0a5955f588757014e6eb39a",
+    "apps/nex-cli/packages/core/src/codemode/source.ts": "424216d7a52841991bb6842067c1753cb3b6592bfd7fba9f5c569ae4b822d3dd",
+    "apps/nex-cli/packages/core/src/codemode/types.ts": "193629e816348debe204d1d2df4729a54d51ca856d2d987e14af9bb31b32c3f3",
+    "apps/nex-cli/packages/core/src/codemode/wasm.ts": "ffdaf310f45e8251f7db67bd21dd1d31379c2526d2aa225e856393d69a27e750",
     "apps/nex-cli/packages/core/src/tool/handlers/generated/bash-command-registry.ts": "60fa5acd9f5c357f4e51b1d1e944ee39da92680e4bc5e98dd708f1457fcf612b",
     "apps/nex-cli/packages/debug/package.json": "16e6a402d995d3a56ed6e97665cd81f0dd22f03280350d5e0a70c14a2cc4b2ca",
     "apps/nex-cli/packages/dynamic-workflow-runtime/package.json": "816309ebb289a59a17ca4d18dc2d6a59f17777afa59ab0c9962510a2b8a2dc7d",
     "apps/nex-cli/packages/dynamic-workflow/package.json": "b3af04564cb9c76dd4e77cc81086e2d973146721cabc4cf2532cc258f2fd89e9",
     "apps/nex-cli/packages/i18n/package.json": "bd3f7c3a41124f9715d7aef346328076f47d63966d77afdd124adb4896d3feb3",
-    "apps/nex-cli/packages/node-repl-host/package.json": "0a51d02cdcd20d43d3d465b66823e17e7e3db73ffd525abb448bbf222dfa1c7a",
+    "apps/nex-cli/packages/node-repl-host/package.json": "9fb190f301f1d2fa0af076573345cfa2d00f7ef1492c5c81071f582e3075664d",
     "apps/nex-cli/packages/shared-types/package.json": "821e43e85879ef311200387d32aa1c6622379cdfe268c89f83f57a26b103630a",
     "apps/nex-cli/packages/superpowers-plugin/LICENSE": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400",
     "apps/nex-cli/packages/swift-bridge/package.json": "bc3eb33b75894455c5f8864b924f1e10b2f2b17b315fb4186af63970296589bf",
-    "apps/nex-cli/packages/telemetry/package.json": "0e6eb302629e1e5309de2204388df27b76787dd66b6e182cd6e99d72b0b7120a",
-    "apps/nex-cli/packages/tui/package.json": "c47e48bd485e3accc9fa884158c7a1b55d06fc91fa592ab5e7a8d162c7d6100a",
+    "apps/nex-cli/packages/tui/package.json": "b759f6859da078c36e605186403ff40bc843a5a37a054721e973f29f231e8f33",
     "apps/nex-cli/tools/prompt-trajectory/package.json": "71a6e2fd6fa0405389b44b25b17ab4594074ffa7d592ed30ca1a37efaedfd12d",
     "apps/nex-cli/tools/typescript/package.json": "31ba314e6b4fabd71911ad6728ef408bb755aaaf7ba5ddebbec4b8cc834b6633",
-    "package.json": "04f5c5ce06a3ac936f6da5a79c97c06428804e60b0479e3f6e603321b47ef4cf",
+    "package.json": "cde7c6a83bc5d6f5cdb493168d086fef97d9da48de783146c373d235af24534c",
     "packages/client/package.json": "cc361fcb2ba712342825e193d01423b0997967e8de11fd91f782a4ccbec4b3f6",
-    "packages/desktop/package.json": "4784b3a9ab4b47e706187cdb72c01b26c0b025ba772db25724486506d26cf96b",
+    "packages/desktop/package.json": "9940950006b14f08a64fb65d39cbc2ba0c302b13aeb7dfee1725f7567fbc442d",
     "packages/desktop/src/renderer/public/material-icons/3d.svg": "9527b849f0fba57ca7640e2717b3a19cb5f5e046712cbbd8b75d73af338c68fb",
     "packages/desktop/src/renderer/public/material-icons/abap.svg": "1335bd7eb9a0ed49deb622330d680c2e97731726a7a5eee8e4f46dc1e5db4de4",
     "packages/desktop/src/renderer/public/material-icons/abc.svg": "d1a68020e8f020ef29dca5f94dc8613b7ae8fb5b212d8b1cc23b0f975ac7acda",
@@ -1411,10 +1418,9 @@
     "packages/rpc/src/channelServer.ts": "b9c61bd3881fff11b38a93853c60fa5c2bc871bcbea5dad0e9be0a4674f6c9da",
     "packages/rpc/src/delayedChannel.ts": "e7607b7fe9f35c742db206df90852e2ccafb75abc088606cf1ddbae801574ecf",
     "packages/rpc/src/foundation.ts": "b4874401965e7bad7e84245a2fc5960657a349b146f355ac7343562fa724da9f",
-    "packages/rpc/src/index.ts": "6a5adcfb0e6c7a7d385e10fede09c3e9c808e3555c27b938091868cdf0c3fbef",
+    "packages/rpc/src/index.ts": "c58af50a9065f23bc9baf3d348241ab9774c3a8b848ffc75240e69cb5c143f36",
     "packages/rpc/src/ipc.ts": "2ec3dfe0654a68300dbed7afd5ac436b563abf983d6e0f59a2b028469fdf71ef",
     "packages/rpc/src/logging-middleware.ts": "20edfd8e5d054097186f2498ec4e9c08c61740ed003fc69eecea8176a15fe025",
-    "packages/rpc/src/network-telemetry-middleware.ts": "18a7cde46e6c65e0138af0623d07bf883ce278acf44654bc5144ecaadd36a536",
     "packages/rpc/src/persistent-protocol.ts": "80609595b89188272d743e557502c6cad3858f828acae31c2ef64206bb3c8978",
     "packages/rpc/src/protocol.ts": "0057c773a22d90298753462bb11df28216c0792f28f0cecad5f3a29713a3a630",
     "packages/rpc/src/proxy-channel.ts": "ec5b43e6a3a622a88a8aaa6af9cb37dbfe517932ee7f4a337019ec138bb2d513",
@@ -1424,7 +1430,7 @@
     "packages/services/package.json": "ed2714a1936780e282616d8f6185d76c98e1879feab56f1721cd95e3d3482a01",
     "packages/shared/package.json": "b50e3fec0bbf1b8ef22c3bc851ddfdd023aea557e034ecbc1943af863b603395",
     "packages/shared/src/nex-protocol-v4/wire-codec.ts": "336634921c74531c8dc314db05524d9180aa938686ca2c179e7a740eb646e30b",
-    "packages/ui/package.json": "f86009cfacab803d13c656b6714ebf6b2319d3c942649d4b154ef882f3d6268b",
+    "packages/ui/package.json": "0ce8c35e54187f019c9c82ee8283d04a9f46b63a87126a0d57f46f3f6758a052",
     "packages/ui/src/components/ai-elements/agent.tsx": "f4e9b1d54414c23b1950f2822e83c478fcfad572248ab1eb8c65f537a47c371d",
     "packages/ui/src/components/ai-elements/artifact.tsx": "1d10c7b37b47f7f04cd1255648d55640ea50b9910f525f4a2690117a2121f54c",
     "packages/ui/src/components/ai-elements/attachments.tsx": "17446d8d44973c63c1d3057f13035d469196de05b148ebb995224837b75b96a7",
@@ -1516,7 +1522,7 @@
     "packages/ui/src/components/ui/toast.tsx": "06cb31129f6d62123c8e232a74b0ae9fd6c31d91aafca934e321421152e885dd",
     "packages/ui/src/components/ui/tooltip.tsx": "301dbf3a6f8b1bc496f9bdc6fbc5fe6202ed373182897f39cd1ecd19b00fdfbe",
     "packages/ui/src/components/ui/usePdfZoomOverlay.ts": "c8c91b003ce2fded32c7a2369dc6eac43aa4b9dc9c830a0f5ceccb21d366b610",
-    "packages/ui/src/lib/builtinSkillI18n.ts": "9101e60aad1652e7ef49cb6536b627a51f0c6975aaffda6a3e5474e36e617106",
+    "packages/ui/src/lib/builtinSkillI18n.ts": "1c684c824329b60a15d1eda7b43da063959cc634816733995c92f51fbefeb987",
     "packages/ui/src/styles.css": "b5deaba48a3e10187cc0b14b7183e681cd69e0ed6d4591851f46f199aa426598",
     "packages/web/package.json": "15625c5a58d7c121a0d2acc903c8a9f81e60c0f83b39a3e7006ced40460fa7c6",
     "packages/web/public/material-icons/3d.svg": "9527b849f0fba57ca7640e2717b3a19cb5f5e046712cbbd8b75d73af338c68fb",
@@ -2667,12 +2673,12 @@
     "packages/web/public/material-icons/zip.svg": "dad79a45f756542d37abd422502ecfbea15720b92ea1c9d80ef0439ab6b9448a",
     "patches/@ai-sdk__anthropic@3.0.81.patch": "d3a7c381eba7f5157f765a0528003af17cf84544911dfb7412c7800168e01c18",
     "patches/@ai-sdk__openai-compatible@2.0.60.patch": "9632fe9d821b3dc20939ae509cc35b968d90d018bbd1d812390718898182a38b",
-    "pnpm-lock.yaml": "77c789f838c227714cd5c812d3ed7fabfa5ce720d60ac65d085d26a95409755f",
+    "pnpm-lock.yaml": "6255a51d14fd32a758088eaf0ebea946360b4bbb8ff2670c23479275c9c01737",
     "pnpm-workspace.yaml": "770297fab757203c0c122932827bff4c98b8a1103bebfc3b680715e79f7eed66",
     "scripts/license-texts/Apache-2.0.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
     "scripts/native-search-tools-config.mjs": "c9eee03dccb8d1cc083de4946663e6a41ef4b29c185887fcd8949b0b2a783b3b",
     "scripts/remote-native-search-tools-config.mjs": "472322a66f84c7452f96aa9e16e9c4e0600f7c2588a03dc6bc869229161b1cb2",
-    "third-party/copied-components.json": "2faf12e591cf928c670d767c522c309ca97165b2ddb83063a7fac5b6e99ee72e",
+    "third-party/copied-components.json": "fea9482f2830ee91974565d1da6b06a5c02ab34b27d783d3e5989ba2ab3e6c94",
     "third-party/embedded-components.json": "9586ccca15897f56d4ca1d703dffe9e02880fedd766c1dff93f7ac1f52ea891a",
     "third-party/native-search/licenses/00373c9bf56a894b2ed67586596bc1e8b0630cabbaf1ab46c75fc754b6bcd1ce.txt": "00373c9bf56a894b2ed67586596bc1e8b0630cabbaf1ab46c75fc754b6bcd1ce",
     "third-party/native-search/licenses/01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f.txt": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
@@ -2795,6 +2801,7 @@
     "third-party/runtime/sources.json": "b27bc8d81aeb71108e523602364ffbb6a1b19c2d5d47733fd43094b769006741",
     "third-party/upstream/000ffa2d773c511f4459fb31d89f841806f93bf5caf2050468ab2097c081b443.txt": "000ffa2d773c511f4459fb31d89f841806f93bf5caf2050468ab2097c081b443",
     "third-party/upstream/014bb31e83d5c2e76aea1cc6e82217346ab41362f32cb355ad0f5c10aa0aeaff.txt": "014bb31e83d5c2e76aea1cc6e82217346ab41362f32cb355ad0f5c10aa0aeaff",
+    "third-party/upstream/0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48.txt": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48",
     "third-party/upstream/0a7cda7d15aca7baaa3035e1f90466dde9ecc980c103cd230382d6675714bf2a.txt": "0a7cda7d15aca7baaa3035e1f90466dde9ecc980c103cd230382d6675714bf2a",
     "third-party/upstream/0ab717053f3e24736cd404a0801407fb305db75d1b58f7e6487d14feee30d28a.txt": "0ab717053f3e24736cd404a0801407fb305db75d1b58f7e6487d14feee30d28a",
     "third-party/upstream/0c74e86d37d6fc7e8f22b4b8e3b801f6737c263c27a71d81c86cd8de0b6a84e5.txt": "0c74e86d37d6fc7e8f22b4b8e3b801f6737c263c27a71d81c86cd8de0b6a84e5",
@@ -3335,18 +3342,6 @@
     {
       "name": "@babel/preset-typescript",
       "version": "7.28.5",
-      "license": "MIT",
-      "repository": "https://github.com/babel/babel.git",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "117da2af0d4ce0fe1c8e19b5cff9dcd806adf973d328d27b11d4448c4ff24f76"
-        }
-      ]
-    },
-    {
-      "name": "@babel/runtime",
-      "version": "7.29.7",
       "license": "MIT",
       "repository": "https://github.com/babel/babel.git",
       "notices": [
@@ -5091,22 +5086,6 @@
       ]
     },
     {
-      "name": "@opentelemetry/api-logs",
-      "version": "0.214.0",
-      "license": "Apache-2.0",
-      "repository": "open-telemetry/opentelemetry-js",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "bd58f2a90815dfc0589075fab5af424dedc7415266765f48ae59b3de98d5e1be"
-        }
-      ]
-    },
-    {
       "name": "@opentelemetry/api",
       "version": "1.9.0",
       "license": "Apache-2.0",
@@ -5135,198 +5114,6 @@
         {
           "member": "README.md (license section)",
           "sha256": "9cfa86899ccd67b76331431bbff57cbe15ceabb2e393aeb5a56c7a958dabd595"
-        }
-      ]
-    },
-    {
-      "name": "@opentelemetry/context-async-hooks",
-      "version": "2.6.1",
-      "license": "Apache-2.0",
-      "repository": "open-telemetry/opentelemetry-js",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "fc58ccbf60cdd4a212be673e7f1278dd1a3e49f1b1ddc21a7d70724bc8b3044a"
-        }
-      ]
-    },
-    {
-      "name": "@opentelemetry/core",
-      "version": "2.6.1",
-      "license": "Apache-2.0",
-      "repository": "open-telemetry/opentelemetry-js",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "998b885208a7e72f854bca1a9fcb439c7665671dcbc77a9b6ca5fae5a15982dc"
-        }
-      ]
-    },
-    {
-      "name": "@opentelemetry/exporter-metrics-otlp-http",
-      "version": "0.214.0",
-      "license": "Apache-2.0",
-      "repository": "open-telemetry/opentelemetry-js",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "f60c6f5ed7777891fdb00c840a9328db068f279da72aee211f1648d28a93be36"
-        }
-      ]
-    },
-    {
-      "name": "@opentelemetry/exporter-metrics-otlp-proto",
-      "version": "0.214.0",
-      "license": "Apache-2.0",
-      "repository": "open-telemetry/opentelemetry-js",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "1b28b52d5dc4fa05b087ba53e75f1f95c11731ed07218fcdc992ad8bcddd93e1"
-        }
-      ]
-    },
-    {
-      "name": "@opentelemetry/exporter-trace-otlp-proto",
-      "version": "0.214.0",
-      "license": "Apache-2.0",
-      "repository": "open-telemetry/opentelemetry-js",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "e1acb133327575513e723320b5c42d7705bfe95dfdf0da1879239824ec5f8496"
-        }
-      ]
-    },
-    {
-      "name": "@opentelemetry/otlp-exporter-base",
-      "version": "0.214.0",
-      "license": "Apache-2.0",
-      "repository": "open-telemetry/opentelemetry-js",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "0b8732770b293090db6e4ec732b98a2b3b199c927dfafcbc23e51c5b724306b7"
-        }
-      ]
-    },
-    {
-      "name": "@opentelemetry/otlp-transformer",
-      "version": "0.214.0",
-      "license": "Apache-2.0",
-      "repository": "open-telemetry/opentelemetry-js",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "df4b0aa1ded638f520ed7ca841161c27677d0678671e98ffc02917fdb0c0ff3b"
-        }
-      ]
-    },
-    {
-      "name": "@opentelemetry/resources",
-      "version": "2.6.1",
-      "license": "Apache-2.0",
-      "repository": "open-telemetry/opentelemetry-js",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "9cb96eeeccf177dd2579c21e2376f52ce4fa90861cc2dda9f14842542da7a3f9"
-        }
-      ]
-    },
-    {
-      "name": "@opentelemetry/sdk-logs",
-      "version": "0.214.0",
-      "license": "Apache-2.0",
-      "repository": "git+https://github.com/open-telemetry/opentelemetry-js.git",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "a194d66e0c5bd6dc8927f5806bd9c5fd1df7c582eb8518d980a612cee902d632"
-        }
-      ]
-    },
-    {
-      "name": "@opentelemetry/sdk-metrics",
-      "version": "2.6.1",
-      "license": "Apache-2.0",
-      "repository": "open-telemetry/opentelemetry-js",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "1c6a18bba0437d60bb18fa58bf055eb32c51c791837ac0ad375b529bcf245f94"
-        }
-      ]
-    },
-    {
-      "name": "@opentelemetry/sdk-trace-base",
-      "version": "2.6.1",
-      "license": "Apache-2.0",
-      "repository": "open-telemetry/opentelemetry-js",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "8375f12da0f472679e1eeee52bf58ea289c9806b8a7605f80a1f8865b01908f1"
-        }
-      ]
-    },
-    {
-      "name": "@opentelemetry/semantic-conventions",
-      "version": "1.43.0",
-      "license": "Apache-2.0",
-      "repository": "open-telemetry/opentelemetry-js",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "ac32ccc44843f58e28c56d475e1e8687a3eeae4aa003c9225b40e9603b5f9c73"
         }
       ]
     },
@@ -13786,22 +13573,6 @@
         {
           "member": "README.md (license section)",
           "sha256": "e9a45168c4e32772336055b667d33706b95bf1cafd4c4d3eb3bb1a9edd5fa8b8"
-        }
-      ]
-    },
-    {
-      "name": "module-details-from-path",
-      "version": "1.0.4",
-      "license": "MIT",
-      "repository": "git+https://github.com/watson/module-details-from-path.git",
-      "notices": [
-        {
-          "member": "LICENSE",
-          "sha256": "9ae360a69508e492009c51dfa9b71322977c2bc3f8902b9ca3fdd521677bcf01"
-        },
-        {
-          "member": "README.md (license section)",
-          "sha256": "daf005969aac8cb4283b3777361f0244f4cce898b9a983a60b7f0d9e96f559bf"
         }
       ]
     },
@@ -28824,7 +28595,7 @@
         },
         {
           "file": "packages/rpc/src/index.ts",
-          "sha256": "6a5adcfb0e6c7a7d385e10fede09c3e9c808e3555c27b938091868cdf0c3fbef"
+          "sha256": "c58af50a9065f23bc9baf3d348241ab9774c3a8b848ffc75240e69cb5c143f36"
         },
         {
           "file": "packages/rpc/src/ipc.ts",
@@ -28833,10 +28604,6 @@
         {
           "file": "packages/rpc/src/logging-middleware.ts",
           "sha256": "20edfd8e5d054097186f2498ec4e9c08c61740ed003fc69eecea8176a15fe025"
-        },
-        {
-          "file": "packages/rpc/src/network-telemetry-middleware.ts",
-          "sha256": "18a7cde46e6c65e0138af0623d07bf883ce278acf44654bc5144ecaadd36a536"
         },
         {
           "file": "packages/rpc/src/persistent-protocol.ts",
@@ -28897,7 +28664,7 @@
       "files": [
         {
           "file": "packages/ui/src/lib/builtinSkillI18n.ts",
-          "sha256": "9101e60aad1652e7ef49cb6536b627a51f0c6975aaffda6a3e5474e36e617106"
+          "sha256": "1c684c824329b60a15d1eda7b43da063959cc634816733995c92f51fbefeb987"
         },
         {
           "file": "apps/nex-cli/packages/superpowers-plugin/LICENSE",
@@ -29220,6 +28987,63 @@
         {
           "file": ".agents/skills/react-best-practices/rules/server-serialization.md",
           "sha256": "4d025c42043c56e6355196a2e885d168cdb15248d0797146c9db838a57b34946"
+        }
+      ]
+    },
+    {
+      "id": "pi-codemode",
+      "referenceRevision": "d78dc83d633229d12f8b79631384c4c2717c399f",
+      "source": "https://raw.githubusercontent.com/earendil-works/pi/d78dc83d633229d12f8b79631384c4c2717c399f/LICENSE",
+      "file": "third-party/upstream/0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48.txt",
+      "sha256": "0457f5bcec3b3b211605dfb5d1a49042fd638f3686a410fe099c24a25af13c48",
+      "importRevision": "d78dc83d633229d12f8b79631384c4c2717c399f",
+      "roots": [
+        "apps/nex-cli/packages/core/src/codemode"
+      ],
+      "scope": "Sandbox host, worker, prelude, protocol, source and wasm loader vendored from @earendil-works/pi-codemode 1.0.3; import specifiers changed to .js. Nex-specific files in the same directory are not attributed to upstream.",
+      "license": "MIT",
+      "modifiedFiles": [
+        "apps/nex-cli/packages/core/src/codemode/identifier.ts",
+        "apps/nex-cli/packages/core/src/codemode/source.ts",
+        "apps/nex-cli/packages/core/src/codemode/types.ts",
+        "apps/nex-cli/packages/core/src/codemode/wasm.ts",
+        "apps/nex-cli/packages/core/src/codemode/runtime/host.ts",
+        "apps/nex-cli/packages/core/src/codemode/runtime/protocol.ts",
+        "apps/nex-cli/packages/core/src/codemode/runtime/prelude-source.ts",
+        "apps/nex-cli/packages/core/src/codemode/runtime/worker.ts"
+      ],
+      "files": [
+        {
+          "file": "apps/nex-cli/packages/core/src/codemode/identifier.ts",
+          "sha256": "a33f99db73ede22cbe57202c0ad71a9fae644f0e1fb9713d026159f090de8092"
+        },
+        {
+          "file": "apps/nex-cli/packages/core/src/codemode/runtime/host.ts",
+          "sha256": "006fd714021342b6562a9772909370ba8c1185bbbef2d556b6691c6de9e47bfe"
+        },
+        {
+          "file": "apps/nex-cli/packages/core/src/codemode/runtime/prelude-source.ts",
+          "sha256": "760b2e0fa7405fa0d80f6d50514c208492f23ddecbc01418a72445bf805f520d"
+        },
+        {
+          "file": "apps/nex-cli/packages/core/src/codemode/runtime/protocol.ts",
+          "sha256": "b4a613f4cdce816490b0c3f2d0126cd5569a0504ba22787bc3c396cef70bd889"
+        },
+        {
+          "file": "apps/nex-cli/packages/core/src/codemode/runtime/worker.ts",
+          "sha256": "ac5b9f392bac74fbc34d61b0f9447870f4302362f0a5955f588757014e6eb39a"
+        },
+        {
+          "file": "apps/nex-cli/packages/core/src/codemode/source.ts",
+          "sha256": "424216d7a52841991bb6842067c1753cb3b6592bfd7fba9f5c569ae4b822d3dd"
+        },
+        {
+          "file": "apps/nex-cli/packages/core/src/codemode/types.ts",
+          "sha256": "193629e816348debe204d1d2df4729a54d51ca856d2d987e14af9bb31b32c3f3"
+        },
+        {
+          "file": "apps/nex-cli/packages/core/src/codemode/wasm.ts",
+          "sha256": "ffdaf310f45e8251f7db67bd21dd1d31379c2526d2aa225e856393d69a27e750"
         }
       ]
     }
