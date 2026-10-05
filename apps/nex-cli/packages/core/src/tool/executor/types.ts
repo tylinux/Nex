@@ -172,6 +172,11 @@ export interface ToolExecuteOptions {
   offPeakTurn?: boolean;
   signal?: AbortSignal;
   traceContext?: TraceContext;
+  /**
+   * 嵌套调用（codemode 脚本发起）的父 tool call id。只进 trace 属性与审计，
+   * 不改变执行路径：嵌套调用与模型直发调用走同一条权限/校验/abort/预算链。
+   */
+  parentToolCallId?: string;
   subagentModelOverride?: SubagentRunOptions["modelOverride"];
   model?: Model;
 }

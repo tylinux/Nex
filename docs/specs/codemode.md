@@ -138,6 +138,21 @@ Acceptance: a script's tool call obeys permission approval and abort like a mode
 call; a cancelled script cancels in-flight child calls; the script receives raw data
 while the model receives budgeted data; audit shows every child call.
 
+#### P2 implementation decisions
+
+- `NestedToolRunner` (`core/src/tool/nested/runner.ts`) is the only way a script calls a
+  tool. It calls `ToolExecutor.execute()` with `parentToolCallId`, so permission,
+  validation, abort and result budget are the same code path as a model-issued call.
+- Admission order: forbidden names (codemode itself) → `registry.get()` (hidden/unknown
+  are "not found") → per-parent call-count limit → concurrency slot → abort check.
+- Channels are projected from one `ToolExecutionResult`: `output` (handler value, before
+  budget truncation) → script; `modelContent` (budgeted) → `modelText`; the audit record
+  keeps raw output, parent id, duration and the model-text length. A raw result larger
+  than `maxResultBytes` fails that call instead of entering the sandbox.
+- Child results are returned to the runner only; they are never appended to message
+  history, so they cannot become `tool_result` entries.
+- Limits: 200 calls, 8 concurrent, 5 MiB per raw result (overridable per runner).
+
 ### P3 — The sandbox
 
 - A restricted JS sandbox runs model-written JavaScript. Reuse a mature sandbox — do

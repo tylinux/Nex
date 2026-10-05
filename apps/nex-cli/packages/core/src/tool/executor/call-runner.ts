@@ -113,6 +113,9 @@ async function executeToolCallImpl(
     attributes: {
       toolCallId: canonicalToolCall.id,
       toolName: canonicalToolCall.name,
+      ...(options?.parentToolCallId === undefined
+        ? {}
+        : { parentToolCallId: options.parentToolCallId }),
     },
   });
   const traceId = traceContext.traceId;
