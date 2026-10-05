@@ -29,7 +29,11 @@ import { cloneModelSelection } from "../model-selection.js";
 import { resolveSubagentSelection } from "../helpers/subagent-selection.js";
 import type { AgentRuntimeDeps } from "../types.js";
 import { toMcpToolName } from "../../mcp/index.js";
-import { createBorrowedSubagentMcpAccess } from "../../subagent/borrowed-mcp-port.js";
+import {
+  createBorrowedSubagentMcpAccess,
+  withoutHiddenMcpTools,
+} from "../../subagent/borrowed-mcp-port.js";
+import { resolveMcpToolExposure } from "../../mcp/exposure.js";
 import { createSubagentMessageSink } from "../../subagent/message-steering.js";
 import {
   extractRequiredMcpServerNames,
@@ -610,11 +614,21 @@ async function resolveSubagentMcpAccess(
     scopedServerNames,
     officialCuaServerNames,
   );
+  // 父会话 hidden 的 MCP 工具不能经 child 绕回。child 自己的 config 没有 server 列表，
+  // 无法自行解析曝光，所以在借用快照上按父的配置剔除：这样无论 child 继承全部工具
+  // 还是 profile 显式点名某个 hidden 工具，child 都注册不出它（显式点名会报「不在快照里」）。
+  const sessionDefault = this.config.toolSearch?.enabled === true ? "deferred" : "direct";
+  const hidden = withoutHiddenMcpTools(borrowed, (serverName, toolName) =>
+    resolveMcpToolExposure(this.config.mcp?.servers?.[serverName], toolName, { sessionDefault }) ===
+    "hidden",
+  );
+  const port = hidden.port;
+  const visibleSnapshot = hidden.snapshot;
   return {
     config: { enabled: true },
     parentSnapshot: parentStartupSnapshot,
-    port: borrowed.port,
-    snapshot: borrowed.snapshot,
+    port,
+    snapshot: visibleSnapshot,
   };
 }
 

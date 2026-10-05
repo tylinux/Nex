@@ -43,7 +43,11 @@ const memorySchema = z.object({
   use: z.boolean().optional(),
 });
 
+const mcpExposureSchema = z.enum(["direct", "deferred", "hidden"]);
+
 const mcpServerBaseSchema = {
+  exposure: mcpExposureSchema.optional(),
+  toolExposure: z.record(z.string().min(1), mcpExposureSchema).optional(),
   // 设置页和 MCP adapter 已支持协议选择；配置入口漏掉该字段会因 strict 校验丢弃整个 server。
   protocolVersion: z.enum(["auto", "legacy", "2026-07-28"]).optional(),
   enabled: z.boolean().optional(),

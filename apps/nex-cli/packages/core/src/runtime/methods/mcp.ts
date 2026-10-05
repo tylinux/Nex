@@ -5,6 +5,7 @@ import {
   NEX_PLUGIN_ID_ENV_KEY,
 } from "@nex/shared";
 import { registerMcpTools, traceContextToLogContext } from "../deps.js";
+import { resolveMcpToolExposure } from "../../mcp/exposure.js";
 import type { McpConnectionSnapshot, McpServerConfig, TraceContext } from "../deps.js";
 import type { AgentRuntimeInternal } from "../internal.js";
 
@@ -136,7 +137,10 @@ export async function initializeMcp(
   try {
     const snapshot = await startup;
     const registered = registerMcpTools(this.registry, mcpPort, snapshot.tools, {
-      deferNonOfficialTools: this.config.toolSearch?.enabled === true,
+      exposureFor: (serverName, serverToolName) =>
+        resolveMcpToolExposure(this.config.mcp?.servers?.[serverName], serverToolName, {
+          sessionDefault: this.config.toolSearch?.enabled === true ? "deferred" : "direct",
+        }),
       allowedTools: this.config.toolAllowlist,
       disallowedTools: this.config.toolDisallowlist,
       officialCuaServerNames: computeOfficialCuaServerNames(

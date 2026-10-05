@@ -245,7 +245,10 @@ Exposure is configured on the MCP server entry, at two levels (modelled on pi's 
 - `ToolSearch` is registered whenever the session default is `deferred` **or** any server or
   tool resolves to `deferred`, so a single `deferred` entry is enough to get a working
   discovery path without turning the global switch on.
-- Invalid values are rejected where the config is validated, never silently coerced.
+- Invalid values are never coerced: the config loader drops only the offending server and
+  reports a `config_mcp_server_invalid` diagnostic naming the field (the existing behaviour for
+  any invalid MCP entry); the protocol DTO path ignores invalid entries instead of failing
+  `session/create`.
 - The field travels with the rest of the server entry: settings UI → `McpServerConfig`
   (shared) → `NexAgentMcpServer` (protocol DTO) → runtime `McpServerConfig` → `registerMcpTools`.
 - UI: Settings → MCP shows a per-server exposure selector (default / direct / deferred /

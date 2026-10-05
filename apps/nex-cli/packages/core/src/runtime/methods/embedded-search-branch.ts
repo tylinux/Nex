@@ -7,6 +7,7 @@ import {
   resolveRuntimeDynamicWorkflowToolsIncluded,
 } from "../helpers/tool-allowlist.js";
 import { isToolNameDisallowed } from "../../tool/tool-visibility.js";
+import { resolveRuntimeToolSearchIncluded } from "../helpers/tool-allowlist.js";
 
 export function resolveRuntimeEmbeddedSearchEnabled(runtime: AgentRuntimeInternal): boolean {
   const builtInToolAllowlist = resolveBuiltInToolAllowlist(runtime.config);
@@ -30,7 +31,7 @@ export function refreshBranchAwareBuiltInTools(runtime: AgentRuntimeInternal): v
     includeSkill: Boolean(runtime.skillPort),
     includeAgent: Boolean(runtime.subagentPort),
     embeddedSearchEnabled,
-    includeToolSearch: runtime.config.toolSearch?.enabled === true,
+    includeToolSearch: resolveRuntimeToolSearchIncluded(runtime.config),
     includeCodemode: runtime.config.codemode?.enabled === true,
     // 本函数是**第二个**
     // 注册入口，且刻意只传一个精简选项集。对「只有 true 才注册」的门（OffPeak / Cron / Workflow…）

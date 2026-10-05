@@ -90,6 +90,7 @@ export * from "./hooks/index.js";
 
 // MCP components
 export * from "./mcp/index.js";
+export { resolveMcpToolExposure, sessionHasDeferredMcpConfig } from "./mcp/exposure.js";
 
 // Plugin 对话引用（@ Plugin capability hint）
 export * from "./plugin-reference/index.js";

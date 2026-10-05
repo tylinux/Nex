@@ -1,3 +1,5 @@
+import type { McpServerConfig } from "@nex/contracts";
+import { sessionHasDeferredMcpConfig } from "../../mcp/exposure.js";
 import {
   AMEND_WORKFLOW_TOOL_NAME,
   CREATE_WORKFLOW_TOOL_NAME,
@@ -120,4 +122,17 @@ function normalizeBuiltInToolAllowlist(
   allowlist: readonly string[] | undefined,
 ): readonly string[] | undefined {
   return allowlist?.map((toolName) => normalizeToolNameAlias(toolName));
+}
+
+/**
+ * ToolSearch 的注册门：会话默认是 deferred，或任何 server / tool 的配置解析成 deferred。
+ * 一条 deferred 配置就足以让发现通道可用，不必为此打开全局开关。
+ */
+export function resolveRuntimeToolSearchIncluded(config: {
+  toolSearch?: { enabled?: boolean };
+  mcp?: { servers?: Record<string, McpServerConfig> };
+}): boolean {
+  return sessionHasDeferredMcpConfig(config.mcp?.servers, {
+    sessionDefault: config.toolSearch?.enabled === true ? "deferred" : "direct",
+  });
 }

@@ -5,6 +5,7 @@ import {
   NEX_MCP_ERROR_PRESENTATION_MESSAGE_ONLY,
   NEX_MCP_ERROR_PRESENTATION_META_KEY,
   type JsonSchema,
+  type McpExposure,
   type McpPort,
   type McpToolCallResult,
   type McpToolDescriptor,
@@ -55,8 +56,11 @@ export interface RegisterMcpToolsOptions {
    * 不投影官方 CUA 规范名，也不挂载 provider 拼写别名。
    */
   officialCuaServerNames?: ReadonlySet<string>;
-  /** 为真时普通 MCP 工具注册为 deferred；官方 CUA 与宿主 node_repl 恒为 direct。 */
-  deferNonOfficialTools?: boolean;
+  /**
+   * 普通 MCP 工具的曝光解析（按 server 与 server 自己的工具名）。缺席即全部 direct。
+   * 官方 CUA 与宿主 node_repl 不经过它：它们的模型可见名是 provider 约定，恒为 direct。
+   */
+  exposureFor?: (serverName: string, serverToolName: string) => McpExposure;
 }
 
 export function registerMcpTools(
@@ -78,9 +82,17 @@ export function registerMcpTools(
     // denylist 会静默失效并放行。新旧名称任一命中 deny 即拒绝，任一命中 allow 即接受。
     if (allowed && !allowed.has(name) && !allowed.has(descriptorName)) continue;
     if (disallowed?.has(name) || disallowed?.has(descriptorName)) continue;
+    const alwaysDirect =
+      officialCuaAuthorityVerified ||
+      (descriptor.serverName === "node_repl" && descriptor.toolName === "js");
+    const exposure: McpExposure = alwaysDirect
+      ? "direct"
+      : (options.exposureFor?.(descriptor.serverName, descriptor.toolName) ?? "direct");
+    // hidden 不注册：既不声明也不可搜索/调用，registry.has() 也如实返回 false。
+    if (exposure === "hidden") continue;
     registry.register(
       createMcpToolEntry(name, descriptor, mcpPort, officialCuaAuthorityVerified, {
-        deferred: options.deferNonOfficialTools === true,
+        deferred: exposure === "deferred",
       }),
     );
     registered.push(name);

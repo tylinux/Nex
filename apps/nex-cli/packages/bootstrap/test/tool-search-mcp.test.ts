@@ -25,7 +25,7 @@ test("real stdio MCP server: tools register deferred, search activates, call sti
     const registry = createToolRegistry();
     registry.register(toolSearchToolEntry);
     const registered = registerMcpTools(registry, mcpPort, snapshot.tools, {
-      deferNonOfficialTools: true,
+      exposureFor: () => "deferred" as const,
     });
     assert.equal(registered.length, 2);
 

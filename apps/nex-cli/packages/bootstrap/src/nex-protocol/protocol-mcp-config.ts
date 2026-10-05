@@ -23,6 +23,8 @@ export function protocolMcpServersToRuntimeMcpConfig(
         ...(server.protocolVersion !== undefined
           ? { protocolVersion: server.protocolVersion }
           : {}),
+        ...(server.exposure !== undefined ? { exposure: server.exposure } : {}),
+        ...(server.toolExposure !== undefined ? { toolExposure: server.toolExposure } : {}),
       };
       continue;
     }
@@ -35,6 +37,8 @@ export function protocolMcpServersToRuntimeMcpConfig(
       ...(server.timeoutMs !== undefined ? { timeoutMs: server.timeoutMs } : {}),
       ...(server.isolation !== undefined ? { isolation: server.isolation } : {}),
       ...(server.protocolVersion !== undefined ? { protocolVersion: server.protocolVersion } : {}),
+      ...(server.exposure !== undefined ? { exposure: server.exposure } : {}),
+      ...(server.toolExposure !== undefined ? { toolExposure: server.toolExposure } : {}),
     };
   }
 

@@ -626,6 +626,8 @@ const nexProtocolMcpOAuthSchema = z.union([
     .strict(),
 ]);
 
+const nexProtocolMcpExposureSchema = z.enum(["direct", "deferred", "hidden"]);
+
 export const nexProtocolMcpServerSchema = z.union([
   z
     .object({
@@ -635,6 +637,8 @@ export const nexProtocolMcpServerSchema = z.union([
       env: z.array(nexProtocolMcpEntrySchema),
       isolation: z.enum(["session", "workspace"]).optional(),
       protocolVersion: z.enum(["legacy", "auto", "2026-07-28"]).optional(),
+      exposure: nexProtocolMcpExposureSchema.optional(),
+      toolExposure: z.record(nonEmptyString, nexProtocolMcpExposureSchema).optional(),
       timeoutMs: z.number().int().positive().optional(),
     })
     .strict(),
@@ -647,6 +651,8 @@ export const nexProtocolMcpServerSchema = z.union([
       oauth: nexProtocolMcpOAuthSchema.optional(),
       isolation: z.enum(["session", "workspace"]).optional(),
       protocolVersion: z.enum(["legacy", "auto", "2026-07-28"]).optional(),
+      exposure: nexProtocolMcpExposureSchema.optional(),
+      toolExposure: z.record(nonEmptyString, nexProtocolMcpExposureSchema).optional(),
       timeoutMs: z.number().int().positive().optional(),
     })
     .strict(),

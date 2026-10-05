@@ -28,7 +28,7 @@ async function setup() {
   const registry = createToolRegistry();
   registry.register(createCodemodeToolEntry(buildCodemodeDescription({ listedCandidates: [] })));
   // 与 toolSearch 同一条路径：MCP 工具默认 deferred，脚本仍可调用。
-  registerMcpTools(registry, mcpPort, snapshot.tools, { deferNonOfficialTools: true });
+  registerMcpTools(registry, mcpPort, snapshot.tools, { exposureFor: () => "deferred" as const });
   setCodemodeWorkerUrl(WORKER_PATH);
   const events: { type: string }[] = [];
   const executor = createToolExecutor({

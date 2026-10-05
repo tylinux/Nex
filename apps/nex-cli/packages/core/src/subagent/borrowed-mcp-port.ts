@@ -69,3 +69,33 @@ export function createBorrowedSubagentMcpAccess(
     },
   };
 }
+
+/**
+ * 在借用的 MCP 访问上剔除父会话 hidden 的工具。child 的 config 没有 server 列表，无法自行解析
+ * 曝光，而它经 `port.listTools()` 发现并注册工具、经 `port.callTool()` 调用——所以快照、
+ * listTools、callTool 三处必须执行同一个判定，缺任何一处 hidden 工具都能经 child 绕回。
+ */
+export function withoutHiddenMcpTools(
+  access: BorrowedSubagentMcpAccess,
+  isHidden: (serverName: string, toolName: string) => boolean,
+): BorrowedSubagentMcpAccess {
+  const snapshot: McpConnectionSnapshot = {
+    ...access.snapshot,
+    tools: access.snapshot.tools.filter(
+      (descriptor) => !isHidden(descriptor.serverName, descriptor.toolName),
+    ),
+  };
+  const port: McpPort = {
+    ...access.port,
+    async listTools() {
+      return [...snapshot.tools];
+    },
+    async callTool(request, options) {
+      if (isHidden(request.serverName, request.toolName)) {
+        throw new Error(`MCP tool is hidden: ${request.serverName}/${request.toolName}`);
+      }
+      return access.port.callTool(request, options);
+    },
+  };
+  return { snapshot, port };
+}

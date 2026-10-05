@@ -163,6 +163,9 @@ export interface McpTestResult {
   response_time?: number;
 }
 
+/** 工具对模型请求的曝光档位；语义见 docs/specs/codemode.md。 */
+export type McpExposure = "direct" | "deferred" | "hidden";
+
 export type NexAgentMcpServer =
   | {
       name: string;
@@ -171,6 +174,8 @@ export type NexAgentMcpServer =
       env: Array<{ name: string; value: string }>;
       isolation?: "session" | "workspace";
       protocolVersion?: "legacy" | "auto" | "2026-07-28";
+      exposure?: McpExposure;
+      toolExposure?: Record<string, McpExposure>;
       timeoutMs?: number;
     }
   | {
@@ -179,6 +184,8 @@ export type NexAgentMcpServer =
       url: string;
       isolation?: "session" | "workspace";
       protocolVersion?: "legacy" | "auto" | "2026-07-28";
+      exposure?: McpExposure;
+      toolExposure?: Record<string, McpExposure>;
       headers: Array<{ name: string; value: string }>;
       oauth?: McpOAuthConfig;
       timeoutMs?: number;
@@ -305,6 +312,10 @@ export function convertToNexAgentMcpServer(
       ...(isMcpProtocolVersion(config.protocolVersion)
         ? { protocolVersion: config.protocolVersion }
         : {}),
+      ...(isMcpExposure(config.exposure) ? { exposure: config.exposure } : {}),
+      ...(sanitizeToolExposure(config.toolExposure)
+        ? { toolExposure: sanitizeToolExposure(config.toolExposure) }
+        : {}),
     };
   } else if (config.url && inferredType) {
     const normalizedType: "http" | "sse" = inferredType === "sse" ? "sse" : "http";
@@ -326,6 +337,10 @@ export function convertToNexAgentMcpServer(
       ...(isMcpProtocolVersion(config.protocolVersion)
         ? { protocolVersion: config.protocolVersion }
         : {}),
+      ...(isMcpExposure(config.exposure) ? { exposure: config.exposure } : {}),
+      ...(sanitizeToolExposure(config.toolExposure)
+        ? { toolExposure: sanitizeToolExposure(config.toolExposure) }
+        : {}),
     };
   }
   return null;
@@ -337,6 +352,19 @@ function isValidMcpTimeoutMs(value: unknown): value is number {
 
 function isMcpIsolation(value: unknown): value is "session" | "workspace" {
   return value === "session" || value === "workspace";
+}
+
+function isMcpExposure(value: unknown): value is McpExposure {
+  return value === "direct" || value === "deferred" || value === "hidden";
+}
+
+/** 只保留合法条目；非法值不能让整个 session/create 被 strict protocol schema 拒绝。 */
+function sanitizeToolExposure(value: unknown): Record<string, McpExposure> | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
+  const entries = Object.entries(value).filter(
+    (entry): entry is [string, McpExposure] => entry[0].length > 0 && isMcpExposure(entry[1]),
+  );
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
 }
 
 function isMcpProtocolVersion(value: unknown): value is "legacy" | "auto" | "2026-07-28" {

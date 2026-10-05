@@ -7,6 +7,9 @@ import type { McpServerFailureKind, OfficialMcpAuthPortFailureReason } from "@ne
 export type McpServerTransportType = "stdio" | "http" | "sse";
 export type McpProtocolVersion = "legacy" | "auto" | "2026-07-28";
 export type McpServerIsolation = "session" | "workspace";
+/** 工具对模型请求的曝光档位；语义见 docs/specs/codemode.md 的 "MCP exposure configuration"。 */
+export type McpExposure = "direct" | "deferred" | "hidden";
+export const MCP_EXPOSURES: readonly McpExposure[] = ["direct", "deferred", "hidden"];
 
 /** 公共 MCP 配置校验完成后由宿主附加的运行时来源。 */
 export interface McpServerRuntimeSource {
@@ -15,6 +18,13 @@ export interface McpServerRuntimeSource {
 
 export interface McpServerConfigBase {
   enabled?: boolean;
+  /** 本 server 全部工具的曝光档位；缺省时由会话默认决定（开启 toolSearch 为 deferred，否则 direct）。 */
+  exposure?: McpExposure;
+  /**
+   * 单个工具的曝光，覆盖 `exposure`。键是 server 自己给的工具名（不是 `mcp__server__tool`），
+   * 或带 `*` 的通配模式；精确名优先，多个模式按对象顺序取第一个命中。
+   */
+  toolExposure?: Record<string, McpExposure>;
   isolation?: McpServerIsolation;
   protocolVersion?: McpProtocolVersion;
   /** 仅限宿主生成，公共配置 schema 会拒绝该字段。 */
