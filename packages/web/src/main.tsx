@@ -25,6 +25,7 @@ import {
   resolveConversationShareCodeFromPath,
 } from "./share/conversationShareRoute.js";
 import type { IPlatformService, RemoteTarget, ServerRemoteInfo } from "@nex/shared";
+import { createWebMcpPlatform, type WebMcpSyncService } from "./webMcpPlatform.js";
 import { WEB_DEFAULT_THEME, resolveWebInitialTheme } from "./webThemeSeed.js";
 
 function resolveWebThemePreference(defaultTheme: Theme = WEB_DEFAULT_THEME): Theme {
@@ -141,7 +142,7 @@ async function renderConversationSharePage(): Promise<void> {
   );
 }
 
-function createWebPlatform(): IPlatformService {
+function createWebPlatform(mcpSyncService: WebMcpSyncService): IPlatformService {
   return {
     canSelectFilePath: false,
     // Web 端无法打开系统目录选择框
@@ -172,12 +173,7 @@ function createWebPlatform(): IPlatformService {
     listWSLDistros: () => Promise.resolve([]),
     listDockerContainers: () => Promise.resolve([]),
     listSSHConfigAliases: () => Promise.resolve([]),
-    loadMcpFromUserDirectory: () => Promise.resolve({ servers: [] }),
-    saveMcpToUserDirectory: () =>
-      Promise.resolve({
-        success: false,
-        error: "MCP native directory management requires a desktop attachment",
-      }),
+    ...createWebMcpPlatform(mcpSyncService),
     migrateLegacyCommonMcp: () =>
       Promise.resolve({
         servers: {},
@@ -390,7 +386,7 @@ async function bootstrapWebApp() {
     const services = await connectViaWebSocket(bootstrap.wsUrl, {
       onClose: () => {},
     });
-    const platform = createWebPlatform();
+    const platform = createWebPlatform(services.mcpSyncService);
     document.title = "Nex - Web + Server";
 
     root.render(
