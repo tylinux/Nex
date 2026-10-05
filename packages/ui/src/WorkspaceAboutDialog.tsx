@@ -14,107 +14,29 @@ export function shouldShowAppleSiliconLine(isDesktop: boolean): boolean {
   return isDesktop && /Macintosh|Mac OS X/.test(navigator.userAgent);
 }
 
-/**
- * Nex 品牌 N 标（"folded ribbon N"，来自 output/imagegen/nex-icon-a-macos.svg）。
- *
- * 三笔画：leftLeg / rightLeg（两侧短腿）+ ribbon（长斜带），mint 渐变。
- * viewBox 裁剪到 N 本体（原 SVG 1024 坐标系中 x 263-763, y 260-766），
- * 形状与官方 icon 源文件逐点一致，仅去掉 charcoal 圆角背景块——
- * 深色由图标块容器提供（与新 icon 底色一致）。
- */
+/** 应用内 About 沿用原来的白标；安装图标的 mint 渐变不应改变应用内配色。 */
 function NexMark() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="121"
-      height="100"
+      width="30"
+      height="30"
       viewBox="258 255 510 516"
-      fill="none"
+      className="w-[30px] h-auto shrink-0"
       aria-hidden="true"
       focusable="false"
     >
-      <defs>
-        <linearGradient
-          id="nex-left"
-          x1="269"
-          y1="423"
-          x2="430"
-          y2="720"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#A5E5CE" />
-          <stop offset=".62" stopColor="#BEF2DC" />
-          <stop offset="1" stopColor="#B2ECD5" />
-        </linearGradient>
-        <linearGradient
-          id="nex-left-fold"
-          x1="367"
-          y1="374"
-          x2="289"
-          y2="444"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#236E5D" stopOpacity=".88" />
-          <stop offset=".4" stopColor="#337E6C" stopOpacity=".65" />
-          <stop offset="1" stopColor="#74BDA6" stopOpacity="0" />
-        </linearGradient>
-        <linearGradient
-          id="nex-right"
-          x1="641"
-          y1="276"
-          x2="787"
-          y2="637"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#C6F7E2" />
-          <stop offset=".55" stopColor="#B5EDD7" />
-          <stop offset="1" stopColor="#7EC4B0" />
-        </linearGradient>
-        <linearGradient
-          id="nex-right-fold"
-          x1="671"
-          y1="629"
-          x2="742"
-          y2="564"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#216B59" stopOpacity=".85" />
-          <stop offset=".42" stopColor="#337F6B" stopOpacity=".58" />
-          <stop offset="1" stopColor="#7EC4B0" stopOpacity="0" />
-        </linearGradient>
-        <linearGradient
-          id="nex-ribbon"
-          x1="313"
-          y1="269"
-          x2="750"
-          y2="750"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#B9F0D8" />
-          <stop offset=".28" stopColor="#C4F5DF" />
-          <stop offset=".62" stopColor="#A6E4CE" />
-          <stop offset="1" stopColor="#83CBB6" />
-        </linearGradient>
-      </defs>
       <path
+        fill="currentColor"
         d="M263 356C263 333 276 337 286 343C305 355 342 402 399 469V702C399 720 392 729 376 736L290 766C271 772 263 762 263 741Z"
-        fill="url(#nex-left)"
       />
       <path
-        d="M263 356C263 333 276 337 286 343C305 355 342 402 399 469V702C399 720 392 729 376 736L290 766C271 772 263 762 263 741Z"
-        fill="url(#nex-left-fold)"
-      />
-      <path
+        fill="currentColor"
         d="M625 528V327C625 307 632 299 649 291L728 260C750 251 763 262 763 282V645C763 671 741 659 724 638Z"
-        fill="url(#nex-right)"
       />
       <path
-        d="M625 528V327C625 307 632 299 649 291L728 260C750 251 763 262 763 282V645C763 671 741 659 724 638Z"
-        fill="url(#nex-right-fold)"
-      />
-      <path
+        fill="currentColor"
         d="M263 356V316C263 282 282 262 313 262H389C406 262 415 272 429 288L722 638C741 660 763 673 763 645V707C763 741 743 763 707 763H663C645 763 636 756 623 741L306 369C282 340 264 336 263 356Z"
-        fill="url(#nex-ribbon)"
       />
     </svg>
   );

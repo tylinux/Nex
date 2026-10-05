@@ -69,3 +69,12 @@ packages/desktop/.e2e-artifacts/
 packages/desktop/.e2e-cache/
 packages/desktop/.e2e-network-capture/
 .nex-runtime/
+
+# 本地部署脚本（仅本机验证用，不入库）
+scripts/deploy-server-local.sh
+
+# 品牌资源生成与评审产物（设计稿、评分预览、光栅导出均可再生；源 SVG 已复制到
+# packages/ui/src/assets 与各品牌标记处）
+output/
+# Nex 工作区文件搜索忽略规则：面向被搜索工作区的本地配置，每台机器各自生成
+.nexignore
