@@ -1528,7 +1528,7 @@
     "packages/ui/src/components/ui/usePdfZoomOverlay.ts": "c8c91b003ce2fded32c7a2369dc6eac43aa4b9dc9c830a0f5ceccb21d366b610",
     "packages/ui/src/lib/builtinSkillI18n.ts": "1c684c824329b60a15d1eda7b43da063959cc634816733995c92f51fbefeb987",
     "packages/ui/src/styles.css": "b5deaba48a3e10187cc0b14b7183e681cd69e0ed6d4591851f46f199aa426598",
-    "packages/web/package.json": "15625c5a58d7c121a0d2acc903c8a9f81e60c0f83b39a3e7006ced40460fa7c6",
+    "packages/web/package.json": "5d27ca0b5af0de41e532e555de77369d0060cc263b143a4d63ab53551734c84b",
     "packages/web/public/material-icons/3d.svg": "9527b849f0fba57ca7640e2717b3a19cb5f5e046712cbbd8b75d73af338c68fb",
     "packages/web/public/material-icons/abap.svg": "1335bd7eb9a0ed49deb622330d680c2e97731726a7a5eee8e4f46dc1e5db4de4",
     "packages/web/public/material-icons/abc.svg": "d1a68020e8f020ef29dca5f94dc8613b7ae8fb5b212d8b1cc23b0f975ac7acda",
