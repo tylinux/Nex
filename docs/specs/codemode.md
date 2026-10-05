@@ -252,7 +252,12 @@ Exposure is configured on the MCP server entry, at two levels (modelled on pi's 
 - The field travels with the rest of the server entry: settings UI → `McpServerConfig`
   (shared) → `NexAgentMcpServer` (protocol DTO) → runtime `McpServerConfig` → `registerMcpTools`.
 - UI: Settings → MCP shows a per-server exposure selector (default / direct / deferred /
-  hidden) in the server form. Per-tool overrides are edited in the config file.
+  hidden) in the server form. Per-tool overrides are edited in the config file; the form keeps
+  an existing `toolExposure` intact when only the selector changes.
+- Web limitation: the web build's platform stub for `saveMcpToUserDirectory` returns
+  "requires a desktop attachment" (pre-existing, unrelated to exposure), so the Settings form
+  cannot persist any MCP edit in the web build. The desktop build and the config file are the
+  supported ways to set exposure today.
 
 ## Non-chat model operations
 
