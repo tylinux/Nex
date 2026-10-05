@@ -58,6 +58,7 @@ function parseStoreWrites(json: string): CodemodeStoreWrites {
 }
 
 function defaultWorkerUrl(): URL {
+	// bundle 里 import.meta 为空；此时必须由调用方给 workerSource，走不到这里。
 	// `.ts` when running from source (tests, tsx), `.js` from the published dist.
 	return new URL(import.meta.url.endsWith(".js") ? "./worker.js" : "./worker.js", import.meta.url);
 }
@@ -78,6 +79,8 @@ interface ExecutionOptions {
 	store: Record<string, string>;
 	wasm: Promise<CodemodeWasmModule>;
 	workerUrl: string | URL;
+	/** CJS source of the worker, run with `eval: true`; wins over `workerUrl` (bundled/SEA builds). */
+	workerSource: string | undefined;
 }
 
 /**
@@ -154,7 +157,10 @@ class Execution {
 		};
 		let worker: Worker;
 		try {
-			worker = new Worker(options.workerUrl, { workerData });
+			worker =
+				options.workerSource === undefined
+					? new Worker(options.workerUrl, { workerData })
+					: new Worker(options.workerSource, { eval: true, workerData });
 		} catch (error) {
 			this.finish({ kind: "sandbox", message: `Failed to start worker: ${errorMessage(error)}` });
 			return;
@@ -291,6 +297,7 @@ export class CodemodeSandbox {
 	private readonly memoryLimitBytes: number | undefined;
 	private readonly wasm: CodemodeWasmModule | Promise<CodemodeWasmModule> | undefined;
 	private readonly workerUrl: string | URL;
+	private readonly workerSource: string | undefined;
 	private readonly running = new Set<Execution>();
 	private closed = false;
 
@@ -298,7 +305,12 @@ export class CodemodeSandbox {
 		this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 		this.memoryLimitBytes = options.memoryLimitBytes;
 		this.wasm = options.wasm;
-		this.workerUrl = options.workerUrl ?? defaultWorkerUrl();
+		this.workerSource = options.workerSource;
+		// bundle 里 import.meta 为空，defaultWorkerUrl() 会抛错；有内嵌源码时根本不需要 URL，
+		// 所以只在确实要按文件起 worker 时才惰性求值。
+		this.workerUrl =
+			options.workerUrl ??
+			(options.workerSource === undefined ? defaultWorkerUrl() : "embedded:worker");
 		for (const tool of options.tools ?? []) this.registerTool(tool);
 		const namespaces = new Set<string>();
 		for (const global of options.globals ?? []) {
@@ -350,6 +362,7 @@ export class CodemodeSandbox {
 			store: serializeStore(options.store),
 			wasm: this.wasm === undefined ? loadQuickJSWasm() : Promise.resolve(this.wasm),
 			workerUrl: this.workerUrl,
+			workerSource: this.workerSource,
 		});
 		this.running.add(execution);
 		return execution.promise.finally(() => this.running.delete(execution));

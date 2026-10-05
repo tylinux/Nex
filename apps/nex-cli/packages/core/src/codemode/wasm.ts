@@ -2,6 +2,7 @@
 // Modified by Nex: import specifiers use .js, no pi dependencies. See THIRD-PARTY-NOTICES.md.
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
+import { embeddedCodemodeWasmBase64 } from "./embedded.js";
 
 /**
  * A compiled `WebAssembly.Module` of `quickjs-wasi/quickjs.wasm`. Typed opaquely because the Node
@@ -21,11 +22,18 @@ const modules = new Map<string, Promise<CodemodeWasmModule>>();
  * compiled executable. A failed load is retried on the next call.
  */
 export function loadQuickJSWasm(path?: string): Promise<CodemodeWasmModule> {
-	const resolved = path ?? createRequire(import.meta.url).resolve("quickjs-wasi/quickjs.wasm");
+	const embedded = path === undefined ? embeddedCodemodeWasmBase64() : undefined;
+	const resolved =
+		embedded !== undefined
+			? "embedded:quickjs.wasm"
+			: (path ?? createRequire(import.meta.url).resolve("quickjs-wasi/quickjs.wasm"));
 	let module = modules.get(resolved);
 	if (!module) {
 		const { WebAssembly } = globalThis as unknown as { WebAssembly: WebAssemblyGlobal };
-		module = readFile(resolved)
+		module = (embedded !== undefined
+			? Promise.resolve(new Uint8Array(Buffer.from(embedded, "base64")))
+			: readFile(resolved)
+		)
 			.then((bytes) => WebAssembly.compile(bytes))
 			.catch((error: unknown) => {
 				modules.delete(resolved);

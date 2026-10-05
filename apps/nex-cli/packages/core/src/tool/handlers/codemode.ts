@@ -19,7 +19,7 @@ import { toCodemodeIdentifier } from "../../codemode/identifier.js";
 import { parseCodemodeSource, CodemodeSourceError } from "../../codemode/source.js";
 import { buildCodemodeDescription } from "../../codemode/description.js";
 import { renderCodemodeOutput } from "../../codemode/output.js";
-import { resolveCodemodeWorkerUrl } from "../../codemode/worker-url.js";
+import { resolveCodemodeWorkerSource, resolveCodemodeWorkerUrl } from "../../codemode/worker-url.js";
 import type { CodemodeTool } from "../../codemode/types.js";
 import { NESTED_FORBIDDEN_TOOL_NAMES } from "../nested/types.js";
 import { searchToolDocuments } from "../tool-search-index.js";
@@ -93,6 +93,7 @@ const codemodeHandler: ToolHandler = async (input, context) => {
     tools,
     globals,
     workerUrl: resolveCodemodeWorkerUrl(),
+    workerSource: resolveCodemodeWorkerSource(),
     timeoutMs: CODEMODE_DEFAULT_TIMEOUT_MS,
   });
   try {

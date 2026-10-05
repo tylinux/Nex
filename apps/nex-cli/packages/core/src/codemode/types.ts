@@ -124,6 +124,8 @@ export interface CodemodeSandboxOptions {
 	 * specifier of an embedded build entrypoint; other hosts usually use a URL.
 	 */
 	workerUrl?: string | URL;
+	/** CJS source of the worker, run with `eval: true`. Used by bundled/SEA builds where no worker file exists. */
+	workerSource?: string;
 }
 
 export interface CodemodeExecuteOptions {
