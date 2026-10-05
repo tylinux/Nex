@@ -65,6 +65,7 @@ function registerRuntimeBuiltInTools(runtime: AgentRuntimeInternal, deps: AgentR
     includeEscalate: Boolean(deps.workflowEscalatePort),
     includeWorkflow: Boolean(deps.workflowPort),
     includeToolSearch: runtime.config.toolSearch?.enabled === true,
+    includeCodemode: runtime.config.codemode?.enabled === true,
     includeAutomation: Boolean(deps.automationPort) && runtime.config.taskType !== "subagent_child",
     // offPeakPort 只在 host 下发 offPeakToolEnabled 时注入（灰度/远程门在 host 端），
     // 端口存在即代表曝光允许；subagent 子会话与 automation 同规则不暴露。

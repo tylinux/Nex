@@ -1,3 +1,5 @@
+import { CODEMODE_TOOL_NAME, TOOL_SEARCH_TOOL_NAME } from "@nex/contracts";
+
 // ============================================================
 // 嵌套工具调用（codemode P2）的契约
 // ============================================================
@@ -40,8 +42,32 @@ export interface NestedToolRunnerLimits {
   maxResultBytes: number;
 }
 
+/** 脚本不得调用：codemode 自身（防自递归）与 ToolSearch（脚本内有 searchTools）。 */
+export const NESTED_FORBIDDEN_TOOL_NAMES: ReadonlySet<string> = new Set([
+  CODEMODE_TOOL_NAME,
+  TOOL_SEARCH_TOOL_NAME,
+]);
+
 export const DEFAULT_NESTED_TOOL_LIMITS: NestedToolRunnerLimits = {
   maxCalls: 200,
   maxConcurrency: 8,
   maxResultBytes: 5 * 1024 * 1024,
 };
+
+/** executor 交给 handler 的嵌套调用入口；handler 不接触 executor 或 registry 本身。 */
+export interface NestedToolsPort {
+  createRunner(input: { parentToolCallId: string; signal: AbortSignal }): NestedToolRunnerLike;
+  catalog(): readonly NestedToolCatalogEntry[];
+}
+
+export interface NestedToolCatalogEntry {
+  name: string;
+  description: string;
+  namespace?: string;
+  inputSchema: Record<string, unknown>;
+}
+
+export interface NestedToolRunnerLike {
+  call(toolName: string, input: unknown): Promise<NestedToolCallResult>;
+  auditRecords(): readonly NestedToolAuditRecord[];
+}

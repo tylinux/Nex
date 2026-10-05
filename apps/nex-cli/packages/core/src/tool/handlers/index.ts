@@ -65,6 +65,9 @@ import { saveWorkflowToolEntry } from "./save-workflow.js";
 import { listSavedWorkflowsToolEntry } from "./list-saved-workflows.js";
 import { listModelsToolEntry } from "./list-models.js";
 import { toolSearchToolEntry } from "./tool-search.js";
+import { NESTED_FORBIDDEN_TOOL_NAMES } from "../nested/types.js";
+import { createCodemodeToolEntry } from "./codemode.js";
+import { buildCodemodeDescription } from "../../codemode/description.js";
 import { evalWorkflowSnippetToolEntry } from "./eval-workflow-snippet.js";
 import { listWorkflowRunsToolEntry } from "./list-workflow-runs.js";
 import { getWorkflowRunToolEntry } from "./get-workflow-run.js";
@@ -177,6 +180,8 @@ interface RegisterBuiltInToolsOptions {
   includeWorkflow?: boolean;
   /** 会话启用 deferred 工具时才注册 ToolSearch；缺席即不注册。 */
   includeToolSearch?: boolean;
+  /** 会话启用 codemode 时才注册 Codemode 工具；缺席即不注册。 */
+  includeCodemode?: boolean;
   includeAutomation?: boolean;
   /** Off-Peak 会话内创建工具面；由 host 的 offPeakToolEnabled flag（灰度/远程门）驱动。 */
   includeOffPeak?: boolean;
@@ -206,6 +211,7 @@ export function registerBuiltInTools(
 ): void {
   const allowedTools = options.allowedTools ? new Set(options.allowedTools) : undefined;
   const disallowedTools = createToolRuleNameSet(options.disallowedTools);
+  const registeredBuiltIns: ToolEntry[] = [];
 
   for (const entry of builtInTools) {
     if (
@@ -271,7 +277,25 @@ export function registerBuiltInTools(
     if (entry.metadata.name === "js" && options.includeNodeRepl !== true) {
       continue;
     }
-    registry.register(resolveBuiltInToolEntryForBranch(entry, options), {
+    const registeredEntry = resolveBuiltInToolEntryForBranch(entry, options);
+    registry.register(registeredEntry, {
+      silentDuplicateWarning: options.silentDuplicateWarnings,
+    });
+    registeredBuiltIns.push(registeredEntry);
+  }
+  if (options.includeCodemode === true) {
+    // 描述只列内置 direct 工具：MCP 连断不会改变描述，prompt 前缀 cache 保持稳定；
+    // MCP 与 deferred 工具由脚本内 searchTools / ALL_TOOLS 发现。
+    const listedCandidates = registeredBuiltIns
+      .filter((builtIn) => builtIn.metadata.exposure !== "deferred")
+      .filter((builtIn) => builtIn.metadata.providerVisible !== false)
+      .filter((builtIn) => !NESTED_FORBIDDEN_TOOL_NAMES.has(builtIn.metadata.name))
+      .map((builtIn) => ({
+        name: builtIn.metadata.name,
+        description: builtIn.metadata.description ?? builtIn.capability,
+        inputSchema: builtIn.inputSchema,
+      }));
+    registry.register(createCodemodeToolEntry(buildCodemodeDescription({ listedCandidates })), {
       silentDuplicateWarning: options.silentDuplicateWarnings,
     });
   }

@@ -20,6 +20,12 @@ export interface ToolRegistry {
   toContracts(): ModelToolContract[];
   /** deferred 工具的检索文档；hidden 与 direct 工具不在其中。 */
   listDeferredDocuments(): ToolSearchDocument[];
+  /** 脚本可调用的全部工具（hidden 与 provider 不可见者除外），含 schema，供沙箱内 searchTools/describeTool。 */
+  listCatalog(): ToolCatalogEntry[];
+}
+
+export interface ToolCatalogEntry extends ToolSearchDocument {
+  inputSchema: Record<string, unknown>;
 }
 
 export interface ToolRegistryRegisterOptions {
@@ -134,6 +140,21 @@ export class ToolRegistryImpl implements ToolRegistry {
         resultBudget: entry.resultBudget,
         execute: undefined,
       }));
+  }
+
+  listCatalog(): ToolCatalogEntry[] {
+    return Array.from(this.tools.values())
+      .filter((entry) => entry.metadata.providerVisible !== false)
+      .filter((entry) => entry.metadata.exposure !== "hidden")
+      .map((entry) => {
+        const namespace = mcpNamespaceOf(entry.metadata.name);
+        return {
+          name: entry.metadata.name,
+          description: entry.metadata.description ?? entry.capability,
+          inputSchema: entry.inputSchema,
+          ...(namespace === undefined ? {} : { namespace }),
+        };
+      });
   }
 
   listDeferredDocuments(): ToolSearchDocument[] {

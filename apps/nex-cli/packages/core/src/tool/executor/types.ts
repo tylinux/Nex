@@ -1,4 +1,5 @@
 import type { ToolSearchDocument } from "../tool-search-index.js";
+import type { NestedToolsPort } from "../nested/types.js";
 import type {
   AgentExecutionTelemetryPort,
   AgentTelemetryActorKind,
@@ -228,6 +229,7 @@ export interface ToolExecutorDeps {
   /** 模型目录端口；缺席则 ListModels 报能力缺席，CreateWorkflow 的 subagent_model 被拒。 */
   modelCatalogPort?: ModelCatalogPort;
   deferredToolCatalog?: () => readonly ToolSearchDocument[];
+  nestedTools?: NestedToolsPort;
   runtimeTaskRegistry?: RuntimeTaskRegistry;
   readFileState: ReadFileStateMap;
   hasLoadedSkill?: (skillName: string) => boolean;

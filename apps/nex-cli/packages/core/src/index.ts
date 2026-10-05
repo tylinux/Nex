@@ -21,6 +21,9 @@ export { createToolRegistry, ToolRegistry, ToolRegistryImpl } from "./tool/regis
 export { createToolExecutor, ToolExecutor, ToolExecutorImpl } from "./tool/executor.js";
 export { builtInTools, registerBuiltInTools } from "./tool/handlers/index.js";
 export { toolSearchToolEntry } from "./tool/handlers/tool-search.js";
+export { createCodemodeToolEntry } from "./tool/handlers/codemode.js";
+export { buildCodemodeDescription } from "./codemode/description.js";
+export { setCodemodeWorkerUrl } from "./codemode/worker-url.js";
 export { searchToolDocuments } from "./tool/tool-search-index.js";
 export {
   encodeToolSearchResults,

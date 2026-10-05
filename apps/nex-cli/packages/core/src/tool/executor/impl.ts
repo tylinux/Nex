@@ -5,6 +5,8 @@ import type { ExecutableToolCall, ToolBatchEvent, ToolExecutionResult } from "..
 import { BackgroundTaskTracker } from "./background-tasks.js";
 import { executeToolBatch, executeToolSchedule } from "./batch-runner.js";
 import { executeToolCall } from "./call-runner.js";
+import { NestedToolRunner } from "../nested/runner.js";
+import { NESTED_FORBIDDEN_TOOL_NAMES } from "../nested/types.js";
 import type {
   ToolBatchExecuteOptions,
   ToolExecuteOptions,
@@ -85,6 +87,18 @@ export class ToolExecutorImpl implements ToolExecutor {
       hookRunner: options.hookRunner,
     };
     this.backgroundTasks = new BackgroundTaskTracker(this.deps);
+    // 嵌套调用必须回到 this.execute：权限、校验、abort、预算、审计与模型直发调用是同一条路径。
+    this.deps.nestedTools = {
+      createRunner: ({ parentToolCallId, signal }) =>
+        new NestedToolRunner({
+          executor: this,
+          registry: this.deps.registry,
+          parentToolCallId,
+          forbiddenToolNames: NESTED_FORBIDDEN_TOOL_NAMES,
+          signal,
+        }),
+      catalog: () => this.deps.registry.listCatalog(),
+    };
   }
 
   execute(

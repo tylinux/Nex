@@ -1,4 +1,4 @@
-// 真实 stdio MCP server：给 ToolSearch 集成测试提供可被 adapter 连接的 deferred 工具。
+// 真实 stdio MCP server：给 ToolSearch / Codemode 集成测试提供可被 adapter 连接的工具。
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";

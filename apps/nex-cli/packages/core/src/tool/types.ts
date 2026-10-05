@@ -60,6 +60,7 @@ import type {
   PersistedReadFileStateTool,
 } from "./read-file-state-metadata.js";
 import type { ToolSearchDocument } from "./tool-search-index.js";
+import type { NestedToolsPort } from "./nested/types.js";
 import type { RuntimeTaskRegistry } from "../runtime-task/registry.js";
 
 // -----------------------------------------------
@@ -187,6 +188,8 @@ export interface ToolExecutionContext {
   modelCatalogPort?: ModelCatalogPort;
   /** deferred 工具目录；ToolSearch 只经它读取候选，不直接碰 registry。 */
   deferredToolCatalog?: () => readonly ToolSearchDocument[];
+  /** codemode 脚本的嵌套调用入口；由 executor 提供，调用仍走统一 executor。 */
+  nestedTools?: NestedToolsPort;
   runtimeTaskRegistry?: RuntimeTaskRegistry;
   readFileState?: ReadFileStateMap;
   recordReadFileStateMetadata?: (metadata: PersistedReadFileStateMetadata) => void;

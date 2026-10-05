@@ -419,6 +419,7 @@ async function executeToolCallImpl(
       dynamicWorkflowSnippetPort: deps.dynamicWorkflowSnippetPort,
       modelCatalogPort: deps.modelCatalogPort,
       deferredToolCatalog: deps.deferredToolCatalog,
+      nestedTools: deps.nestedTools,
       runtimeTaskRegistry: deps.runtimeTaskRegistry,
       readFileState: deps.readFileState,
       recordReadFileStateMetadata: (metadata) => {

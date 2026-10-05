@@ -42,6 +42,8 @@ export * from "./list-saved-workflows.js";
 export * from "./list-models.js";
 // deferred 工具的上桌门：名字常量被 core 的注册、声明集推导读走。
 export * from "./tool-search.js";
+// codemode 的名字常量被 core 的注册、嵌套调用禁用名单读走。
+export * from "./codemode.js";
 export * from "./eval-workflow-snippet.js";
 export * from "./list-workflow-runs.js";
 export * from "./get-workflow-run.js";

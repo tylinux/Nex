@@ -179,6 +179,38 @@ script is killed and does not affect the next run; a script can call MCP and bui
 tools through the P2 executor; output over budget spills to a file; the SEA-packaged
 CLI loads the wasm asset.
 
+#### P3 implementation decisions
+
+- **Sandbox:** `pi-codemode` host/worker/prelude are vendored under
+  `apps/nex-cli/packages/core/src/codemode/` (MIT, provenance in
+  `third-party/copied-components.json`); the only dependency is `quickjs-wasi@3.6.2`.
+  One execution = one worker thread + one QuickJS VM, terminated on completion.
+- **Tool:** `Codemode` (`core/src/tool/handlers/codemode.ts`), registered only when
+  `runtimeConfig.codemode.enabled` is true. Its `permission` is low-risk/no-approval
+  because the script has no host capability; every child call is permission-checked on
+  its own through `NestedToolRunner` → `ToolExecutor.execute()`.
+- **Globals:** `tools.<name>`, `ALL_TOOLS`, `text`, `image`, `exit`, `store`, `load`
+  come from the vendored prelude. `searchTools(query, {limit, namespace})` and
+  `describeTool(name)` are host globals over the registry catalog and the P1 BM25 index;
+  they never change the declared set. Both are async in the script.
+- **Callable scope:** every non-hidden provider-visible tool except `Codemode` and
+  `ToolSearch`, including deferred MCP tools.
+- **Description:** fixed intro + globals + a tool list capped at 3000 estimated tokens,
+  built from built-in non-deferred tools only and sorted by name, so MCP connect/drop and
+  registration order never change it (prompt-cache stable). Everything else is found with
+  `searchTools`.
+- **Output:** `return` value, `text()`/`console` output and images; budget defaults to
+  10,000 tokens (`// @options max_output_tokens`). Over budget, the model text is cut and
+  the full text is written through the artifact store, returned as `fullOutputPath`.
+- **Failure:** timeout, cancel and script exceptions return an error result (with the
+  call trace and output so far), never a partial success. The deadline defaults to 120 s
+  and is capped at 600 s.
+- **Worker location:** `worker_threads` can only load a real file, so the worker URL is
+  resolved next to `host.js` by default and overridable with `setCodemodeWorkerUrl()` for
+  packaged builds (see the packaging notes).
+- **Out of scope here:** `models.classify` / `models.generateImages` (non-chat model
+  typing) are not part of this phase; the `models` global is absent.
+
 ## Non-chat model operations
 
 Scripts reach non-chat models through a `models` global, using the session's resolved
