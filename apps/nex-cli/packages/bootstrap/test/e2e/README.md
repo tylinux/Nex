@@ -13,7 +13,8 @@ Proves the whole path in a real server (dev build or SEA binary) without a real 
    For the SEA binary, copy it to a path outside the repo first: the agent child is spawned
    from `process.execPath` and a binary inside the monorepo is resolved as a dev runtime.
 4. In the web UI pick the mock model and a workspace, then send any prompt. Approve the
-   `mcp__fixture__read_issue` permission prompt (one confirmation covers the parallel calls).
+   `mcp__fixture__read_issue` permission prompt; it can reappear, so keep approving until the
+   turn finishes (the dev run needed one approval, the SEA run two).
 
 Expected request log (`$MOCK_MODEL_LOG`):
 

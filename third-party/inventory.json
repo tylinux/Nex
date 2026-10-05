@@ -231,14 +231,18 @@
     "apps/nex-cli/packages/cli/package.json": "614f9ac4f456b643ea3586e3701db1d076e5dc5b2b738f0ca7f9b10650afbda1",
     "apps/nex-cli/packages/contracts/package.json": "136fece6ac6a0285e2c60b6a71e9f733021d0caddd6824a499bcfdcf3fde5d46",
     "apps/nex-cli/packages/core/package.json": "5517e64aefe9419064915308df036783c19f7d54c52fe7a67c4d359cc9475552",
+    "apps/nex-cli/packages/core/src/codemode/description.ts": "8d1b93bd8a592a7a000b331d670f5e9b1a0073d211b75e725e7d0294cd8f4a60",
+    "apps/nex-cli/packages/core/src/codemode/embedded.ts": "c9082e58c69249f289f8c051a01bfebb2266da2d810b38081b185c753ca15387",
     "apps/nex-cli/packages/core/src/codemode/identifier.ts": "a33f99db73ede22cbe57202c0ad71a9fae644f0e1fb9713d026159f090de8092",
-    "apps/nex-cli/packages/core/src/codemode/runtime/host.ts": "006fd714021342b6562a9772909370ba8c1185bbbef2d556b6691c6de9e47bfe",
+    "apps/nex-cli/packages/core/src/codemode/output.ts": "021d2cb5b8add35c3c5756c3df467cc71d1efd5c002cfb4dfec1d7d87c55ff38",
+    "apps/nex-cli/packages/core/src/codemode/runtime/host.ts": "357101ad89d454d19cb888eb8365f7dff5bda797906ee7a5b1dec9a951d455ae",
     "apps/nex-cli/packages/core/src/codemode/runtime/prelude-source.ts": "760b2e0fa7405fa0d80f6d50514c208492f23ddecbc01418a72445bf805f520d",
     "apps/nex-cli/packages/core/src/codemode/runtime/protocol.ts": "b4a613f4cdce816490b0c3f2d0126cd5569a0504ba22787bc3c396cef70bd889",
     "apps/nex-cli/packages/core/src/codemode/runtime/worker.ts": "ac5b9f392bac74fbc34d61b0f9447870f4302362f0a5955f588757014e6eb39a",
     "apps/nex-cli/packages/core/src/codemode/source.ts": "424216d7a52841991bb6842067c1753cb3b6592bfd7fba9f5c569ae4b822d3dd",
-    "apps/nex-cli/packages/core/src/codemode/types.ts": "193629e816348debe204d1d2df4729a54d51ca856d2d987e14af9bb31b32c3f3",
-    "apps/nex-cli/packages/core/src/codemode/wasm.ts": "ffdaf310f45e8251f7db67bd21dd1d31379c2526d2aa225e856393d69a27e750",
+    "apps/nex-cli/packages/core/src/codemode/types.ts": "4b2362330d914a4ef8a333da709f71ca41ddc9e49836cfa1a84f0c2768cca147",
+    "apps/nex-cli/packages/core/src/codemode/wasm.ts": "1d5ff470570d1d0a3c538381cc6a0f1c69ec3c0063334357bcaf07b83563608f",
+    "apps/nex-cli/packages/core/src/codemode/worker-url.ts": "a8ef3d2f24324ffade5a627602b5542a20f58394023b129257f12676406b6527",
     "apps/nex-cli/packages/core/src/tool/handlers/generated/bash-command-registry.ts": "60fa5acd9f5c357f4e51b1d1e944ee39da92680e4bc5e98dd708f1457fcf612b",
     "apps/nex-cli/packages/debug/package.json": "16e6a402d995d3a56ed6e97665cd81f0dd22f03280350d5e0a70c14a2cc4b2ca",
     "apps/nex-cli/packages/dynamic-workflow-runtime/package.json": "816309ebb289a59a17ca4d18dc2d6a59f17777afa59ab0c9962510a2b8a2dc7d",
@@ -29014,12 +29018,24 @@
       ],
       "files": [
         {
+          "file": "apps/nex-cli/packages/core/src/codemode/description.ts",
+          "sha256": "8d1b93bd8a592a7a000b331d670f5e9b1a0073d211b75e725e7d0294cd8f4a60"
+        },
+        {
+          "file": "apps/nex-cli/packages/core/src/codemode/embedded.ts",
+          "sha256": "c9082e58c69249f289f8c051a01bfebb2266da2d810b38081b185c753ca15387"
+        },
+        {
           "file": "apps/nex-cli/packages/core/src/codemode/identifier.ts",
           "sha256": "a33f99db73ede22cbe57202c0ad71a9fae644f0e1fb9713d026159f090de8092"
         },
         {
+          "file": "apps/nex-cli/packages/core/src/codemode/output.ts",
+          "sha256": "021d2cb5b8add35c3c5756c3df467cc71d1efd5c002cfb4dfec1d7d87c55ff38"
+        },
+        {
           "file": "apps/nex-cli/packages/core/src/codemode/runtime/host.ts",
-          "sha256": "006fd714021342b6562a9772909370ba8c1185bbbef2d556b6691c6de9e47bfe"
+          "sha256": "357101ad89d454d19cb888eb8365f7dff5bda797906ee7a5b1dec9a951d455ae"
         },
         {
           "file": "apps/nex-cli/packages/core/src/codemode/runtime/prelude-source.ts",
@@ -29039,11 +29055,15 @@
         },
         {
           "file": "apps/nex-cli/packages/core/src/codemode/types.ts",
-          "sha256": "193629e816348debe204d1d2df4729a54d51ca856d2d987e14af9bb31b32c3f3"
+          "sha256": "4b2362330d914a4ef8a333da709f71ca41ddc9e49836cfa1a84f0c2768cca147"
         },
         {
           "file": "apps/nex-cli/packages/core/src/codemode/wasm.ts",
-          "sha256": "ffdaf310f45e8251f7db67bd21dd1d31379c2526d2aa225e856393d69a27e750"
+          "sha256": "1d5ff470570d1d0a3c538381cc6a0f1c69ec3c0063334357bcaf07b83563608f"
+        },
+        {
+          "file": "apps/nex-cli/packages/core/src/codemode/worker-url.ts",
+          "sha256": "a8ef3d2f24324ffade5a627602b5542a20f58394023b129257f12676406b6527"
         }
       ]
     }

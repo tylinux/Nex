@@ -418,9 +418,10 @@ P1, P2 and P3 are implemented behind two opt-in switches (Settings → "On-deman
 
 Known limits:
 
-- Permission prompts for child calls: the browser e2e needed one confirmation covering the
-  three parallel `read_issue` calls. A script that calls many different tools prompts once per
-  distinct permission request.
+- Permission prompts for child calls: each child call goes through the normal permission
+  gate. The browser e2e needed one approval in the dev run and two in the SEA run for the
+  three parallel `read_issue` calls; whether the second prompt is per-call or a re-prompt
+  was not investigated. Setting `autoApproveHighRisk` in the e2e config did not suppress it.
 - `getTools()` is derived from message history on every call, so a compaction that drops a
   `ToolSearch` result also drops its activations (the model must search again).
 - `ToolSearch` is not declared when no deferred tool exists, and the deferred set is
