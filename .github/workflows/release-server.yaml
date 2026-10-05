@@ -6,10 +6,16 @@
 #     alpha-<shortsha> (one release per main build, kept for rollback)
 #   - v* tag push -> versioned assets on that tag's release
 #
-# Artifacts (binary + packaging/: install.sh, systemd unit, launchd plist):
+# Artifacts (binary + packaging/: install.sh, systemd unit, launchd plist +
+# web static assets):
 #   nex-server-darwin-arm64-alpha-<shortsha>.tar.gz
 #   nex-server-linux-x64-alpha-<shortsha>.tar.gz
 #   nex-server-linux-arm64-alpha-<shortsha>.tar.gz
+#
+# The tarball also carries the matching web build (packages/web/dist). The
+# installer deploys it next to the data dir and points NEX_WEB_STATIC_ROOT at
+# it, so a bare-metal server install serves a version-aligned web UI from the
+# same process — no separate web service, no drift between binary and UI.
 #
 # The Node version used for the build must match the license entry recorded in
 # third-party/runtime/sources.json (currently 24.14.0); CI pins it via setup-node.
@@ -68,6 +74,9 @@ jobs:
           pnpm --filter @nex/model-option-map build
           pnpm exec turbo --skip-infer --cwd apps/nex-cli run build --filter='!@nex/cli' --force
           pnpm -r --filter "@nex/cli..." build
+          # Web static assets ship inside the install tarball so a bare-metal
+          # server serves a UI matching its own binary version.
+          pnpm --filter @nex/web build
 
       - name: Resolve short sha
         id: meta
@@ -80,9 +89,12 @@ jobs:
       - name: Package one-step install tarball
         working-directory: packages/server/dist/sea
         run: |
-          mkdir -p bundle/packaging
+          mkdir -p bundle/packaging bundle/web
           cp nex-server-${{ matrix.target }} bundle/
           cp -r ../../packaging/. bundle/packaging/
+          # Matching web build (index.html + hashed assets), served by the
+          # server process itself via NEX_WEB_STATIC_ROOT.
+          cp -r ../../../web/dist/. bundle/web/
           tar -czf nex-server-${{ matrix.target }}-alpha-${{ steps.meta.outputs.shortsha }}.tar.gz -C bundle .
 
       - name: Upload artifact
