@@ -17,9 +17,12 @@ import {
 import { CodemodeSandbox } from "../../codemode/runtime/host.js";
 import { toCodemodeIdentifier } from "../../codemode/identifier.js";
 import { parseCodemodeSource, CodemodeSourceError } from "../../codemode/source.js";
-import { buildCodemodeDescription } from "../../codemode/description.js";
+import { buildCodemodeDescription, oneLine } from "../../codemode/description.js";
 import { renderCodemodeOutput } from "../../codemode/output.js";
-import { resolveCodemodeWorkerSource, resolveCodemodeWorkerUrl } from "../../codemode/worker-url.js";
+import {
+  resolveCodemodeWorkerSource,
+  resolveCodemodeWorkerUrl,
+} from "../../codemode/worker-url.js";
 import type { CodemodeTool } from "../../codemode/types.js";
 import { NESTED_FORBIDDEN_TOOL_NAMES } from "../nested/types.js";
 import { searchToolDocuments } from "../tool-search-index.js";
@@ -39,13 +42,17 @@ const codemodeHandler: ToolHandler = async (input, context) => {
   const { code: rawCode } = CodemodeInputSchema.parse(input);
   const nested = context.nestedTools;
   if (nested === undefined) {
-    return failure(CODEMODE_ERROR_CODE.UNAVAILABLE, "codemode_unavailable: this session has no nested tool runner.");
+    return failure(
+      CODEMODE_ERROR_CODE.UNAVAILABLE,
+      "codemode_unavailable: this session has no nested tool runner.",
+    );
   }
   let parsed;
   try {
     parsed = parseCodemodeSource(rawCode);
   } catch (error) {
-    if (error instanceof CodemodeSourceError) return failure(CODEMODE_ERROR_CODE.SOURCE, error.message);
+    if (error instanceof CodemodeSourceError)
+      return failure(CODEMODE_ERROR_CODE.SOURCE, error.message);
     throw error;
   }
 
@@ -57,7 +64,7 @@ const codemodeHandler: ToolHandler = async (input, context) => {
 
   const tools: CodemodeTool[] = catalog.map((entry) => ({
     name: entry.name,
-    description: entry.description,
+    description: oneLine(entry.description),
     execute: async (args) => {
       const result = await runner.call(entry.name, args ?? {});
       // 脚本拿未截断原值；失败以异常形式交给脚本，让它决定是否继续。
@@ -75,15 +82,21 @@ const codemodeHandler: ToolHandler = async (input, context) => {
           query: String(query ?? ""),
           limit: options?.limit ?? CODEMODE_SEARCH_DEFAULT_LIMIT,
           ...(options?.namespace === undefined ? {} : { namespace: options.namespace }),
-        }).map((hit) => ({ name: toCodemodeIdentifier(hit.name), description: hit.description }));
+        }).map((hit) => ({
+          name: toCodemodeIdentifier(hit.name),
+          description: oneLine(hit.description),
+        }));
       },
     },
     {
       name: "describeTool",
       execute: (args) => {
         const wanted = String(args);
-        const found = catalog.find((entry) => entry.name === wanted || toCodemodeIdentifier(entry.name) === wanted);
-        if (found === undefined) throw new Error(`Unknown tool "${wanted}". Use searchTools(query) to find tools.`);
+        const found = catalog.find(
+          (entry) => entry.name === wanted || toCodemodeIdentifier(entry.name) === wanted,
+        );
+        if (found === undefined)
+          throw new Error(`Unknown tool "${wanted}". Use searchTools(query) to find tools.`);
         return { name: found.name, description: found.description, inputSchema: found.inputSchema };
       },
     },
@@ -97,7 +110,10 @@ const codemodeHandler: ToolHandler = async (input, context) => {
     timeoutMs: CODEMODE_DEFAULT_TIMEOUT_MS,
   });
   try {
-    const timeoutMs = Math.min(parsed.options.timeoutMs ?? CODEMODE_DEFAULT_TIMEOUT_MS, CODEMODE_MAX_TIMEOUT_MS);
+    const timeoutMs = Math.min(
+      parsed.options.timeoutMs ?? CODEMODE_DEFAULT_TIMEOUT_MS,
+      CODEMODE_MAX_TIMEOUT_MS,
+    );
     const result = await sandbox.execute(parsed.code, { signal: context.abortSignal, timeoutMs });
     const rendered = renderCodemodeOutput(
       result,
@@ -194,7 +210,8 @@ export function createCodemodeToolEntry(description: string): ToolEntry {
     formatModelContent: formatCodemodeModelContent,
     permission: {
       permission: "codemode",
-      reason: "Codemode runs an isolated script; every tool it calls is permission-checked on its own",
+      reason:
+        "Codemode runs an isolated script; every tool it calls is permission-checked on its own",
       riskLevel: "low",
       sideEffectScope: "none",
       needsApproval: false,

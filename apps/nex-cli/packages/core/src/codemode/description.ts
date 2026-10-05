@@ -20,7 +20,7 @@ export const CODEMODE_DESCRIPTION_INTRO = [
   "- Call tools as `tools.<name>(args)`; they are async, so use `Promise.all` to run independent calls in parallel.",
   "- Only what the script returns, prints with `text(...)`, or shows with `image(...)` reaches you. Intermediate tool results stay in the sandbox, so filter and summarize inside the script.",
   "- There is no filesystem, network, `process`, or `require` in the sandbox.",
-  "- Optional first line: `// @options: {\"max_output_tokens\": 2000, \"timeout_ms\": 30000}`.",
+  '- Optional first line: `// @options: {"max_output_tokens": 2000, "timeout_ms": 30000}`.',
 ].join("\n");
 
 export const CODEMODE_GLOBALS_LINES = [
@@ -37,7 +37,11 @@ export interface CodemodeDescriptionInput {
   inlineBudgetTokens?: number;
 }
 
-function oneLine(text: string): string {
+/**
+ * 把工具描述压成一行摘要。完整描述可达数 KB（例如 EnterPlanMode），而 searchTools/ALL_TOOLS 的
+ * 结果常被脚本整体 text() 出来——不压缩就会把省下的上下文又吐回去。完整文本走 describeTool。
+ */
+export function oneLine(text: string): string {
   const collapsed = text.replace(/\s+/g, " ").trim();
   return collapsed.length > LISTED_DESCRIPTION_MAX_CHARS
     ? `${collapsed.slice(0, LISTED_DESCRIPTION_MAX_CHARS - 1)}…`

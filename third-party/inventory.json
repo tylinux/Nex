@@ -225,13 +225,13 @@
     ".agents/skills/react-best-practices/rules/server-serialization.md": "4d025c42043c56e6355196a2e885d168cdb15248d0797146c9db838a57b34946",
     ".agents/skills/react-best-practices/SKILL.md": "b7d246acb440bee224ab33614979a5b8debe5fdb13d0304967aa19358eb69d9f",
     "apps/nex-cli/package.json": "2bd058723792d609f1dc770ffd00dd08fead0d1ccc1c75ed86a210a3f233cce0",
-    "apps/nex-cli/packages/adapters/package.json": "a0943c1f8c93139e55689ca56bad844cc627c71c6d8e98e1d3524af015242a6b",
+    "apps/nex-cli/packages/adapters/package.json": "3d40ab96cda24e526c41423fa38246c24bd9f6e71177efb73c1e5898d8224b0b",
     "apps/nex-cli/packages/bootstrap/package.json": "99fdcb40f26dcac93a1c68f6581dc4c84c049e47568eaf7b5aaca3663ad3380d",
     "apps/nex-cli/packages/browser-use-plugin/package.json": "ec8038d784e072396629735fa5b6d4d8eb136d33ef1f1ee5c6de179587192c05",
     "apps/nex-cli/packages/cli/package.json": "614f9ac4f456b643ea3586e3701db1d076e5dc5b2b738f0ca7f9b10650afbda1",
     "apps/nex-cli/packages/contracts/package.json": "136fece6ac6a0285e2c60b6a71e9f733021d0caddd6824a499bcfdcf3fde5d46",
     "apps/nex-cli/packages/core/package.json": "5517e64aefe9419064915308df036783c19f7d54c52fe7a67c4d359cc9475552",
-    "apps/nex-cli/packages/core/src/codemode/description.ts": "8d1b93bd8a592a7a000b331d670f5e9b1a0073d211b75e725e7d0294cd8f4a60",
+    "apps/nex-cli/packages/core/src/codemode/description.ts": "d4c8d7b3a14a94675cc29fc45db46948449fd33f178a4574389efe4b1aa5c673",
     "apps/nex-cli/packages/core/src/codemode/embedded.ts": "c9082e58c69249f289f8c051a01bfebb2266da2d810b38081b185c753ca15387",
     "apps/nex-cli/packages/core/src/codemode/identifier.ts": "a33f99db73ede22cbe57202c0ad71a9fae644f0e1fb9713d026159f090de8092",
     "apps/nex-cli/packages/core/src/codemode/output.ts": "021d2cb5b8add35c3c5756c3df467cc71d1efd5c002cfb4dfec1d7d87c55ff38",
@@ -29019,7 +29019,7 @@
       "files": [
         {
           "file": "apps/nex-cli/packages/core/src/codemode/description.ts",
-          "sha256": "8d1b93bd8a592a7a000b331d670f5e9b1a0073d211b75e725e7d0294cd8f4a60"
+          "sha256": "d4c8d7b3a14a94675cc29fc45db46948449fd33f178a4574389efe4b1aa5c673"
         },
         {
           "file": "apps/nex-cli/packages/core/src/codemode/embedded.ts",
