@@ -20,6 +20,12 @@ export type { ToolSchedule, ToolScheduleItem, ToolDependency } from "./tool/sche
 export { createToolRegistry, ToolRegistry, ToolRegistryImpl } from "./tool/registry.js";
 export { createToolExecutor, ToolExecutor, ToolExecutorImpl } from "./tool/executor.js";
 export { builtInTools, registerBuiltInTools } from "./tool/handlers/index.js";
+export { toolSearchToolEntry } from "./tool/handlers/tool-search.js";
+export { searchToolDocuments } from "./tool/tool-search-index.js";
+export {
+  encodeToolSearchResults,
+  filterDeclaredToolContracts,
+} from "./tool/tool-search-activation.js";
 // dwf driver 的 submit profile 运行时守卫要把 typed 声明换回通用声明。
 export {
   createSubmitResultToolEntry,

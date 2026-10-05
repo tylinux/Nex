@@ -29,8 +29,7 @@ import { applyRuntimeExecutionState } from "../execution-state.js";
 
 import { orderProviderVisibleToolContracts } from "../../tool/provider-visible-order.js";
 import { projectToolModelContract } from "../../tool/model-contract.js";
-import { collectActivatedToolNames } from "../../tool/tool-search-activation.js";
-import { TOOL_SEARCH_TOOL_NAME } from "@nex/contracts";
+import { filterDeclaredToolContracts } from "../../tool/tool-search-activation.js";
 import { rebuildContextPrefix } from "./context-refresh.js";
 import { filterEmbeddedSearchRuntimeVisibleTools } from "./embedded-search-branch.js";
 import {
@@ -139,31 +138,17 @@ export function getTools(this: AgentRuntimeInternal, model?: Model): ModelToolCo
   if (this.cachedTools === null) {
     this.cachedTools = filterRuntimeVisibleTools.call(this, this.registry.toContracts());
   }
-  const declaredDeferred = resolveDeclaredDeferredToolNames.call(this);
-  return this.cachedTools
-    .filter((tool) => declaredDeferred.isDeclared(tool.name))
-    .filter((tool) => tool.name !== TOOL_SEARCH_TOOL_NAME || declaredDeferred.hasDeferred)
+  return filterDeclaredToolContracts(
+    this.cachedTools,
+    this.registry,
+    this.messageHistory.borrowReadOnlyRuntimeEntries(),
+  )
     .filter((tool) => tool.name !== "WebSearch" || shouldExposeWebSearch.call(this, model))
     .map((tool) =>
       projectToolModelContract(tool, this.registry.get(tool.name), {
         model,
       }),
     );
-}
-
-/**
- * declared set 的唯一推导点：deferred 工具只有出现在 provider 可见历史里成功的 ToolSearch
- * 结果中才被声明。不另存状态，所以 resume / rewind / compaction 重建历史后结果自动一致；
- * 本函数在每次模型请求边界（turn-loop 的 getTools）求值，请求中途不会变化。
- */
-function resolveDeclaredDeferredToolNames(this: AgentRuntimeInternal): {
-  hasDeferred: boolean;
-  isDeclared(name: string): boolean;
-} {
-  const deferred = new Set(this.registry.listDeferredDocuments().map((doc) => doc.name));
-  if (deferred.size === 0) return { hasDeferred: false, isDeclared: () => true };
-  const activated = collectActivatedToolNames(this.messageHistory.borrowReadOnlyRuntimeEntries());
-  return { hasDeferred: true, isDeclared: (name) => !deferred.has(name) || activated.has(name) };
 }
 
 export function invalidateToolCache(this: AgentRuntimeInternal): void {

@@ -77,3 +77,22 @@ export function collectActivatedToolNames(entries: readonly RuntimeMessageEntry[
   }
   return activated;
 }
+
+/**
+ * declared set 的唯一推导点：deferred 工具只有出现在 provider 可见历史里成功的 ToolSearch
+ * 结果中才被声明；没有 deferred 工具时 ToolSearch 自己也不声明。不另存状态，所以
+ * resume / rewind / compaction 重建历史后结果自动一致。每次模型请求边界求值一次，
+ * 请求中途不会变化。
+ */
+export function filterDeclaredToolContracts<T extends { name: string }>(
+  contracts: readonly T[],
+  registry: { listDeferredDocuments(): readonly { name: string }[] },
+  history: readonly RuntimeMessageEntry[],
+): T[] {
+  const deferred = new Set(registry.listDeferredDocuments().map((doc) => doc.name));
+  if (deferred.size === 0) {
+    return contracts.filter((tool) => tool.name !== TOOL_SEARCH_TOOL_NAME);
+  }
+  const activated = collectActivatedToolNames(history);
+  return contracts.filter((tool) => !deferred.has(tool.name) || activated.has(tool.name));
+}
