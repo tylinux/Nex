@@ -31,3 +31,14 @@ test("session runtime preferences default codemodeEnabled to false and carry tru
     true,
   );
 });
+
+test("MCP status snapshots accept toolNames and still accept the old shape", async () => {
+  const { nexMcpServerStatusSnapshotSchema } = await import("@nex/shared");
+  const base = { status: "connected", transport: "stdio", toolCount: 2, updatedAt: "2026-10-06T00:00:00Z" };
+  assert.deepEqual(
+    nexMcpServerStatusSnapshotSchema.parse({ ...base, toolNames: ["a", "b"] }).toolNames,
+    ["a", "b"],
+  );
+  assert.equal(nexMcpServerStatusSnapshotSchema.parse(base).toolNames, undefined);
+  assert.throws(() => nexMcpServerStatusSnapshotSchema.parse({ ...base, toolNames: [""] }));
+});

@@ -122,6 +122,8 @@ export interface NexMcpServer {
   failureKind?: McpServerFailureKind;
   serverRequestId?: string;
   toolCount?: number;
+  /** 已连接时 server 提供的工具名（逐工具曝光配置用）；未连接时缺席。 */
+  toolNames?: string[];
   authorization?: {
     type: "oauth_authorization_code";
     authorizationUrl: string;

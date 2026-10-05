@@ -75,6 +75,8 @@ export function mergeMcpServerStatusSnapshots(
       failureKind: mapped.failureKind,
       serverRequestId: mapped.serverRequestId,
       toolCount: snapshot.toolCount,
+      // 只有已连接才有可信的工具列表；其它状态不能沿用旧列表，否则会展示早已不存在的工具。
+      toolNames: mapped.status === "connected" ? snapshot.toolNames : undefined,
       changed: false,
       lastConnected:
         mapped.status === "connected" ? new Date(snapshot.updatedAt) : server.lastConnected,

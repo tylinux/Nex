@@ -254,6 +254,20 @@ Exposure is configured on the MCP server entry, at two levels (modelled on pi's 
 - UI: Settings → MCP shows a per-server exposure selector (default / direct / deferred /
   hidden) in the server form. Per-tool overrides are edited in the config file; the form keeps
   an existing `toolExposure` intact when only the selector changes.
+- **Per-tool editor.** When a server is connected, the form lists its tools (names as the
+  server offers them) each with a Default / Direct / Deferred / Hidden dropdown. Owner of
+  the tool list: the MCP adapter (it already holds the descriptors); it travels as
+  `toolNames` on the server status (`McpServerStatus` → protocol snapshot → UI `NexMcpServer`),
+  next to `toolCount`. Owner of the setting: the server entry's `toolExposure`.
+  - Choosing "Default" removes that tool's entry. Saving writes only exact tool names.
+  - Wildcard entries already in the file (e.g. `take_*`) are not expanded or rewritten: the
+    list shows "Hidden via take\_\*" for each tool they cover, read-only, and the entry is kept
+    verbatim in `toolExposure`. Setting a tool explicitly adds an exact entry, which wins.
+  - `toolExposure` keys that match none of the server's current tools are kept as-is and shown
+    in a separate "Not matching any current tool" line, so a temporarily disconnected or
+    renamed tool never silently loses its setting.
+  - While the server is not connected, no tool list is shown; the JSON tab remains the way
+    to edit `toolExposure`.
 - Web limitation: the web build's platform stub for `saveMcpToUserDirectory` returns
   "requires a desktop attachment" (pre-existing, unrelated to exposure), so the Settings form
   cannot persist any MCP edit in the web build. The desktop build and the config file are the

@@ -22,6 +22,12 @@ test("real stdio MCP server: tools register deferred, search activates, call sti
     });
     assert.equal(snapshot.tools.length, 2);
 
+    // 设置页的逐工具曝光列表依赖状态里的 toolNames：必须是 server 自己的工具名（非 mcp__ 形式）。
+    const status = snapshot.statuses.fixture;
+    assert.equal(status?.status, "connected");
+    assert.deepEqual([...(status?.toolNames ?? [])].sort(), ["post_message", "read_issue"]);
+    assert.equal(status?.toolCount, 2);
+
     const registry = createToolRegistry();
     registry.register(toolSearchToolEntry);
     const registered = registerMcpTools(registry, mcpPort, snapshot.tools, {

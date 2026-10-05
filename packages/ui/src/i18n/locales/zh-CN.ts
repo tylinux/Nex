@@ -2447,6 +2447,10 @@ const zhCN: Record<string, string> = {
   "settings.mcp.form.exposure.direct": "直接可见",
   "settings.mcp.form.exposure.deferred": "按需加载（用 ToolSearch 查找）",
   "settings.mcp.form.exposure.hidden": "隐藏（不可用）",
+  "settings.mcp.form.toolExposure": "逐工具曝光",
+  "settings.mcp.form.toolExposure.hint": "单独覆盖某个工具的设置。「默认」表示该工具跟随 server 的设置。",
+  "settings.mcp.form.toolExposure.viaPattern": "{value}（来自 {pattern}）",
+  "settings.mcp.form.toolExposure.unmatched": "已保留在配置里，但当前没有工具匹配：{keys}",
   "settings.mcp.form.exposure.hint":
     "默认跟随「设置 > 按需加载 MCP 工具」。单个工具的覆盖请在配置文件里写 toolExposure。仅对新会话生效。",
   "settings.mcp.form.type.stdio": "stdio（本地命令）",

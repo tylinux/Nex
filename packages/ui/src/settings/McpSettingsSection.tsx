@@ -1396,6 +1396,8 @@ export function McpSettingsSection({
           </div>
 
           <McpServerForm
+            // editingServer 是点击 Edit 时的快照；工具名随连接状态到达，要取实时记录。
+            liveToolNames={servers.find((server) => server.id === editingServer?.id)?.toolNames}
             initial={editingServer ?? undefined}
             editingId={editingServer?.id}
             editorMode={editorMode}

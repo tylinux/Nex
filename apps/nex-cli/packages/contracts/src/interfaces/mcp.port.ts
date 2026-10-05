@@ -123,6 +123,8 @@ export interface McpServerStatus {
   status: McpServerStatusKind;
   transport: McpServerTransportType;
   toolCount: number;
+  /** 已连接时 server 自己给的工具名（非 mcp__ 形式），供设置页逐工具配置曝光；其它状态缺席。 */
+  toolNames?: string[];
   updatedAt: string;
   error?: string;
   failureKind?: McpServerFailureKind;

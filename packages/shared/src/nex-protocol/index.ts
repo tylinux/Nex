@@ -695,6 +695,7 @@ export const nexMcpServerStatusSnapshotSchema = z
     status: nexMcpServerStatusKindSchema,
     transport: z.enum(["stdio", "http", "sse"]),
     toolCount: z.number().int().nonnegative(),
+    toolNames: z.array(nonEmptyString).optional(),
     updatedAt: nonEmptyString,
     error: z.string().optional(),
     failureKind: mcpServerFailureKindSchema.optional(),

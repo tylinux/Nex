@@ -2617,6 +2617,12 @@ const enUS: Record<string, string> = {
   "settings.mcp.form.exposure.direct": "Direct (always visible)",
   "settings.mcp.form.exposure.deferred": "Deferred (find with ToolSearch)",
   "settings.mcp.form.exposure.hidden": "Hidden (unavailable)",
+  "settings.mcp.form.toolExposure": "Per-tool exposure",
+  "settings.mcp.form.toolExposure.hint":
+    "Overrides the server setting for a single tool. Default means the tool follows the server setting.",
+  "settings.mcp.form.toolExposure.viaPattern": "{value} via {pattern}",
+  "settings.mcp.form.toolExposure.unmatched":
+    "Kept in the config but matching no current tool: {keys}",
   "settings.mcp.form.exposure.hint":
     "Default follows Settings > On-demand MCP tools. Per-tool overrides go in the config file as toolExposure. Applies to new sessions.",
   "settings.mcp.form.type.stdio": "stdio (local command)",

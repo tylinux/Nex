@@ -1092,6 +1092,7 @@ class NodeMcpAdapter implements McpPort {
       const status = this.createStatus(config, "connected", {
         protocolEra: negotiatedProtocolEra,
         toolCount: tools.length,
+        toolNames: tools.map((tool) => tool.toolName),
       });
       if (!this.isCurrentConnection(name, generation)) {
         await this.closeClientAndTransport(name, client, transport);
@@ -1729,12 +1730,14 @@ class NodeMcpAdapter implements McpPort {
       protocolEra?: McpServerStatus["protocolEra"];
       serverRequestId?: string;
       toolCount?: number;
+      toolNames?: string[];
     } = {},
   ): McpServerStatus {
     return {
       status,
       transport: config.type,
       toolCount: extra.toolCount ?? 0,
+      ...(extra.toolNames === undefined ? {} : { toolNames: extra.toolNames }),
       updatedAt: new Date().toISOString(),
       authorization: extra.authorization,
       error: extra.error,

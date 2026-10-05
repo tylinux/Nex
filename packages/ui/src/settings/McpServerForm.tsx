@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/select.js";
 import { useNexIntl } from "@/i18n/IntlProvider.js";
 import { McpExposureField } from "./McpExposureField.js";
-import { PluginScopeMenu } from "@/settings/PluginScopeMenu.js";
+import { McpToolExposureList } from "./McpToolExposureList.js";
 import type { WorkspaceTabState } from "@/store/tabStore.js";
+import { McpScopeMenu } from "./McpScopeMenu.js";
 import { SettingsFormTextarea } from "@/settings/SettingsFormTextarea.js";
 import { SettingsFormActions } from "@/settings/SettingsFormActions.js";
 import { ChevronDown, ChevronUpIcon as ChevronUp, Trash2 } from "lucide-react";
@@ -31,36 +32,9 @@ function McpFormFieldLabel({ children }: { children: string }) {
   );
 }
 
-function McpScopeMenu({
-  disabled,
-  scopeKey,
-  workspaceTabs,
-  onChange,
-}: {
-  disabled: boolean;
-  scopeKey: string;
-  workspaceTabs: WorkspaceTabState[];
-  onChange: (scopeKey: string) => void;
-}) {
-  const { intl } = useNexIntl();
-  const scopeLabel = intl.formatMessage({ id: "settings.scope.label" });
-
-  return (
-    <label className="flex min-w-0 flex-wrap items-center justify-end gap-2">
-      <span className="shrink-0 text-ui-base text-foreground-subtle">{scopeLabel}</span>
-      <PluginScopeMenu
-        align="end"
-        disabled={disabled}
-        selectedScopeKey={scopeKey}
-        workspaceTabs={workspaceTabs}
-        onScopeKeyChange={onChange}
-      />
-    </label>
-  );
-}
-
 export function McpServerForm({
   initial,
+  liveToolNames,
   editingId,
   editorMode,
   onEditorModeChange,
@@ -72,6 +46,8 @@ export function McpServerForm({
   onScopeKeyChange,
 }: {
   initial?: NexMcpServer;
+  /** 已连接时 server 提供的工具名（来自 store 实时记录，不是点 Edit 时的快照）。 */
+  liveToolNames?: readonly string[];
   editingId?: string;
   editorMode: McpEditorMode;
   source?: McpSource;
@@ -335,6 +311,13 @@ export function McpServerForm({
           )}
 
           <McpExposureField value={form.exposure} onChange={(exposure) => update({ exposure })} />
+          {liveToolNames && liveToolNames.length > 0 ? (
+            <McpToolExposureList
+              toolNames={liveToolNames}
+              value={form.toolExposure}
+              onChange={(toolExposure) => update({ toolExposure })}
+            />
+          ) : null}
 
           {form.type === "stdio" ? (
             <>
