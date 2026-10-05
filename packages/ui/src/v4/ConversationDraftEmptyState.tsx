@@ -225,12 +225,20 @@ function NexEmptyStateLogo({ className }: { className?: string }) {
         )}
         width="400"
         height="320"
-        viewBox="0 0 400 320"
+        viewBox="258 255 510 516"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M70 0L140 0L70 319.5L0 319.5ZM140 0L210 0L330 319.5L260 319.5ZM330 0L400 0L330 319.5L260 319.5Z"
+          d="M263 356C263 333 276 337 286 343C305 355 342 402 399 469V702C399 720 392 729 376 736L290 766C271 772 263 762 263 741Z"
+          stroke="currentColor"
+        />
+        <path
+          d="M625 528V327C625 307 632 299 649 291L728 260C750 251 763 262 763 282V645C763 671 741 659 724 638Z"
+          stroke="currentColor"
+        />
+        <path
+          d="M263 356V316C263 282 282 262 313 262H389C406 262 415 272 429 288L722 638C741 660 763 673 763 645V707C763 741 743 763 707 763H663C645 763 636 756 623 741L306 369C282 340 264 336 263 356Z"
           stroke="currentColor"
         />
       </svg>

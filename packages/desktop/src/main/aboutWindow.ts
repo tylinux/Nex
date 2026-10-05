@@ -171,18 +171,12 @@ export function createCustomAboutDialogHtml(input: CustomAboutDialogHtmlInput): 
       <section class="about-card" role="dialog" aria-modal="true" aria-labelledby="about-title">
         <div class="content">
           <div class="app-icon" aria-hidden="true">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="121"
-              height="100"
-              fill="none"
-              viewBox="0 0 436 360"
-              class="app-logo"
-              focusable="false"
-            >
-              <path fill="currentColor" d="M88 20.5L158 20.5L88 340L18 340Z" />
-              <path fill="currentColor" d="M158 20.5L228 20.5L348 340L278 340Z" />
-              <path fill="currentColor" d="M348 20.5L418 20.5L348 340L278 340Z" />
+            <!-- About 沿用白标，与共享 UI 保持一致，避免安装图标的绿色进入应用内。 -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30"
+              viewBox="258 255 510 516" class="app-logo" focusable="false">
+              <path fill="currentColor" d="M263 356C263 333 276 337 286 343C305 355 342 402 399 469V702C399 720 392 729 376 736L290 766C271 772 263 762 263 741Z" />
+              <path fill="currentColor" d="M625 528V327C625 307 632 299 649 291L728 260C750 251 763 262 763 282V645C763 671 741 659 724 638Z" />
+              <path fill="currentColor" d="M263 356V316C263 282 282 262 313 262H389C406 262 415 272 429 288L722 638C741 660 763 673 763 645V707C763 741 743 763 707 763H663C645 763 636 756 623 741L306 369C282 340 264 336 263 356Z" />
             </svg>
           </div>
           <h1 id="about-title" class="title">
