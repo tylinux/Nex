@@ -2620,6 +2620,9 @@ const enUS: Record<string, string> = {
   "settings.mcp.form.toolExposure": "Per-tool exposure",
   "settings.mcp.form.toolExposure.hint":
     "Overrides the server setting for a single tool. Default means the tool follows the server setting.",
+  "settings.mcp.form.toolExposure.search": "Search tools",
+  "settings.mcp.form.toolExposure.matchCount": "{shown} of {total} tools",
+  "settings.mcp.form.toolExposure.noMatch": "No tool matches this search.",
   "settings.mcp.form.toolExposure.viaPattern": "{value} via {pattern}",
   "settings.mcp.form.toolExposure.unmatched":
     "Kept in the config but matching no current tool: {keys}",

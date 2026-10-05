@@ -1,4 +1,9 @@
-import { TID_SETTINGS_MCP_TOOL_EXPOSURE_ROW } from "@nex/shared";
+import {
+  TID_SETTINGS_MCP_TOOL_EXPOSURE_ROW,
+  TID_SETTINGS_MCP_TOOL_EXPOSURE_SEARCH,
+} from "@nex/shared";
+import { useState } from "react";
+import { Input } from "@/components/ui/input.js";
 import {
   Select,
   SelectContent,
@@ -9,6 +14,7 @@ import {
 import { useNexIntl } from "@/i18n/IntlProvider.js";
 import {
   buildToolExposureRows,
+  filterToolExposureRows,
   findUnmatchedToolExposureKeys,
   isToolExposureValue,
   parseToolExposure,
@@ -35,7 +41,10 @@ export function McpToolExposureList({
 }) {
   const { intl } = useNexIntl();
   const map = parseToolExposure(value);
-  const rows = buildToolExposureRows(toolNames, map);
+  // 查询只影响展示；toolExposure 仍是整体写回，被过滤掉的行设置不会丢。
+  const [query, setQuery] = useState("");
+  const allRows = buildToolExposureRows(toolNames, map);
+  const rows = filterToolExposureRows(allRows, query);
   const unmatched = findUnmatchedToolExposureKeys(toolNames, map);
   const label = (option: string) =>
     intl.formatMessage({ id: `settings.mcp.form.exposure.${option}` });
@@ -48,7 +57,29 @@ export function McpToolExposureList({
       <p className="text-ui-xs text-muted-foreground">
         {intl.formatMessage({ id: "settings.mcp.form.toolExposure.hint" })}
       </p>
+      <Input
+        size="lg"
+        type="search"
+        value={query}
+        placeholder={intl.formatMessage({ id: "settings.mcp.form.toolExposure.search" })}
+        aria-label={intl.formatMessage({ id: "settings.mcp.form.toolExposure.search" })}
+        data-testid={TID_SETTINGS_MCP_TOOL_EXPOSURE_SEARCH}
+        onChange={(event) => setQuery(event.target.value)}
+      />
+      {query.trim() ? (
+        <p className="text-ui-xs text-muted-foreground">
+          {intl.formatMessage(
+            { id: "settings.mcp.form.toolExposure.matchCount" },
+            { shown: String(rows.length), total: String(allRows.length) },
+          )}
+        </p>
+      ) : null}
       <div className="max-h-80 divide-y divide-border overflow-y-auto rounded-lg border border-border">
+        {rows.length === 0 ? (
+          <div className="px-3 py-3 text-ui-sm text-muted-foreground">
+            {intl.formatMessage({ id: "settings.mcp.form.toolExposure.noMatch" })}
+          </div>
+        ) : null}
         {rows.map((row) => (
           <div
             key={row.toolName}

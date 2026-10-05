@@ -16,7 +16,10 @@ test("rows are sorted; exact entries are explicit; wildcard coverage is read-onl
     evaluate_script: "hidden",
     list_pages: "direct",
   });
-  assert.deepEqual(rows.map((r) => r.toolName), ["click", "evaluate_script", "list_pages", "take_screenshot", "take_snapshot"]);
+  assert.deepEqual(
+    rows.map((r) => r.toolName),
+    ["click", "evaluate_script", "list_pages", "take_screenshot", "take_snapshot"],
+  );
   const byName = Object.fromEntries(rows.map((r) => [r.toolName, r]));
   assert.equal(byName.evaluate_script?.explicit, "hidden");
   assert.equal(byName.list_pages?.explicit, "direct");
@@ -62,4 +65,36 @@ test("regex metacharacters in tool names and patterns match literally", () => {
   const rows = buildToolExposureRows(["a.b", "aXb"], { "a.*": "hidden" });
   assert.equal(rows.find((r) => r.toolName === "a.b")?.viaPattern?.value, "hidden");
   assert.equal(rows.find((r) => r.toolName === "aXb")?.viaPattern, undefined);
+});
+
+test("search filters rows by name, case-insensitively, all words must match", async () => {
+  const { filterToolExposureRows } = await import("../src/settings/mcpToolExposure.js");
+  const rows = buildToolExposureRows(tools, { "take_*": "hidden" });
+  const names = (q: string) => filterToolExposureRows(rows, q).map((r) => r.toolName);
+  assert.deepEqual(names(""), [
+    "click",
+    "evaluate_script",
+    "list_pages",
+    "take_screenshot",
+    "take_snapshot",
+  ]);
+  assert.deepEqual(names("   "), names(""));
+  assert.deepEqual(names("TAKE"), ["take_screenshot", "take_snapshot"]);
+  // 多个词是 AND；注意 "shot" 也出现在 snapshot 里，所以用 "screen" 才能区分
+  assert.deepEqual(names("take shot"), ["take_screenshot", "take_snapshot"]);
+  assert.deepEqual(names("take screen"), ["take_screenshot"]);
+  assert.deepEqual(names("screen take"), ["take_screenshot"]);
+  assert.deepEqual(names("nothing"), []);
+});
+
+test("filtering is display-only: an edit made while filtered keeps every other entry", () => {
+  const start = { "take_*": "hidden", click: "deferred", old_tool: "hidden" } as const;
+  const edited = setToolExposure({ ...start }, "list_pages", "direct");
+  // 过滤只缩小可见行；写回的 map 仍包含被过滤掉的 click、通配与失配键
+  assert.deepEqual(edited, {
+    "take_*": "hidden",
+    click: "deferred",
+    old_tool: "hidden",
+    list_pages: "direct",
+  });
 });

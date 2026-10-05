@@ -66,6 +66,22 @@ export function buildToolExposureRows(
     });
 }
 
+/**
+ * 按名字过滤列表行：不区分大小写的子串匹配，查询按空白拆成多个词时每个词都要命中（AND）。
+ * 只过滤展示，不触碰 toolExposure——被过滤掉的行的设置照常保留并随保存写回。
+ */
+export function filterToolExposureRows(
+  rows: readonly McpToolExposureRow[],
+  query: string,
+): McpToolExposureRow[] {
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return [...rows];
+  return rows.filter((row) => {
+    const name = row.toolName.toLowerCase();
+    return terms.every((term) => name.includes(term));
+  });
+}
+
 /** toolExposure 里没有任何当前工具能被它命中的键：保留并单独展示，不能因为暂时断连/改名就丢。 */
 export function findUnmatchedToolExposureKeys(
   toolNames: readonly string[],

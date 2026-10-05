@@ -327,6 +327,7 @@ export const TID_SETTINGS_TOOL_SEARCH_SWITCH = "settings-tool-search-switch";
 export const TID_SETTINGS_CODEMODE_SWITCH = "settings-codemode-switch";
 export const TID_SETTINGS_MCP_EXPOSURE_SELECT = "settings-mcp-exposure-select";
 export const TID_SETTINGS_MCP_TOOL_EXPOSURE_ROW = "settings-mcp-tool-exposure-row";
+export const TID_SETTINGS_MCP_TOOL_EXPOSURE_SEARCH = "settings-mcp-tool-exposure-search";
 /** 常规设置中的数据存储路径只读输入框 */
 export const TID_SETTINGS_DATA_BASE_DIR_INPUT = "settings-data-base-dir-input";
 /** 常规设置中的数据存储路径目录选择按钮 */
