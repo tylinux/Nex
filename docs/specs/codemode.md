@@ -1,6 +1,6 @@
 # Spec: Codemode (sandboxed tool orchestration)
 
-Status: proposed
+Status: P1, P2, P3 implemented (non-chat model operations not implemented)
 Owner: apps/nex-cli/packages/core (agent runtime), with contracts/adapters/ui touch points
 Related: `packages/shared/src/nex-protocol/index.ts`, `apps/nex-cli/packages/core/src/tool/`,
 `apps/nex-cli/packages/core/src/mcp/index.ts`, `apps/nex-cli/packages/contracts/src/interfaces/mcp.port.ts`
@@ -397,6 +397,35 @@ script in sandbox (P3)                    ├─ execution data → script
 7. In the SEA-packaged CLI, a codemode script runs (wasm asset loads).
 8. A `hidden` tool cannot be searched, declared, or called.
 9. A script cannot call codemode; the attempt is rejected.
+
+## Implementation status and verification
+
+P1, P2 and P3 are implemented behind two opt-in switches (Settings → "On-demand MCP tools",
+"Codemode"), both default off. Not implemented: the `models` global (`classify`,
+`generateImages`) and the model-type prerequisite it needs; see "Non-chat model operations".
+
+| Acceptance scenario                                                    | Status           | Evidence                                                                                                                                                                                                                               |
+| ---------------------------------------------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. First request has no deferred schemas                               | verified         | `core/test/tool-search-declared-set.test.ts`; request log in `bootstrap/test/e2e` (request 1: 23 tools, no `read_issue`)                                                                                                               |
+| 2. `ToolSearch` activates; next request has the schema                 | verified         | same tests; request 2 declares `mcp__fixture__read_issue`                                                                                                                                                                              |
+| 3. Script calls MCP + built-in tools; model sees only the return value | verified for MCP | `bootstrap/test/codemode-e2e.test.ts` (real stdio MCP server, real `ToolExecutor`); browser e2e: the 2 KB bodies never reach the model. A script calling a built-in tool is covered by the nested-runner unit tests, not by an e2e run |
+| 4. `models.generateImages()`                                           | not implemented  |                                                                                                                                                                                                                                        |
+| 5. `models.classify()`                                                 | not implemented  |                                                                                                                                                                                                                                        |
+| 6. Runaway script terminated, next run works                           | verified         | `core/test/codemode-sandbox.test.ts`, `bootstrap/test/codemode-e2e.test.ts`, and inside the SEA binary                                                                                                                                 |
+| 7. Codemode runs in the SEA-packaged CLI                               | verified         | `packages/server` SEA binary served the browser e2e turn (ToolSearch → Codemode → answer); `cli/scripts/verify-codemode-embed.mjs` runs the sandbox from a bundle with no `node_modules`                                               |
+| 8. `hidden` tool cannot be searched, declared or called                | verified (unit)  | `core/test/tool-search*.test.ts`, `core/test/nested-runner.test.ts`. No production path sets `hidden` yet                                                                                                                              |
+| 9. Script cannot call codemode                                         | verified         | `core/test/nested-runner.test.ts`, `bootstrap/test/codemode-e2e.test.ts`                                                                                                                                                               |
+
+Known limits:
+
+- Permission prompts for child calls: the browser e2e needed one confirmation covering the
+  three parallel `read_issue` calls. A script that calls many different tools prompts once per
+  distinct permission request.
+- `getTools()` is derived from message history on every call, so a compaction that drops a
+  `ToolSearch` result also drops its activations (the model must search again).
+- `ToolSearch` is not declared when no deferred tool exists, and the deferred set is
+  recomputed from the registry each request, so MCP connect/disconnect is reflected at the
+  next request boundary, never mid-request.
 
 ## Open questions
 
