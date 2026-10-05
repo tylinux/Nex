@@ -22,7 +22,8 @@ import { getRawAsset, isSea } from "node:sea";
 
 const AGENT_BUNDLE_ASSET_KEY = "nex-sea-agent/nex.cjs";
 const PTY_ASSET_PREFIX = "nex-sea-pty/";
-const PTY_ENTRY_ASSET_KEY = `${PTY_ASSET_PREFIX}lib/index.js`;
+// 释放后的入口固定是 <released>/lib/index.js（asset key 见 listPtyAssetKeys）。
+const PTY_ENTRY_RELATIVE_PATH = "lib/index.js";
 
 /** Release directory for the agent bundle: data dir first (server setups set NEX_DATA_BASE_DIR), else the user cache. */
 function agentRuntimeDirectory(): string {
@@ -111,7 +112,7 @@ function releasePtyRuntime(sea: { getRawAsset: (key: string) => ArrayBuffer }): 
       sea.getRawAsset(`${PTY_ASSET_PREFIX}prebuilds/${platformArch}/pty.node`),
     );
     const targetDirectory = join(ptyRuntimeDirectory(), assetFingerprint(addonBytes));
-    const entryPath = join(targetDirectory, "lib", "index.js");
+    const entryPath = join(targetDirectory, PTY_ENTRY_RELATIVE_PATH);
     if (!existsSync(entryPath)) {
       for (const key of listPtyAssetKeys(sea)) {
         const relative = key.slice(PTY_ASSET_PREFIX.length);

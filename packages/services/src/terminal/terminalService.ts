@@ -6,11 +6,8 @@ import { Emitter, type Event } from "@nex/rpc";
 import type { IPty } from "node-pty";
 import type { ISettingService } from "../setting/setting.js";
 import type { ITerminalService, TerminalWindowsPtyInfo } from "./terminal.js";
-import {
-  ensureFallbackSpawnHelperInstalled,
-  installNativePtyAddonRedirect,
-  resolveFallbackPtyModuleDir,
-} from "./terminalPtyFallback.js";
+import { resolveFallbackPtyModuleDir } from "./terminalPtyFallback.js";
+import { loadNodePtyModule, type NodePtyModule } from "./terminalPtyLoader.js";
 import {
   resolveTerminalFontProfile,
   type TerminalFontFamilySource,
@@ -19,7 +16,6 @@ import {
 import { registerMemoryDiagnosticsProvider } from "#src/memoryDiagnostics.js";
 
 const require = createRequire(import.meta.url);
-type NodePtyModule = typeof import("node-pty");
 type PtySpawnOptions = Parameters<NodePtyModule["spawn"]>[2];
 
 interface TerminalInstance {
@@ -29,94 +25,6 @@ interface TerminalInstance {
 }
 
 let hasEnsuredNodePtyHelper = false;
-let nodePtyModulePromise: Promise<NodePtyModule> | null = null;
-
-function isUsableNodePtyModule(mod: unknown): mod is NodePtyModule {
-  return (
-    typeof mod === "object" && mod !== null && typeof (mod as NodePtyModule).spawn === "function"
-  );
-}
-
-/**
- * SEA 运行时的确定性加载路径：embedding runtime（seaEntry）把自包含的
- * node-pty 包（JS + 平台 addon，来自 @lydell 变体包）释放到磁盘并把
- * NEX_PTY_ENTRY 指向 lib/index.js。SEA 主脚本的 require 被 loader 接管，
- * 内联的 node-pty 无法完成 addon 探测（ERR_UNKNOWN_BUILTIN_MODULE），而
- * createRequire 锚定在磁盘路径上的 require 走标准解析，能加载完整包。
- */
-function loadNodePtyFromReleasedEntry(): NodePtyModule | null {
-  const entry = process.env.NEX_PTY_ENTRY?.trim();
-  if (!entry || !existsSync(entry)) {
-    return null;
-  }
-  try {
-    const loaded = createRequire(entry)(entry) as NodePtyModule;
-    if (!isUsableNodePtyModule(loaded)) {
-      throw new Error(`released node-pty at '${entry}' has no spawn function`);
-    }
-    return loaded;
-  } catch (error: unknown) {
-    // 释放副本损坏（版本切换中断等）时回退到内联 import 路径并如实报告。
-    console.warn(
-      `[terminal] released node-pty entry '${entry}' failed to load: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
-    return null;
-  }
-}
-
-async function loadNodePtyModule(): Promise<NodePtyModule> {
-  if (!nodePtyModulePromise) {
-    const released = loadNodePtyFromReleasedEntry();
-    if (released) {
-      nodePtyModulePromise = Promise.resolve(released);
-      return nodePtyModulePromise;
-    }
-    nodePtyModulePromise = (async () => {
-      // The addon redirect hook must be installed BEFORE the first node-pty
-      // import: its main module probes build/Release/pty.node at the top
-      // level, and esbuild's __commonJS helper caches the (half-initialized)
-      // exports even when that probe throws. Installing the hook only in a
-      // catch-and-retry path makes the retry return an empty namespace
-      // ("nodePty.spawn is not a function") because the second __require()
-      // hits the poisoned cache instead of re-running the probes. With the
-      // hook installed up front the very first load resolves the addon from
-      // the fallback dir and node-pty initializes cleanly.
-      const fallbackDir = resolveFallbackPtyModuleDir();
-      const restore = fallbackDir ? installNativePtyAddonRedirect(fallbackDir) : null;
-      try {
-        if (fallbackDir) {
-          // The addon require probes build/Release first, so node-pty will
-          // look for the darwin spawn-helper there as well; stage it from the
-          // fallback dir before the first load reads it.
-          ensureFallbackSpawnHelperInstalled(fallbackDir);
-        }
-        const loaded = (await import("node-pty")) as NodePtyModule;
-        if (!isUsableNodePtyModule(loaded)) {
-          throw new Error(
-            "node-pty namespace has no spawn function (module loaded but addon initialization failed)",
-          );
-        }
-        return loaded;
-      } catch (error: unknown) {
-        nodePtyModulePromise = null;
-        if (fallbackDir) {
-          throw new Error(
-            `node-pty is unavailable in this runtime (fallback dir '${fallbackDir}' did not resolve it either): ${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          );
-        }
-        throw error;
-      } finally {
-        restore?.();
-      }
-    })();
-  }
-
-  return nodePtyModulePromise;
-}
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
