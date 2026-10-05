@@ -1954,6 +1954,9 @@ const zhCN: Record<string, string> = {
   "settings.toolSearch": "按需加载 MCP 工具",
   "settings.toolSearchDescription":
     "不再把 MCP 工具定义放进每次请求，模型需要时通过 ToolSearch 查找。仅对新会话和应用重启后恢复的会话生效。",
+  "settings.codemode": "Codemode（脚本编排工具）",
+  "settings.codemodeDescription":
+    "允许模型写一小段 JavaScript，在隔离沙箱里批量调用工具，中间结果不进入对话。仅对新会话和应用重启后恢复的会话生效。",
   "settings.memory": "记忆",
   "settings.memory.workspaceMemory": "工作区记忆",
   "settings.memoryDescription":

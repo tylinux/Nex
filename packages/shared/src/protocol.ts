@@ -325,6 +325,8 @@ export interface AppSettings {
   memoryEnabled?: boolean;
   /** 新建或冷恢复 Session 是否延迟声明 MCP 工具并启用 ToolSearch；默认关闭。 */
   toolSearchEnabled?: boolean;
+  /** 新建或冷恢复 Session 是否注册 Codemode 工具（沙箱里写 JS 编排工具）；默认关闭。 */
+  codemodeEnabled?: boolean;
   onboardingOccupation?:
     | "office"
     | "developer"

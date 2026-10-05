@@ -16,3 +16,18 @@ test("session runtime preferences carry toolSearchEnabled=true", () => {
   });
   assert.equal(parsed.toolSearchEnabled, true);
 });
+
+test("session runtime preferences default codemodeEnabled to false and carry true", () => {
+  assert.equal(
+    nexSessionRuntimePreferencesResultSchema.parse({ nativeSearchEnhancementsEnabled: true })
+      .codemodeEnabled,
+    false,
+  );
+  assert.equal(
+    nexSessionRuntimePreferencesResultSchema.parse({
+      nativeSearchEnhancementsEnabled: true,
+      codemodeEnabled: true,
+    }).codemodeEnabled,
+    true,
+  );
+});

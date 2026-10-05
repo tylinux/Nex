@@ -152,6 +152,9 @@ export function resolveAppRuntimeConfig(input: {
       ...configResult.config.modelAnomalyGuard,
       ...options.runtimeConfig?.modelAnomalyGuard,
     },
+    ...(options.runtimeConfig?.codemode === undefined
+      ? {}
+      : { codemode: options.runtimeConfig.codemode }),
     ...(options.runtimeConfig?.toolSearch === undefined
       ? {}
       : { toolSearch: options.runtimeConfig.toolSearch }),

@@ -2081,6 +2081,9 @@ const enUS: Record<string, string> = {
   "settings.toolSearch": "On-demand MCP tools",
   "settings.toolSearchDescription":
     "Keep MCP tool schemas out of every request; the model finds them with ToolSearch when needed. Applies to new sessions and sessions restored after an app restart.",
+  "settings.codemode": "Codemode (script tool calls)",
+  "settings.codemodeDescription":
+    "Let the model write a short JavaScript program that calls tools in an isolated sandbox, so intermediate results stay out of the conversation. Applies to new sessions and sessions restored after an app restart.",
   "settings.memory": "Memory",
   "settings.memory.workspaceMemory": "Workspace Memory",
   "settings.memoryDescription":

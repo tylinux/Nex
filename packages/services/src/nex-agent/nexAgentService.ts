@@ -1739,6 +1739,7 @@ export function createNexAgentService(
                     nativeSearchEnhancementsEnabled: true,
                     memoryEnabled: false,
                     toolSearchEnabled: false,
+                    codemodeEnabled: false,
                   },
                 );
               } catch (error) {

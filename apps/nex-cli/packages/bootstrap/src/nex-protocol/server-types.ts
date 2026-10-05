@@ -84,6 +84,7 @@ export interface NexProtocolSessionRecord {
   app: NexApp;
   memoryEnabled: boolean;
   toolSearchEnabled: boolean;
+  codemodeEnabled: boolean;
   nativeSearchEnhancementsEnabled: boolean;
   modelContextBudgetStrategy: NexModelContextBudgetStrategy;
   createdAt: number;

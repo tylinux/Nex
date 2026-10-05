@@ -268,6 +268,7 @@ export function SettingsPage({
   }, [sharedSettings?.recentProjects, workspaceTabs]);
   const memoryEnabled = sharedSettings?.memoryEnabled === true;
   const toolSearchEnabled = sharedSettings?.toolSearchEnabled === true;
+  const codemodeEnabled = sharedSettings?.codemodeEnabled === true;
   const nativeSearchEnhancementsEnabled = sharedSettings?.nativeSearchEnhancementsEnabled !== false;
   const askUserQuestionAutoResolutionEnabled =
     sharedSettings?.askUserQuestionAutoResolutionEnabled !== false;
@@ -419,6 +420,12 @@ export function SettingsPage({
   const handleToolSearchEnabledChange = useCallback(
     async (enabled: boolean) => {
       await updateSharedSettings({ toolSearchEnabled: enabled });
+    },
+    [updateSharedSettings],
+  );
+  const handleCodemodeEnabledChange = useCallback(
+    async (enabled: boolean) => {
+      await updateSharedSettings({ codemodeEnabled: enabled });
     },
     [updateSharedSettings],
   );
@@ -900,6 +907,7 @@ export function SettingsPage({
                             integratedTerminalShellOptions={integratedTerminalShellOptions}
                             nativeSearchEnhancementsEnabled={nativeSearchEnhancementsEnabled}
                             toolSearchEnabled={toolSearchEnabled}
+                            codemodeEnabled={codemodeEnabled}
                             httpProxy={httpProxy}
                             httpProxyNoProxy={httpProxyNoProxy}
                             httpProxyCaCertPath={httpProxyCaCertPath}
@@ -933,6 +941,7 @@ export function SettingsPage({
                               handleNativeSearchEnhancementsEnabledChange
                             }
                             onToolSearchEnabledChange={handleToolSearchEnabledChange}
+                            onCodemodeEnabledChange={handleCodemodeEnabledChange}
                             onModelIoFullRetentionEnabledChange={
                               handleModelIoFullRetentionEnabledChange
                             }
