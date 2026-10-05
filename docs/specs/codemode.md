@@ -211,6 +211,46 @@ CLI loads the wasm asset.
 - **Out of scope here:** `models.classify` / `models.generateImages` (non-chat model
   typing) are not part of this phase; the `models` global is absent.
 
+### MCP exposure configuration
+
+Exposure is configured on the MCP server entry, at two levels (modelled on pi's `mcp.json`):
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "github": {
+        "type": "http",
+        "url": "https://example.test/mcp",
+        "exposure": "deferred",
+        "toolExposure": { "read_issue": "direct", "delete_*": "hidden" }
+      }
+    }
+  }
+}
+```
+
+- `exposure`: `"direct" | "deferred" | "hidden"` for every tool of the server.
+- `toolExposure`: overrides per tool. Keys are the tool names _as the server offers them_
+  (not the `mcp__server__tool` form), or patterns where `*` matches any characters. An exact
+  name wins over patterns; among patterns the first match in object order wins.
+- Resolution for one tool: `toolExposure` match → server `exposure` → session default.
+- **Session default** (when neither is set): `deferred` if Settings → "On-demand MCP tools"
+  is on, otherwise `direct`. So existing configs behave exactly as before.
+- `hidden` tools are never registered, so they cannot be declared, searched or called, from a
+  script or from a subagent. They are not registered at all (not "registered but unreachable"),
+  which keeps `registry.has()` truthful.
+- Official computer-use tools and the host `node_repl` tool ignore these fields and stay
+  `direct`: their model-visible names are a provider contract.
+- `ToolSearch` is registered whenever the session default is `deferred` **or** any server or
+  tool resolves to `deferred`, so a single `deferred` entry is enough to get a working
+  discovery path without turning the global switch on.
+- Invalid values are rejected where the config is validated, never silently coerced.
+- The field travels with the rest of the server entry: settings UI → `McpServerConfig`
+  (shared) → `NexAgentMcpServer` (protocol DTO) → runtime `McpServerConfig` → `registerMcpTools`.
+- UI: Settings → MCP shows a per-server exposure selector (default / direct / deferred /
+  hidden) in the server form. Per-tool overrides are edited in the config file.
+
 ## Non-chat model operations
 
 Scripts reach non-chat models through a `models` global, using the session's resolved
