@@ -5,6 +5,36 @@ All notable changes to Nex are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.1] - 2026-10-05
+
+### Added
+
+- Cross-platform About dialog in the workspace help menu (was desktop-only via
+  the native Electron window; web had no version surface). Shows the app
+  version from the build-time constant, with the commit behind a details
+  toggle, and the "Optimized for Apple Silicon" line only on desktop macOS
+- Brand mark surfaces documentation (`docs/specs/brand-mark-surfaces.md`) and a
+  test asserting every mark shares the same three-stroke geometry
+
+### Fixed
+
+- **Terminals in the SEA server**: `terminal.create` always failed with
+  "nodePty.spawn is not a function". The SEA loader takes over the main
+  script's `require()`, so node-pty's inlined native-addon probes failed with
+  `ERR_UNKNOWN_BUILTIN_MODULE`; esbuild's `__commonJS` helper then returned a
+  half-initialized cache on retry. The server now releases a self-contained
+  node-pty package (JS + platform addon + darwin spawn-helper) from the SEA
+  assets and loads it from disk via `createRequire`; verified end to end
+  against the built darwin-arm64 binary
+- Server install tarballs now carry the matching web build; `install.sh`
+  deploys it next to the data dir and sets `NEX_WEB_STATIC_ROOT`, so a
+  bare-metal install serves a version-aligned UI from the same process
+  (previously the served assets could drift from the binary version)
+- Brand mark geometry corrected to match the official app icon (equal-width
+  parallelograms replaced by the folded-ribbon N), applied consistently across
+  the About dialog, both boot splashes, the startup badge, and the draft
+  empty state
+
 ## [1.1.0] - 2026-09-29
 
 ### Added
