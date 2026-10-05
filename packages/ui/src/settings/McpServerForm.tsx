@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select.js";
 import { useNexIntl } from "@/i18n/IntlProvider.js";
+import { McpExposureField } from "./McpExposureField.js";
 import { PluginScopeMenu } from "@/settings/PluginScopeMenu.js";
 import type { WorkspaceTabState } from "@/store/tabStore.js";
 import { SettingsFormTextarea } from "@/settings/SettingsFormTextarea.js";
@@ -332,6 +333,8 @@ export function McpServerForm({
               </Select>
             </div>
           )}
+
+          <McpExposureField value={form.exposure} onChange={(exposure) => update({ exposure })} />
 
           {form.type === "stdio" ? (
             <>

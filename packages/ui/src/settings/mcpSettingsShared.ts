@@ -19,6 +19,13 @@ export interface FormState {
   timeoutMs: string;
   oauth?: string;
   protocolVersion: string;
+  /** 本 server 全部工具的曝光；空串 = 未设置（由会话默认决定）。 */
+  exposure: string;
+  /**
+   * 单个工具的曝光覆盖。表单没有对应控件（在配置文件里编辑），但保存仍走 FormState，
+   * 必须隐藏保留，否则只改了 exposure 下拉就会把用户手写的 toolExposure 吞掉。
+   */
+  toolExposure: string;
 }
 
 export const EMPTY_FORM: FormState = {
@@ -34,6 +41,8 @@ export const EMPTY_FORM: FormState = {
   timeoutMs: "",
   oauth: "",
   protocolVersion: "",
+  exposure: "",
+  toolExposure: "",
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -67,6 +76,8 @@ export function serverToForm(server: NexMcpServer): FormState {
     // 非法枚举值归一为未设置（等价 auto），与 shared DTO 的 isMcpProtocolVersion
     // 静默丢弃行为对齐；否则 config 里的手滑值会让协议版本下拉显示空白。
     protocolVersion: isMcpProtocolVersion(cfg.protocolVersion) ? cfg.protocolVersion : "",
+    exposure: isMcpExposure(cfg.exposure) ? cfg.exposure : "",
+    toolExposure: isRecord(cfg.toolExposure) ? JSON.stringify(cfg.toolExposure, null, 2) : "",
   };
 }
 
@@ -91,6 +102,7 @@ export function formToConfig(form: FormState): McpServerConfig {
       ...(form.protocolVersion
         ? { protocolVersion: form.protocolVersion as McpServerConfig["protocolVersion"] }
         : {}),
+      ...exposureConfig(form),
     };
   }
 
@@ -121,6 +133,27 @@ export function formToConfig(form: FormState): McpServerConfig {
     ...(form.protocolVersion
       ? { protocolVersion: form.protocolVersion as McpServerConfig["protocolVersion"] }
       : {}),
+    ...exposureConfig(form),
+  };
+}
+
+/** 未设置的字段不写进配置文件；toolExposure 解析失败时丢弃（保存校验会提示 JSON 错误的其它字段）。 */
+function exposureConfig(form: FormState): {
+  exposure?: "direct" | "deferred" | "hidden";
+  toolExposure?: Record<string, string>;
+} {
+  let toolExposure: Record<string, string> | undefined;
+  if (form.toolExposure.trim()) {
+    try {
+      const parsed = JSON.parse(form.toolExposure) as unknown;
+      if (isRecord(parsed)) toolExposure = parsed as Record<string, string>;
+    } catch {
+      // ignore invalid json until save validation
+    }
+  }
+  return {
+    ...(isMcpExposure(form.exposure) ? { exposure: form.exposure } : {}),
+    ...(toolExposure !== undefined ? { toolExposure } : {}),
   };
 }
 
@@ -207,7 +240,16 @@ export function jsonDraftToForm(jsonText: string, fallback: FormState): FormStat
     protocolVersion: isMcpProtocolVersion(normalizedConfig.protocolVersion)
       ? normalizedConfig.protocolVersion
       : "",
+    // JSON 模式同样要保留曝光配置，非法枚举归一为未设置。
+    exposure: isMcpExposure(normalizedConfig.exposure) ? normalizedConfig.exposure : "",
+    toolExposure: isRecord(normalizedConfig.toolExposure)
+      ? JSON.stringify(normalizedConfig.toolExposure, null, 2)
+      : "",
   };
+}
+
+function isMcpExposure(value: unknown): value is "direct" | "deferred" | "hidden" {
+  return value === "direct" || value === "deferred" || value === "hidden";
 }
 
 // 与 shared 层 convertToNexAgentMcpServer 的 isMcpProtocolVersion 守卫保持同一语义：

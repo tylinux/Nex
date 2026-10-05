@@ -2442,6 +2442,13 @@ const zhCN: Record<string, string> = {
   "settings.mcp.form.protocolVersion.auto": "自动（推荐）",
   "settings.mcp.form.protocolVersion.legacy": "兼容旧版",
   "settings.mcp.form.protocolVersion.modern": "v2",
+  "settings.mcp.form.exposure": "工具曝光",
+  "settings.mcp.form.exposure.default": "默认",
+  "settings.mcp.form.exposure.direct": "直接可见",
+  "settings.mcp.form.exposure.deferred": "按需加载（用 ToolSearch 查找）",
+  "settings.mcp.form.exposure.hidden": "隐藏（不可用）",
+  "settings.mcp.form.exposure.hint":
+    "默认跟随「设置 > 按需加载 MCP 工具」。单个工具的覆盖请在配置文件里写 toolExposure。仅对新会话生效。",
   "settings.mcp.form.type.stdio": "stdio（本地命令）",
   "settings.mcp.form.type.sse": "SSE（Server-Sent Events）",
   "settings.mcp.form.command": "命令",

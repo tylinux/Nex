@@ -2612,6 +2612,13 @@ const enUS: Record<string, string> = {
   "settings.mcp.form.protocolVersion.auto": "Auto (recommended)",
   "settings.mcp.form.protocolVersion.legacy": "Legacy compatibility",
   "settings.mcp.form.protocolVersion.modern": "v2",
+  "settings.mcp.form.exposure": "Tool exposure",
+  "settings.mcp.form.exposure.default": "Default",
+  "settings.mcp.form.exposure.direct": "Direct (always visible)",
+  "settings.mcp.form.exposure.deferred": "Deferred (find with ToolSearch)",
+  "settings.mcp.form.exposure.hidden": "Hidden (unavailable)",
+  "settings.mcp.form.exposure.hint":
+    "Default follows Settings > On-demand MCP tools. Per-tool overrides go in the config file as toolExposure. Applies to new sessions.",
   "settings.mcp.form.type.stdio": "stdio (local command)",
   "settings.mcp.form.type.sse": "SSE (Server-Sent Events)",
   "settings.mcp.form.command": "Command",
