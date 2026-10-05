@@ -8,6 +8,7 @@ import type {
 import {
   TID_SETTINGS_ASK_USER_QUESTION_AUTO_RESOLUTION_SWITCH,
   TID_SETTINGS_NATIVE_SEARCH_SWITCH,
+  TID_SETTINGS_TOOL_SEARCH_SWITCH,
 } from "@nex/shared";
 import { useState, useCallback, useEffect } from "react";
 import type { IPlatformService } from "@nex/shared";
@@ -62,6 +63,7 @@ export function GeneralSectionContent({
   integratedTerminalShell = { mode: "auto" },
   integratedTerminalShellOptions = [],
   nativeSearchEnhancementsEnabled,
+  toolSearchEnabled = false,
   httpProxy = "",
   httpProxyNoProxy = "",
   httpProxyCaCertPath = "",
@@ -88,6 +90,7 @@ export function GeneralSectionContent({
   onTerminalFontFamilyChange = async () => {},
   onIntegratedTerminalShellChange = async () => {},
   onNativeSearchEnhancementsEnabledChange,
+  onToolSearchEnabledChange,
   onHttpProxyChange = async () => {},
   onHttpProxyNoProxyChange = async () => {},
   onHttpProxyCaCertPathChange = async () => {},
@@ -123,6 +126,7 @@ export function GeneralSectionContent({
   integratedTerminalShell?: IntegratedTerminalShellSelection;
   integratedTerminalShellOptions?: IntegratedTerminalShellOption[];
   nativeSearchEnhancementsEnabled: boolean;
+  toolSearchEnabled?: boolean;
   httpProxy?: string;
   httpProxyNoProxy?: string;
   httpProxyCaCertPath?: string;
@@ -150,6 +154,7 @@ export function GeneralSectionContent({
   onTerminalFontFamilyChange: (fontFamily: string) => Promise<void>;
   onIntegratedTerminalShellChange?: (selection: IntegratedTerminalShellSelection) => Promise<void>;
   onNativeSearchEnhancementsEnabledChange: (enabled: boolean) => Promise<void>;
+  onToolSearchEnabledChange: (enabled: boolean) => Promise<void>;
   onHttpProxyChange?: (httpProxy: string) => Promise<void>;
   onHttpProxyNoProxyChange?: (noProxy: string) => Promise<void>;
   onHttpProxyCaCertPathChange?: (caCertPath: string) => Promise<void>;
@@ -439,6 +444,20 @@ export function GeneralSectionContent({
               data-testid={TID_SETTINGS_NATIVE_SEARCH_SWITCH}
               onCheckedChange={(checked) => {
                 void onNativeSearchEnhancementsEnabledChange(checked);
+              }}
+            />
+          }
+        />
+        <SettingsRow
+          label={intl.formatMessage({ id: "settings.toolSearch" })}
+          description={intl.formatMessage({ id: "settings.toolSearchDescription" })}
+          control={
+            <Switch
+              aria-label={intl.formatMessage({ id: "settings.toolSearch" })}
+              checked={toolSearchEnabled}
+              data-testid={TID_SETTINGS_TOOL_SEARCH_SWITCH}
+              onCheckedChange={(checked) => {
+                void onToolSearchEnabledChange(checked);
               }}
             />
           }

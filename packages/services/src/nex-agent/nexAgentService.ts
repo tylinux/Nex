@@ -1738,6 +1738,7 @@ export function createNexAgentService(
                     askUserQuestionAutoResolutionEnabled: true,
                     nativeSearchEnhancementsEnabled: true,
                     memoryEnabled: false,
+                    toolSearchEnabled: false,
                   },
                 );
               } catch (error) {

@@ -323,6 +323,8 @@ export interface AppSettings {
   nativeSearchEnhancementsEnabled?: boolean;
   /** 新建或冷恢复 Session 是否启用 Memory；默认关闭。 */
   memoryEnabled?: boolean;
+  /** 新建或冷恢复 Session 是否延迟声明 MCP 工具并启用 ToolSearch；默认关闭。 */
+  toolSearchEnabled?: boolean;
   onboardingOccupation?:
     | "office"
     | "developer"

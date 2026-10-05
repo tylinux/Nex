@@ -142,6 +142,7 @@ type NexSessionRecordParams = (
 
 interface SessionStartupPreferences {
   memoryEnabled: boolean;
+  toolSearchEnabled: boolean;
   modelContextBudgetStrategy: NexModelContextBudgetStrategy;
   nativeSearchEnhancementsEnabled: boolean;
   resolveInitialBashShellSelection: () => Promise<ExecutionShellSelection | undefined>;
@@ -3223,6 +3224,7 @@ async function requestSessionRuntimePreferences(
       return {
         askUserQuestionAutoResolutionEnabled: true,
         memoryEnabled: false,
+        toolSearchEnabled: false,
         modelContextBudgetStrategy: DEFAULT_NEX_MODEL_CONTEXT_BUDGET_STRATEGY,
         nativeSearchEnhancementsEnabled: true,
       };
@@ -3241,6 +3243,7 @@ async function resolveSessionStartupPreferences(
     const inheritedShellSelection = source.parent.app.runtime.getSessionShellSelection();
     return {
       memoryEnabled: source.parent.memoryEnabled,
+      toolSearchEnabled: source.parent.toolSearchEnabled,
       modelContextBudgetStrategy: DEFAULT_NEX_MODEL_CONTEXT_BUDGET_STRATEGY,
       nativeSearchEnhancementsEnabled: source.parent.nativeSearchEnhancementsEnabled,
       resolveInitialBashShellSelection: async () => inheritedShellSelection,
@@ -3259,6 +3262,7 @@ async function resolveSessionStartupPreferences(
   );
   return {
     memoryEnabled: runtimePreferences.memoryEnabled,
+    toolSearchEnabled: runtimePreferences.toolSearchEnabled,
     modelContextBudgetStrategy: DEFAULT_NEX_MODEL_CONTEXT_BUDGET_STRATEGY,
     nativeSearchEnhancementsEnabled: runtimePreferences.nativeSearchEnhancementsEnabled,
     resolveInitialBashShellSelection: async () => {
@@ -3354,6 +3358,7 @@ async function createRecord(
       // Memory Settings 是现有 CLI features.memory/use 之外的总开关。只在关闭时
       // 写入 override，避免开启值反向覆盖用户已有的 CLI 禁用配置。
       ...(startupPreferences.memoryEnabled ? {} : { memory: { enabled: false } }),
+      ...(startupPreferences.toolSearchEnabled ? { toolSearch: { enabled: true } } : {}),
       // desktop-continuous session/create 由 UI 先解析 ~/.nex/.agents 的 enabled MCP，
       // 但 protocol app-server 自己不会读取 UI/main 侧的 MCP store；之前 createRecord 没把
       // params.mcpServers 注入 runtimeConfig，导致日志里 runtimeHasMcpConfig=false，工具永远不启动。
@@ -3410,6 +3415,7 @@ async function createRecord(
     createdAt: now,
     eventStore,
     memoryEnabled: startupPreferences.memoryEnabled,
+    toolSearchEnabled: startupPreferences.toolSearchEnabled,
     modelContextBudgetStrategy: startupPreferences.modelContextBudgetStrategy,
     nativeSearchEnhancementsEnabled: startupPreferences.nativeSearchEnhancementsEnabled,
     ...(parentSessionId ? { parentSessionId } : {}),

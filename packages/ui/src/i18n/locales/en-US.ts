@@ -2078,6 +2078,9 @@ const enUS: Record<string, string> = {
   "settings.nativeSearchEnhancements": "Enhanced Find and Grep",
   "settings.nativeSearchEnhancementsDescription":
     "Use enhanced Find and Grep in new sessions and sessions restored after an app restart. Active sessions keep their current setting; Find remains unchanged on Windows.",
+  "settings.toolSearch": "On-demand MCP tools",
+  "settings.toolSearchDescription":
+    "Keep MCP tool schemas out of every request; the model finds them with ToolSearch when needed. Applies to new sessions and sessions restored after an app restart.",
   "settings.memory": "Memory",
   "settings.memory.workspaceMemory": "Workspace Memory",
   "settings.memoryDescription":
