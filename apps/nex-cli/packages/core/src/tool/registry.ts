@@ -4,6 +4,7 @@
 
 import { type ModelToolContract } from "@nex/contracts";
 import type { ToolEntry, ToolMetadata } from "./types.js";
+import { mcpNamespaceOf, type ToolSearchDocument } from "./tool-search-index.js";
 
 // -----------------------------------------------
 // Tool Registry Interface
@@ -17,6 +18,8 @@ export interface ToolRegistry {
   list(): string[];
   getMetadata(name: string): ToolMetadata | undefined;
   toContracts(): ModelToolContract[];
+  /** deferred 工具的检索文档；hidden 与 direct 工具不在其中。 */
+  listDeferredDocuments(): ToolSearchDocument[];
 }
 
 export interface ToolRegistryRegisterOptions {
@@ -86,7 +89,9 @@ export class ToolRegistryImpl implements ToolRegistry {
   }
 
   get(name: string): ToolEntry | undefined {
-    return this.tools.get(this.aliases.get(name) ?? name);
+    const entry = this.tools.get(this.aliases.get(name) ?? name);
+    // hidden 对 executor 等同「不存在」：既不会被声明，脚本/模型也调不到。
+    return entry?.metadata.exposure === "hidden" ? undefined : entry;
   }
 
   has(name: string): boolean {
@@ -94,7 +99,9 @@ export class ToolRegistryImpl implements ToolRegistry {
   }
 
   list(): string[] {
-    return Array.from(this.tools.keys());
+    return Array.from(this.tools.entries())
+      .filter(([, entry]) => entry.metadata.exposure !== "hidden")
+      .map(([name]) => name);
   }
 
   getMetadata(name: string): ToolMetadata | undefined {
@@ -104,6 +111,7 @@ export class ToolRegistryImpl implements ToolRegistry {
   toContracts(): ModelToolContract[] {
     return Array.from(this.tools.values())
       .filter((entry) => entry.metadata.providerVisible !== false)
+      .filter((entry) => entry.metadata.exposure !== "hidden")
       .map((entry) => ({
         name: entry.metadata.name,
         description: toolDescriptionForProvider(entry.metadata),
@@ -126,6 +134,22 @@ export class ToolRegistryImpl implements ToolRegistry {
         resultBudget: entry.resultBudget,
         execute: undefined,
       }));
+  }
+
+  listDeferredDocuments(): ToolSearchDocument[] {
+    return Array.from(this.tools.values())
+      .filter(
+        (entry) =>
+          entry.metadata.exposure === "deferred" && entry.metadata.providerVisible !== false,
+      )
+      .map((entry) => {
+        const namespace = mcpNamespaceOf(entry.metadata.name);
+        return {
+          name: entry.metadata.name,
+          description: entry.metadata.description ?? entry.capability,
+          ...(namespace === undefined ? {} : { namespace }),
+        };
+      });
   }
 }
 

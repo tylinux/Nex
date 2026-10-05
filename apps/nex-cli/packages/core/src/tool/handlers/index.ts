@@ -8,6 +8,7 @@ import {
   EVAL_WORKFLOW_SNIPPET_TOOL_NAME,
   GET_WORKFLOW_RUN_TOOL_NAME,
   LIST_MODELS_TOOL_NAME,
+  TOOL_SEARCH_TOOL_NAME,
   LIST_SAVED_WORKFLOWS_TOOL_NAME,
   LIST_WORKFLOW_RUNS_TOOL_NAME,
   RESOLVE_WORKFLOW_QUESTION_TOOL_NAME,
@@ -63,6 +64,7 @@ import { createWorkflowToolEntry } from "./create-workflow.js";
 import { saveWorkflowToolEntry } from "./save-workflow.js";
 import { listSavedWorkflowsToolEntry } from "./list-saved-workflows.js";
 import { listModelsToolEntry } from "./list-models.js";
+import { toolSearchToolEntry } from "./tool-search.js";
 import { evalWorkflowSnippetToolEntry } from "./eval-workflow-snippet.js";
 import { listWorkflowRunsToolEntry } from "./list-workflow-runs.js";
 import { getWorkflowRunToolEntry } from "./get-workflow-run.js";
@@ -133,6 +135,8 @@ export const builtInTools: ToolEntry[] = [
   // `subagent_model`。不进 WORKFLOW_CHILD_DISALLOWED_TOOLS
   // ——那条禁令的理由是 alwaysAsk 在 child 里无窗可弹，只读查询不适用。
   listModelsToolEntry,
+  // deferred 工具的上桌门；只有会话开启 toolSearch 时才注册（见 includeToolSearch）。
+  toolSearchToolEntry,
   // workflowToolEntry,
 ];
 
@@ -171,6 +175,8 @@ interface RegisterBuiltInToolsOptions {
   /** actor 的升级通道；门与 includeSubmitResult 同款（注入了 WorkflowEscalatePort 才注册）。 */
   includeEscalate?: boolean;
   includeWorkflow?: boolean;
+  /** 会话启用 deferred 工具时才注册 ToolSearch；缺席即不注册。 */
+  includeToolSearch?: boolean;
   includeAutomation?: boolean;
   /** Off-Peak 会话内创建工具面；由 host 的 offPeakToolEnabled flag（灰度/远程门）驱动。 */
   includeOffPeak?: boolean;
@@ -257,6 +263,9 @@ export function registerBuiltInTools(
       options.includeDynamicWorkflow === false &&
       DYNAMIC_WORKFLOW_TOOL_NAMES.has(entry.metadata.name)
     ) {
+      continue;
+    }
+    if (entry.metadata.name === TOOL_SEARCH_TOOL_NAME && options.includeToolSearch !== true) {
       continue;
     }
     if (entry.metadata.name === "js" && options.includeNodeRepl !== true) {

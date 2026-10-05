@@ -152,6 +152,9 @@ export function resolveAppRuntimeConfig(input: {
       ...configResult.config.modelAnomalyGuard,
       ...options.runtimeConfig?.modelAnomalyGuard,
     },
+    ...(options.runtimeConfig?.toolSearch === undefined
+      ? {}
+      : { toolSearch: options.runtimeConfig.toolSearch }),
     mcp: {
       enabled: options.runtimeConfig?.mcp?.enabled ?? configResult.config.features.mcp,
       servers: autoConnectMcpServers,

@@ -64,6 +64,7 @@ function registerRuntimeBuiltInTools(runtime: AgentRuntimeInternal, deps: AgentR
     // escalate 与 submit_result 同门同理由：端口在场即注册（不做 opt-in：最可能撞墙的 actor 恰是作者没标记的那个）。
     includeEscalate: Boolean(deps.workflowEscalatePort),
     includeWorkflow: Boolean(deps.workflowPort),
+    includeToolSearch: runtime.config.toolSearch?.enabled === true,
     includeAutomation: Boolean(deps.automationPort) && runtime.config.taskType !== "subagent_child",
     // offPeakPort 只在 host 下发 offPeakToolEnabled 时注入（灰度/远程门在 host 端），
     // 端口存在即代表曝光允许；subagent 子会话与 automation 同规则不暴露。
@@ -196,6 +197,7 @@ function createRuntimeToolExecutor(
     dynamicWorkflowRunPort: deps.dynamicWorkflowRunPort,
     dynamicWorkflowSnippetPort: deps.dynamicWorkflowSnippetPort,
     modelCatalogPort: deps.modelCatalogPort,
+    deferredToolCatalog: () => runtime.registry.listDeferredDocuments(),
     runtimeTaskRegistry: runtime.runtimeTaskRegistry,
     readFileState: runtime.readFileState,
     // 工作流创作工具的技能门（tool/handlers/workflow-skill-gate.ts）：按模型此刻看得见的历史回答

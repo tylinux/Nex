@@ -40,6 +40,8 @@ export * from "./list-saved-workflows.js";
 // dwf 选型的发现面：名字常量被 core 的工具注册与
 // bootstrap 的 actor 禁用名单读走，漏掉这行消费方拿不到 schema 与 LIST_MODELS_TOOL_NAME。
 export * from "./list-models.js";
+// deferred 工具的上桌门：名字常量被 core 的注册、声明集推导读走。
+export * from "./tool-search.js";
 export * from "./eval-workflow-snippet.js";
 export * from "./list-workflow-runs.js";
 export * from "./get-workflow-run.js";

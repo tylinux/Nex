@@ -55,6 +55,8 @@ export interface RegisterMcpToolsOptions {
    * 不投影官方 CUA 规范名，也不挂载 provider 拼写别名。
    */
   officialCuaServerNames?: ReadonlySet<string>;
+  /** 为真时普通 MCP 工具注册为 deferred；官方 CUA 与宿主 node_repl 恒为 direct。 */
+  deferNonOfficialTools?: boolean;
 }
 
 export function registerMcpTools(
@@ -76,7 +78,11 @@ export function registerMcpTools(
     // denylist 会静默失效并放行。新旧名称任一命中 deny 即拒绝，任一命中 allow 即接受。
     if (allowed && !allowed.has(name) && !allowed.has(descriptorName)) continue;
     if (disallowed?.has(name) || disallowed?.has(descriptorName)) continue;
-    registry.register(createMcpToolEntry(name, descriptor, mcpPort, officialCuaAuthorityVerified));
+    registry.register(
+      createMcpToolEntry(name, descriptor, mcpPort, officialCuaAuthorityVerified, {
+        deferred: options.deferNonOfficialTools === true,
+      }),
+    );
     registered.push(name);
   }
 
@@ -104,6 +110,7 @@ function createMcpToolEntry(
   descriptor: McpToolDescriptor,
   mcpPort: McpPort,
   officialCuaAuthorityVerified: boolean,
+  exposure: { deferred: boolean } = { deferred: false },
 ): ToolEntry {
   const readOnly = descriptor.annotations?.readOnlyHint === true;
   const destructive = descriptor.annotations?.destructiveHint === true;
@@ -185,6 +192,10 @@ function createMcpToolEntry(
       riskLevel,
       sideEffectScope,
       timeoutMs,
+      // 官方 CUA 与宿主 node_repl 是 provider 约定的常驻工具，不能延迟声明。
+      ...(exposure.deferred && !officialCuaAuthorityVerified && !isHostNodeReplExecution
+        ? { exposure: "deferred" as const }
+        : {}),
     },
     permission: {
       permission: "mcp",
