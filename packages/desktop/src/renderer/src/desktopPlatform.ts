@@ -60,6 +60,7 @@ export function createDesktopPlatform(options: {
     syncWindowUnreadCount: (count) => window.nex.syncWindowUnreadCount(count),
     syncActiveTaskSession: (sessionId) => window.nex.syncActiveTaskSession(sessionId),
     syncAppSettings: (patch) => window.nex.syncAppSettings?.(patch),
+    syncPetState: (state) => window.nex.syncPetState?.(state),
     setShortcutRecordingActive: (active) => window.nex.setShortcutRecordingActive?.(active),
     onFocusTab: (handler) => window.nex.onFocusTab(handler),
     onNewTab: (handler) => window.nex.onNewTab(handler),

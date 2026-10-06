@@ -62,6 +62,7 @@ import type {
   WindowControlsOverlayReadyPayload,
   CreateTempTextAttachmentRequest,
   OpenCuaPermissionOnboardingOptions,
+  PetWindowState,
 } from "@nex/shared";
 import { InternalChannels, PlatformChannels, formatNexRendererProcessName } from "@nex/shared";
 
@@ -315,6 +316,9 @@ contextBridge.exposeInMainWorld("nex", {
   /** 同步需要 main 进程即时感知的应用设置 */
   syncAppSettings: (patch: Partial<AppSettings>) =>
     ipcRenderer.send(PlatformChannels.SyncAppSettings, patch),
+  /** 同步桌面宠物悬浮窗状态（null = 销毁/隐藏） */
+  syncPetState: (state: PetWindowState | null) =>
+    ipcRenderer.send(PlatformChannels.SyncPetState, state),
   /** 快捷键设置页录制态开关：main 暂时摘除可配置菜单 accelerator，防止录制按键触发原命令 */
   setShortcutRecordingActive: (active: boolean) =>
     ipcRenderer.send(PlatformChannels.SetShortcutRecordingActive, active),

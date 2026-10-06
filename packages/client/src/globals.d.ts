@@ -112,6 +112,8 @@ declare global {
       syncActiveTaskSession(sessionId: string | null): void;
       /** 同步需要 main 进程即时感知的应用设置 */
       syncAppSettings?(patch: Partial<AppSettings>): void;
+      /** 同步桌面宠物悬浮窗状态（null = 销毁/隐藏）；docs/specs/desktop-pets.md */
+      syncPetState?(state: import("@nex/shared").PetWindowState | null): void;
       /** 注册 main 进程要求聚焦指定 workspace tab 的回调，返回 disposer */
       onFocusTab(handler: (path: string) => void): () => void;
       /** 注册 main 进程触发新建 tab 的回调，返回 disposer */

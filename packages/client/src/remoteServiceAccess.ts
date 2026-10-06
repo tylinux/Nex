@@ -38,6 +38,7 @@ import {
   IFeedbackService,
   IPromptAttachmentTransferService,
   IWindowControllerService,
+  IPetService,
   type IServiceAccessor,
 } from "@nex/services";
 
@@ -76,6 +77,7 @@ export class RemoteServiceAccess implements IServiceAccessor {
   readonly clientConfigService: IClientConfigService;
   readonly clientScenesService: IClientScenesService;
   readonly skillsService: ISkillsService;
+  readonly petService: IPetService;
   readonly skillSyncService: ISkillSyncService;
   readonly mcpSyncService: IMcpSyncService;
   readonly pluginSyncService: IPluginSyncService;
@@ -208,6 +210,9 @@ export class RemoteServiceAccess implements IServiceAccessor {
     );
     this.promptAttachmentTransferService = ProxyChannel.toService<IPromptAttachmentTransferService>(
       channelClient.getChannel(IPromptAttachmentTransferService.channelName),
+    );
+    this.petService = ProxyChannel.toService<IPetService>(
+      channelClient.getChannel(IPetService.channelName),
     );
   }
 }

@@ -121,6 +121,8 @@ const PREFIX_RULES: Record<Exclude<StorageCategoryId, "other">, string[]> = {
     "perf-task-manifests",
     "plugin-workspace",
     "projects",
+    // 桌面宠物目录（docs/specs/desktop-pets.md）：用户资产，不可清理。
+    "pets",
   ],
 };
 

@@ -44,6 +44,7 @@ import { SubagentsSection } from "@/settings/SubagentsSection.js";
 import { AutomationsSection } from "@/settings/AutomationsSection.js";
 import { PluginsSection } from "@/settings/PluginsSection.js";
 import { HooksSection } from "@/settings/HooksSection.js";
+import { PetsSettingsSection } from "@/settings/PetsSettingsSection.js";
 import { WorkspaceFileSearchSection } from "@/settings/WorkspaceFileSearchSection.js";
 import { MemorySettingsSection } from "@/settings/MemorySettingsSection.js";
 import { BrowserSettingsSection } from "@/settings/BrowserSettingsSection.js";
@@ -1091,6 +1092,8 @@ export function SettingsPage({
                             workspacePath={activeWorkspacePath}
                             workspaceIdentity={activeWorkspaceIdentity}
                           />
+                        ) : activeSection === "pets" ? (
+                          <PetsSettingsSection isDesktop={Boolean(isDesktop)} />
                         ) : activeSection === "workspaceFileSearch" ? (
                           <WorkspaceFileSearchSection
                             workspacePath={activeWorkspacePath}

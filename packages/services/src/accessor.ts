@@ -22,6 +22,7 @@ import type { ICodingPlanSubscriptionService } from "./coding-plan-subscription/
 import type { IClientConfigService } from "./client-config/clientConfig.js";
 import type { IClientScenesService } from "./client-scenes/clientScenes.js";
 import type { ISkillsService } from "./skills/skills.js";
+import type { IPetService } from "./pets/contract.js";
 import type { ISkillSyncService } from "./skill-sync/skillSync.js";
 import type { IMcpSyncService } from "./mcp-sync/mcpSync.js";
 import type { IPluginSyncService } from "./plugin-sync/pluginSync.js";
@@ -70,6 +71,8 @@ export interface IServiceAccessor {
   readonly clientConfigService: IClientConfigService;
   readonly clientScenesService: IClientScenesService;
   readonly skillsService: ISkillsService;
+  /** 桌面宠物目录服务；旧 server wire 或测试 double 可暂不提供。 */
+  readonly petService?: IPetService;
   readonly skillSyncService: ISkillSyncService;
   readonly mcpSyncService: IMcpSyncService;
   readonly pluginSyncService: IPluginSyncService;

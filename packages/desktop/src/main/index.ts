@@ -21,6 +21,7 @@ import {
   installLocalMediaPreviewProtocol,
   registerLocalMediaPreviewScheme,
 } from "./localMediaPreviewProtocol.js";
+import { createPetWindowController, registerPetWindowActionHandler } from "./petWindow.js";
 import { createDesktopBrowserScreenshotSurfaceCoordinator } from "./browserView/browserScreenshotSurfaceCoordinatorWiring.js";
 import { EMBEDDED_BROWSER_PARTITION } from "./browserDataManager.js";
 import { EmbeddedBrowserJavaScriptDialogController } from "./embeddedBrowserJavaScriptDialog.js";
@@ -35,6 +36,7 @@ import {
   ipcMain,
   nativeImage,
   protocol,
+  screen,
   session,
   webContents,
 } from "electron";
@@ -707,6 +709,26 @@ function resolveExternalWorkspaceConfirmationCopy() {
   return resolveExternalWorkspaceOpenDialogCopy(effectiveLocale);
 }
 
+// 桌面宠物悬浮窗（单例）：位置持久化走 main 侧 setting.json，聚焦走 primary coordinator。
+// 回调惰性引用 primaryWindowCoordinator（声明在后），只在用户点击时才解引用，无 TDZ 问题。
+let petWindowController: ReturnType<typeof createPetWindowController> | null = null;
+function getPetWindowController() {
+  if (!petWindowController) {
+    petWindowController = createPetWindowController({
+      BrowserWindow,
+      screen,
+      app,
+      preloadPath: join(import.meta.dirname, "../preload/petWindow.cjs"),
+      rendererDir: join(import.meta.dirname, "../renderer"),
+      rendererDevUrl: process.env["ELECTRON_RENDERER_URL"],
+      focusPrimaryWindow: () => {
+        void primaryWindowCoordinator.ensurePrimaryWindow("pet-window-click");
+      },
+    });
+  }
+  return petWindowController;
+}
+
 const primaryWindowCoordinator = createPrimaryWindowCoordinator({
   listWindows: getApplicationWindowsExcludingCuaIndicator,
   resolveStartupWindowBootstrap: () => {
@@ -833,6 +855,9 @@ async function prepareAppQuit(reason: string, kind: AppShutdownKind = "normal"):
   markForceQuit(reason);
   windowsCuaOperationIndicator.dispose();
   browserScreenshotSurfaceCoordinator.dispose();
+  // 宠物悬浮窗随应用退出销毁（窗口关闭不退出时它仍留在桌面上，但真退出要收干净）。
+  petWindowController?.destroy();
+  petWindowController = null;
 
   const cronSchedulerToDispose = cronScheduler;
   cronScheduler = null;
@@ -1244,7 +1269,11 @@ function resolveFocusedDesktopZoomLevel(): number {
 
 function getApplicationWindowsExcludingCuaIndicator(): BrowserWindow[] {
   return BrowserWindow.getAllWindows().filter(
-    (win) => !win.isDestroyed() && !windowsCuaOperationIndicator.ownsWindow(win),
+    (win) =>
+      !win.isDestroyed() &&
+      !windowsCuaOperationIndicator.ownsWindow(win) &&
+      // 宠物悬浮窗不算应用窗口：主窗口全关后它留在桌面上，不阻塞 window-all-closed / 退出清理。
+      !(petWindowController?.ownsWindow(win) ?? false),
   );
 }
 
@@ -1919,6 +1948,7 @@ app.whenReady().then(async () => {
       runningAgentSessionCount: getRunningAgentSessionCount(),
     }),
     syncAppSettings: syncImmediateAppSettings,
+    syncPetState: (state) => getPetWindowController().syncState(state),
     setShortcutRecordingActive,
     deviceMid,
   });
@@ -1935,6 +1965,33 @@ app.whenReady().then(async () => {
     listAvailableWSLDistros,
     listAvailableDockerContainers,
     listSSHConfigAliases,
+  });
+
+  // 宠物悬浮窗动作通道（点击聚焦主窗口）。
+  registerPetWindowActionHandler({
+    ipcMain,
+    focusPrimaryWindow: () => {
+      void primaryWindowCoordinator.ensurePrimaryWindow("pet-window-click");
+    },
+    getPetWindowController: () => petWindowController,
+    onPositionPersist: (position) => {
+      void mainSettingService
+        .get()
+        .then((settings) =>
+          mainSettingService.update({
+            pet: {
+              enabled: settings.pet?.enabled ?? true,
+              petId: settings.pet?.petId ?? null,
+              windowPosition: position,
+            },
+          }),
+        )
+        .catch((error: unknown) => {
+          logger.warn(
+            `[pets] 悬浮窗位置持久化失败: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        });
+    },
   });
 
   // 本地未打包 dev 构建（app.isPackaged === false）必须跳过远端强制升级 gate。

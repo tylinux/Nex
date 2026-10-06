@@ -5,6 +5,18 @@ All notable changes to Nex are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.1] - 2026-10-07
+
+### Added
+
+- Desktop pets (Codex-compatible format): an animated companion that lives on
+  the desktop (transparent always-on-top window) and reflects the agent state
+  across all open workspaces (running / needs input / ready / blocked). Pet
+  folders (`pet.json` + `spritesheet.webp`) go in `~/.nex/pets/`, managed from
+  Settings → Pets; supports drag-to-move with directional running animations,
+  click-to-focus the main window, and position persistence. On web, the pet is
+  an in-app floating widget instead of a system window.
+
 ## [1.2.0] - 2026-10-06
 
 ### Added

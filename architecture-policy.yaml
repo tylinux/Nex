@@ -31,6 +31,12 @@ modules:
     layers: { domain: domain, app: app, adapters: adapters }
     layerOrder: [domain, app, adapters]
     owner: desktop-settings
+  - id: pets
+    roots: [packages/services/src/pets]
+    managed: true
+    requires: [shared, services]
+    publicEntrypoints: [packages/services/src/pets/contract.ts]
+    owner: desktop-settings
   - id: client
     roots: [packages/client/src]
     managed: false

@@ -36,6 +36,7 @@ import { RootWorkspaceContent } from "@/root/RootWorkspaceContent.js";
 import { resolveRootWorkspaceShellTarget } from "@/root/rootWorkspaceShellTarget.js";
 import { OccupationOnboarding } from "@/onboarding/OccupationOnboarding.js";
 import { OnboardingDialog } from "@/onboarding/OnboardingDialog.js";
+import { PetRuntime } from "@/pets/PetRuntime.js";
 import { useRemoteWorkspaceHistory } from "@/root/useRemoteWorkspaceHistory.js";
 import { useRemoteWorkspaceTabLifecycle } from "@/root/useRemoteWorkspaceTabLifecycle.js";
 import { useModelSelectionServiceView } from "@/hooks/useModelSelectionView.js";
@@ -798,6 +799,10 @@ function RootInner({
             workspaceIdentity={workspaceShellIdentity}
             isDesktop={isDesktop}
           />
+        </ScopedErrorBoundary>
+        {/* 桌面宠物运行时：应用级（不依赖 workspace），窗口隐藏后悬浮窗仍在桌面上。 */}
+        <ScopedErrorBoundary scope="pet-runtime" variant="silent">
+          <PetRuntime isDesktop={Boolean(isDesktop)} />
         </ScopedErrorBoundary>
       </OccupationOnboarding>
     </RootShell>

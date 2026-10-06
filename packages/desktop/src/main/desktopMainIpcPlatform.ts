@@ -88,6 +88,8 @@ export function registerPlatformIpcHandlers(options: {
   }>;
   setAutoDownloadAndInstallUpdates: (enabled: boolean) => Promise<void>;
   syncAppSettings: (patch: unknown) => void;
+  /** 桌面宠物悬浮窗状态同步；docs/specs/desktop-pets.md。 */
+  syncPetState?: (state: import("@nex/shared").PetWindowState | null) => void;
   /** 快捷键设置页录制态开关：true 时 main 重建菜单摘除可配置 accelerator */
   setShortcutRecordingActive?: (active: boolean, ownerWebContentsId?: number | null) => void;
   /** 桌面端设备标识符（基于 userData 路径的 SHA-256） */
@@ -289,6 +291,11 @@ export function registerPlatformIpcHandlers(options: {
     }
 
     options.syncAppSettings(result.data);
+  });
+
+  // 桌面宠物悬浮窗状态同步（docs/specs/desktop-pets.md）。
+  ipcMain.on(PlatformChannels.SyncPetState, (_event, payload: unknown) => {
+    options.syncPetState?.(payload as Parameters<NonNullable<typeof options.syncPetState>>[0]);
   });
 
   // 快捷键录制态：renderer 设置页进入/退出录制时通知。macOS 系统菜单会先于 renderer

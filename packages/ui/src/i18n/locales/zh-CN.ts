@@ -2448,7 +2448,8 @@ const zhCN: Record<string, string> = {
   "settings.mcp.form.exposure.deferred": "按需加载（用 ToolSearch 查找）",
   "settings.mcp.form.exposure.hidden": "隐藏（不可用）",
   "settings.mcp.form.toolExposure": "逐工具曝光",
-  "settings.mcp.form.toolExposure.hint": "单独覆盖某个工具的设置。「默认」表示该工具跟随 server 的设置。",
+  "settings.mcp.form.toolExposure.hint":
+    "单独覆盖某个工具的设置。「默认」表示该工具跟随 server 的设置。",
   "settings.mcp.form.toolExposure.search": "搜索工具",
   "settings.mcp.form.toolExposure.matchCount": "共 {total} 个工具，匹配 {shown} 个",
   "settings.mcp.form.toolExposure.noMatch": "没有匹配的工具。",
@@ -3906,6 +3907,18 @@ const zhCN: Record<string, string> = {
   "settings.hooks.review.reason.host_unavailable": "当前连接不支持审核此 Hook",
   "settings.hooks.review.reason.rejected": "操作被拒绝",
   "settings.hooks.title": "钩子",
+  "settings.pets.title": "宠物",
+  "settings.pets.enable": "桌面宠物",
+  "settings.pets.enableDescription":
+    "在桌面上显示一只小伙伴，跟随 Nex 的工作状态变化——即使窗口关闭它也会留在桌面上，点一下就能回到 Nex。",
+  "settings.pets.myPets": "我的宠物",
+  "settings.pets.refresh": "刷新",
+  "settings.pets.create": "创建宠物",
+  "settings.pets.createDisabledHint":
+    "创建宠物将在支持图片生成后开放。现在可以把兼容 Codex 格式的宠物目录放入 ~/.nex/pets/。",
+  "settings.pets.empty":
+    "还没有宠物。把兼容 Codex 格式的宠物目录（pet.json + spritesheet.webp）放入 ~/.nex/pets/ 后点击刷新。",
+  "settings.pets.errorsTitle": "部分目录被跳过",
   "settings.workspaceFileSearch.title": "工作区搜索范围",
   "settings.workspaceFileSearch.description":
     "编辑 .nexignore 忽略规则（语法与 .gitignore 一致），控制工作区文件搜索的范围。保存后下次搜索生效。",
@@ -4261,7 +4274,8 @@ const zhCN: Record<string, string> = {
   "chat.contextUsage.compress": "压缩",
   "chat.systemPrompt.button": "显示系统提示词",
   "chat.systemPrompt.title": "提示词上下文",
-  "chat.systemPrompt.description": "模型在当前对话中收到的除消息外的全部内容：系统提示词、元上下文、技能和工具。",
+  "chat.systemPrompt.description":
+    "模型在当前对话中收到的除消息外的全部内容：系统提示词、元上下文、技能和工具。",
   "chat.systemPrompt.loading": "加载中…",
   "chat.systemPrompt.empty": "当前对话还没有构建提示词。",
   "chat.systemPrompt.unavailable": "当前对话无法读取提示词。",

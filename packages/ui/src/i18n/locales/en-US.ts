@@ -4183,6 +4183,18 @@ const enUS: Record<string, string> = {
   "settings.hooks.review.reason.host_unavailable": "This connection cannot review this Hook",
   "settings.hooks.review.reason.rejected": "Request rejected",
   "settings.hooks.title": "Hooks",
+  "settings.pets.title": "Pets",
+  "settings.pets.enable": "Desktop pet",
+  "settings.pets.enableDescription":
+    "Show a little companion on your desktop that reacts to what Nex is doing — it stays on top even when the window is closed, and you can click it to come back.",
+  "settings.pets.myPets": "My pets",
+  "settings.pets.refresh": "Refresh",
+  "settings.pets.create": "Create pet",
+  "settings.pets.createDisabledHint":
+    "Pet creation will be available once image generation is supported. For now, drop a Codex-compatible pet folder into ~/.nex/pets/.",
+  "settings.pets.empty":
+    "No pets yet. Put a Codex-compatible pet folder (pet.json + spritesheet.webp) into ~/.nex/pets/ and click Refresh.",
+  "settings.pets.errorsTitle": "Some folders were skipped",
   "settings.workspaceFileSearch.title": "Workspace Search Scope",
   "settings.workspaceFileSearch.description":
     "Edit .nexignore rules (gitignore syntax) that scope workspace file search. Takes effect on the next search after saving.",
@@ -4562,7 +4574,8 @@ const enUS: Record<string, string> = {
   "chat.contextUsage.compress": "Compress",
   "chat.systemPrompt.button": "Show system prompt",
   "chat.systemPrompt.title": "Prompt context",
-  "chat.systemPrompt.description": "Everything the model receives in this conversation except the messages: system prompt, meta context, skills and tools.",
+  "chat.systemPrompt.description":
+    "Everything the model receives in this conversation except the messages: system prompt, meta context, skills and tools.",
   "chat.systemPrompt.loading": "Loading…",
   "chat.systemPrompt.empty": "No prompt has been built for this conversation yet.",
   "chat.systemPrompt.unavailable": "The prompt is not available for this conversation.",
