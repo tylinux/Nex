@@ -125,6 +125,11 @@ const petSettingsSchema = z.object({
   petId: z.string().nullable(),
   anchor: z.enum(["bottom-right", "bottom-left", "top-right", "top-left"]).optional(),
   windowPosition: z.object({ x: z.number(), y: z.number() }).optional(),
+  windowDisplayId: z.number().int().optional(),
+  windowSnapZone: z
+    .enum(["top-left", "top-center", "top-right", "bottom-left", "bottom-center", "bottom-right"])
+    .optional(),
+  size: z.number().int().min(80).max(224).optional(),
 });
 
 const nexEndpointOriginSchema = z.preprocess((value) => {

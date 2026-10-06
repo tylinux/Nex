@@ -6,7 +6,13 @@
  * 详见 docs/specs/desktop-pets.md。
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { PetAnchor, PetSemanticState, PetSummary } from "@nex/shared";
+import {
+  clampPetSize,
+  mergePetSettings,
+  type PetAnchor,
+  type PetSemanticState,
+  type PetSummary,
+} from "@nex/shared";
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useServices } from "@/hooks/useServices.js";
 import { useSettings } from "@/hooks/useSettingService.js";
@@ -115,7 +121,21 @@ export function PetRuntime({ isDesktop }: PetRuntimeProps) {
       // 无订阅就绪时回落 idle（不因 ready=false 把窗口销毁）。
       animation: ready ? state : "idle",
       spriteUrl,
-      ...(petSettings?.windowPosition ? { position: petSettings.windowPosition } : {}),
+      manifest: selectedPet.manifest,
+      spriteRows: selectedPet.spriteRows,
+      sizePx: clampPetSize(petSettings?.size),
+      ...(petSettings?.windowPosition
+        ? {
+            placement: {
+              x: petSettings.windowPosition.x,
+              y: petSettings.windowPosition.y,
+              ...(petSettings.windowDisplayId !== undefined
+                ? { displayId: petSettings.windowDisplayId }
+                : {}),
+              ...(petSettings.windowSnapZone ? { snapZone: petSettings.windowSnapZone } : {}),
+            },
+          }
+        : {}),
     });
     // 注意：effect cleanup 不再 syncPetState(null)——主窗口隐藏不等于关闭宠物；
     // 销毁只在「开关关闭 / 宠物被删 / spriteUrl 丢失」的分支里显式触发。
@@ -128,35 +148,16 @@ export function PetRuntime({ isDesktop }: PetRuntimeProps) {
     ready,
     state,
     petSettings?.windowPosition,
+    petSettings?.windowDisplayId,
+    petSettings?.windowSnapZone,
+    petSettings?.size,
   ]);
-
-  // Desktop 悬浮窗动作（拖拽移动 → 持久化位置）。
-  useEffect(() => {
-    if (!supportsOverlayWindow || !platform.onPetWindowAction) return;
-    return platform.onPetWindowAction((action) => {
-      if (action.kind === "moved") {
-        void update({
-          pet: {
-            enabled: true,
-            petId: petSettings?.petId ?? null,
-            windowPosition: { x: action.x, y: action.y },
-          },
-        });
-      }
-    });
-  }, [supportsOverlayWindow, platform, update, petSettings?.petId]);
 
   const handleWidgetAnchorChange = useCallback(
     (anchor: PetAnchor) => {
-      void update({
-        pet: {
-          enabled: petSettings?.enabled ?? true,
-          petId: petSettings?.petId ?? null,
-          anchor,
-        },
-      });
+      void update({ pet: mergePetSettings(petSettings, { anchor }) });
     },
-    [update, petSettings?.enabled, petSettings?.petId],
+    [update, petSettings],
   );
 
   // Web（或 desktop 悬浮窗不可用时的降级）：主窗口内浮动挂件。
@@ -170,6 +171,8 @@ export function PetRuntime({ isDesktop }: PetRuntimeProps) {
       spriteUrl={spriteUrl}
       manifest={selectedPet.manifest}
       state={state}
+      spriteRows={selectedPet.spriteRows}
+      sizePx={clampPetSize(petSettings?.size)}
       anchor={petSettings?.anchor ?? "bottom-right"}
       onAnchorChange={handleWidgetAnchorChange}
     />

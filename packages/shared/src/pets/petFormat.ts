@@ -16,6 +16,19 @@ export const PET_FRAME_WIDTH = 192;
 export const PET_FRAME_HEIGHT = 208;
 export const PET_FRAME_COLUMNS = 8;
 export const PET_FRAME_ROWS = 9;
+/** v2 精灵图行数（1536×2288）：第 9/10 行为 16 帧「看向光标」环。 */
+export const PET_FRAME_ROWS_V2 = 11;
+export const PET_LOOK_FIRST_ROW = 9;
+export const PET_LOOK_SECTOR_COUNT = 16;
+
+/** 宠物展示宽度（px）：默认 112，设置范围 80–224；高度按帧宽高比推导。 */
+export const PET_SIZE_DEFAULT_PX = 112;
+export const PET_SIZE_MIN_PX = 80;
+export const PET_SIZE_MAX_PX = 224;
+
+/** 播放语义：非 idle 状态播放遍数；idle 逐帧时长倍率（缓慢呼吸）。 */
+export const PET_ONE_SHOT_REPEAT_COUNT = 3;
+export const PET_IDLE_DURATION_SCALE = 6;
 /** 单只宠物帧索引上限（与 codex model.rs 的 MAX_PET_FRAMES 对齐）。 */
 export const PET_MAX_FRAMES = 256;
 /** 自定义动画 fps 上限。 */

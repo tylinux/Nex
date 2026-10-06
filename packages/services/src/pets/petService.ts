@@ -146,6 +146,7 @@ async function scanOnePetDir(rootDir: string, dirName: string): Promise<PetSumma
     description: manifest.description ?? "",
     dirPath,
     spritesheetFileName,
+    spriteRows: Math.floor(size.height / grid.height),
     manifest,
   };
 }

@@ -66,6 +66,7 @@ import {
   resolveNexEndpointOrigin,
   type UpdateStatePayload,
   HostMessageTypes,
+  mergePetSettings,
 } from "@nex/shared";
 import { logger } from "./logger.js";
 import { markMainLaunchAppReady } from "./desktopLaunchMarks.js";
@@ -721,8 +722,24 @@ function getPetWindowController() {
       preloadPath: join(import.meta.dirname, "../preload/petWindow.cjs"),
       rendererDir: join(import.meta.dirname, "../renderer"),
       rendererDevUrl: process.env["ELECTRON_RENDERER_URL"],
-      focusPrimaryWindow: () => {
-        void primaryWindowCoordinator.ensurePrimaryWindow("pet-window-click");
+      onPlacementPersist: (placement) => {
+        // 与设置页共用 mergePetSettings，避免互相抹掉对方字段。
+        void mainSettingService
+          .get()
+          .then((settings) =>
+            mainSettingService.update({
+              pet: mergePetSettings(settings.pet, {
+                windowPosition: { x: placement.x, y: placement.y },
+                windowDisplayId: placement.displayId,
+                windowSnapZone: placement.snapZone,
+              }),
+            }),
+          )
+          .catch((error: unknown) => {
+            logger.warn(
+              `[pets] 悬浮窗位置持久化失败: ${error instanceof Error ? error.message : String(error)}`,
+            );
+          });
       },
     });
   }
@@ -1974,24 +1991,6 @@ app.whenReady().then(async () => {
       void primaryWindowCoordinator.ensurePrimaryWindow("pet-window-click");
     },
     getPetWindowController: () => petWindowController,
-    onPositionPersist: (position) => {
-      void mainSettingService
-        .get()
-        .then((settings) =>
-          mainSettingService.update({
-            pet: {
-              enabled: settings.pet?.enabled ?? true,
-              petId: settings.pet?.petId ?? null,
-              windowPosition: position,
-            },
-          }),
-        )
-        .catch((error: unknown) => {
-          logger.warn(
-            `[pets] 悬浮窗位置持久化失败: ${error instanceof Error ? error.message : String(error)}`,
-          );
-        });
-    },
   });
 
   // 本地未打包 dev 构建（app.isPackaged === false）必须跳过远端强制升级 gate。

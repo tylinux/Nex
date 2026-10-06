@@ -55,6 +55,7 @@ test("listPets: 合法 WebP 宠物被识别", async () => {
     assert.equal(result.pets[0]?.id, "tater");
     assert.equal(result.pets[0]?.displayName, "Tater");
     assert.equal(result.pets[0]?.spritesheetFileName, "spritesheet.webp");
+    assert.equal(result.pets[0]?.spriteRows, 9);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -141,6 +142,7 @@ test("listPets: 社区扩展行高变体（1536×2288，11 行）被接受", asy
     const result = await service.listPets();
     assert.equal(result.errors.length, 0);
     assert.equal(result.pets.length, 1);
+    assert.equal(result.pets[0]?.spriteRows, 11);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

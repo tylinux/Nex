@@ -5,6 +5,10 @@
 import {
   PET_DEFAULT_ANIMATIONS,
   PET_DEFAULT_FRAME_GRID,
+  PET_FRAME_ROWS_V2,
+  PET_IDLE_DURATION_SCALE,
+  PET_ONE_SHOT_REPEAT_COUNT,
+  petLookSectorCell,
   type PetAnimationName,
   type PetFrameGrid,
   type PetManifest,
@@ -113,4 +117,59 @@ export function resolvePetAnimationFrames(
     return resolvePetAnimationFrames(manifest, "idle");
   }
   return framesFromRow(grid, 0, Math.min(6, grid.columns), [280, 110, 110, 140, 140, 320]);
+}
+
+export interface PetPlaybackSequence {
+  frames: PetSpriteFrame[];
+  /** 播放到末尾后回绕的起点；idle 为 0，一次性动画指向末尾的 idle 段。 */
+  loopStartIndex: number;
+}
+
+/**
+ * 播放序列（对齐 Codex）：idle 逐帧时长 ×6 循环；其余状态播放 3 遍后落回 idle 循环。
+ * manifest 自定义动画 `loop: false` 同样按一次性处理，`loop: true` 直接循环。
+ */
+export function buildPetPlaybackSequence(
+  manifest: PetManifest | null,
+  animationName: string,
+): PetPlaybackSequence {
+  const idleFrames = resolvePetAnimationFrames(manifest, "idle").map((frame) => ({
+    ...frame,
+    durationMs: frame.durationMs * PET_IDLE_DURATION_SCALE,
+  }));
+  if (animationName === "idle") {
+    return { frames: idleFrames, loopStartIndex: 0 };
+  }
+  const base = resolvePetAnimationFrames(manifest, animationName);
+  if (manifest?.animations?.[animationName]?.loop === true) {
+    return { frames: base, loopStartIndex: 0 };
+  }
+  const repeated: PetSpriteFrame[] = [];
+  for (let round = 0; round < PET_ONE_SHOT_REPEAT_COUNT; round += 1) repeated.push(...base);
+  return { frames: [...repeated, ...idleFrames], loopStartIndex: repeated.length };
+}
+
+/** 「看向光标」单帧：仅 v2（≥11 行）且默认网格时可用，否则返回 null。 */
+export function resolvePetLookFrame(
+  manifest: PetManifest | null,
+  spriteRows: number,
+  sector: number,
+): PetSpriteFrame | null {
+  const grid = gridOf(manifest);
+  if (
+    spriteRows < PET_FRAME_ROWS_V2 ||
+    grid.width !== PET_DEFAULT_FRAME_GRID.width ||
+    grid.height !== PET_DEFAULT_FRAME_GRID.height ||
+    grid.columns !== PET_DEFAULT_FRAME_GRID.columns
+  ) {
+    return null;
+  }
+  const { row, column } = petLookSectorCell(sector);
+  return {
+    sx: column * grid.width,
+    sy: row * grid.height,
+    sw: grid.width,
+    sh: grid.height,
+    durationMs: 1000,
+  };
 }

@@ -1,25 +1,36 @@
 /**
- * 桌面宠物悬浮窗（单例）：透明、无边框、置顶、不抢焦点、可点击、可拖拽。
+ * 桌面宠物悬浮窗（单例）：透明、无边框、置顶、可点击、可拖拽。
  *
- * 窗口性质踩坑结论沿用 cuaPermissionDragPanel.ts：
- * `type:"panel"` 管「app 不被激活」，`focusable:false` 管「窗口不拿焦点」，二者缺一不可。
- * 但宠物窗需要接受拖拽/点击，因此 focusable 必须为 true——折中方案：
- *   - 不抢焦点：showInactive() 展示；
- *   - 点击/拖拽可用：focusable:true + 不设 type:panel（普通窗口），
- *     点击后宠物窗短暂拿焦点，但不影响主窗口（同 app 内）。
+ * 窗口性质踩坑结论沿用 cuaPermissionDragPanel.ts：宠物窗需要接受拖拽/点击，
+ * 因此 focusable 必须为 true——展示用 showInactive() 不抢焦点，窗口大小等于精灵大小，
+ * 不存在需要穿透的透明区域，无需 input shape 命中测试。
  *
  * 状态流：renderer（PetRuntime）→ SyncPetState IPC → 本模块 → PetWindowState IPC → pet window。
- * 动作流：pet window → PetWindowAction IPC → main（点击聚焦 / drag-move 跟随 / moved 持久化）。
- * 详见 docs/specs/desktop-pets.md。
+ * 动作流：pet window → PetWindowAction IPC → 本模块（唯一的拖拽状态机所有者）→ onPlacementPersist。
+ * 拖拽状态机：drag-start → drag-move 跟手 → drag-end：Alt 自由放置 / 有速度则动量 / 吸附 6 边缘区。
+ * 几何与物理常量见 @nex/shared 的 petPhysics，详见 docs/specs/desktop-pets.md。
  */
-import type { BrowserWindow, Rectangle, screen as ElectronScreen } from "electron";
-import type { PetWindowAction, PetWindowState } from "@nex/shared";
-import { PlatformChannels } from "@nex/shared";
+import type { BrowserWindow, Display, screen as ElectronScreen } from "electron";
+import type { PetWindowAction, PetWindowPlacement, PetWindowState } from "@nex/shared";
+import {
+  PET_FRAME_HEIGHT,
+  PET_FRAME_WIDTH,
+  PET_MOMENTUM_MAX_MS,
+  PET_MOMENTUM_TICK_MS,
+  PET_SNAP_ANIMATION_MS,
+  PlatformChannels,
+  classifyPetSnapZone,
+  clampPetToWorkArea,
+  computePetSnapPosition,
+  isPetMomentumSettled,
+  petWindowActionSchema,
+  pickPetDisplay,
+  restorePetPlacement,
+  stepPetMomentum,
+  type PetDisplayInfo,
+  type PetMomentumState,
+} from "@nex/shared";
 import { logger } from "./logger.js";
-
-const PET_WINDOW_WIDTH = 160;
-const PET_WINDOW_HEIGHT = 140;
-const PET_WINDOW_MARGIN = 24;
 
 interface PetWindowDeps {
   BrowserWindow: typeof import("electron").BrowserWindow;
@@ -28,45 +39,189 @@ interface PetWindowDeps {
   preloadPath: string;
   rendererDir: string;
   rendererDevUrl?: string | undefined;
-  /** 点击宠物时聚焦主窗口。 */
-  focusPrimaryWindow: () => void;
+  /** 落点确定（拖拽落定 / 显示器变化重算）后持久化。 */
+  onPlacementPersist: (placement: PetWindowPlacement) => void;
 }
+
+export type PetDragAction = Exclude<PetWindowAction, { kind: "focus-main-window" }>;
 
 export interface PetWindowController {
   /** 同步状态；null 表示销毁窗口。 */
   syncState(state: PetWindowState | null): void;
+  /** 处理 pet window 回传的拖拽动作。 */
+  handleDragAction(action: PetDragAction): void;
   destroy(): void;
   isActive(): boolean;
   /** 判断某窗口是否为宠物悬浮窗（用于应用窗口列表排除）。 */
   ownsWindow(candidate: BrowserWindow): boolean;
-  /** 拖拽跟随：把窗口移到给定屏幕坐标（不做持久化，落定由 moved 动作负责）。 */
-  moveTo(x: number, y: number): void;
 }
 
-function defaultBounds(screen: typeof ElectronScreen): Rectangle {
-  const display = screen.getPrimaryDisplay();
-  const { x, y, width, height } = display.workArea;
+function toDisplayInfo(display: Display): PetDisplayInfo {
+  return { id: display.id, workArea: display.workArea };
+}
+
+function petWindowSize(sizePx: number): { width: number; height: number } {
   return {
-    x: x + width - PET_WINDOW_WIDTH - PET_WINDOW_MARGIN,
-    y: y + height - PET_WINDOW_HEIGHT - PET_WINDOW_MARGIN,
-    width: PET_WINDOW_WIDTH,
-    height: PET_WINDOW_HEIGHT,
+    width: Math.round(sizePx),
+    height: Math.round((sizePx * PET_FRAME_HEIGHT) / PET_FRAME_WIDTH),
   };
 }
 
 export function createPetWindowController(deps: PetWindowDeps): PetWindowController {
   let win: BrowserWindow | null = null;
   let lastState: PetWindowState | null = null;
+  /** 窗口当前的规范落点；窗口存在期间以用户拖拽结果为准，不被状态推送覆盖。 */
+  let placement: PetWindowPlacement | undefined;
+  let drag: { offsetX: number; offsetY: number } | null = null;
+  let stopMotion: (() => void) | null = null;
+  let displayListenersAttached = false;
 
-  const ensureWindow = (position?: { x: number; y: number }): BrowserWindow => {
+  const listDisplays = () => deps.screen.getAllDisplays().map(toDisplayInfo);
+
+  const currentSize = () => petWindowSize(lastState?.sizePx ?? PET_FRAME_WIDTH);
+
+  const cancelMotion = () => {
+    stopMotion?.();
+    stopMotion = null;
+  };
+
+  const setWindowPosition = (x: number, y: number) => {
+    if (win && !win.isDestroyed()) win.setPosition(Math.round(x), Math.round(y));
+  };
+
+  const commit = (next: PetWindowPlacement) => {
+    placement = next;
+    deps.onPlacementPersist(next);
+  };
+
+  /** 缓动到目标位置（ease-out）；期间被新拖拽打断则取消。 */
+  const animateTo = (target: { x: number; y: number }, onDone: () => void) => {
+    cancelMotion();
+    if (!win || win.isDestroyed()) return;
+    const from = win.getBounds();
+    if (from.x === target.x && from.y === target.y) {
+      onDone();
+      return;
+    }
+    const startedAt = Date.now();
+    const timer = setInterval(() => {
+      const progress = Math.min(1, (Date.now() - startedAt) / PET_SNAP_ANIMATION_MS);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setWindowPosition(from.x + (target.x - from.x) * eased, from.y + (target.y - from.y) * eased);
+      if (progress >= 1) {
+        cancelMotion();
+        onDone();
+      }
+    }, PET_MOMENTUM_TICK_MS);
+    stopMotion = () => clearInterval(timer);
+  };
+
+  const snapToNearestZone = () => {
+    if (!win || win.isDestroyed()) return;
+    const size = currentSize();
+    const bounds = win.getBounds();
+    const display = pickPetDisplay({ ...bounds, ...size }, listDisplays());
+    if (!display) return;
+    const zone = classifyPetSnapZone(
+      { x: bounds.x + size.width / 2, y: bounds.y + size.height / 2 },
+      display.workArea,
+    );
+    const target = computePetSnapPosition(zone, display.workArea, size);
+    animateTo(target, () => commit({ ...target, displayId: display.id, snapZone: zone }));
+  };
+
+  const placeFreely = () => {
+    if (!win || win.isDestroyed()) return;
+    const size = currentSize();
+    const bounds = win.getBounds();
+    const display = pickPetDisplay({ ...bounds, ...size }, listDisplays());
+    if (!display) return;
+    const target = clampPetToWorkArea(bounds, size, display.workArea);
+    animateTo(target, () => commit({ ...target, displayId: display.id }));
+  };
+
+  const startMomentum = (velocity: { x: number; y: number }) => {
+    cancelMotion();
+    if (!win || win.isDestroyed()) return;
+    const size = currentSize();
+    const bounds = win.getBounds();
+    const display = pickPetDisplay({ ...bounds, ...size }, listDisplays());
+    if (!display) {
+      snapToNearestZone();
+      return;
+    }
+    let state: PetMomentumState = { x: bounds.x, y: bounds.y, vx: velocity.x, vy: velocity.y };
+    const startedAt = Date.now();
+    let lastTickAt = startedAt;
+    const timer = setInterval(() => {
+      const now = Date.now();
+      state = stepPetMomentum(state, now - lastTickAt, size, display.workArea);
+      lastTickAt = now;
+      setWindowPosition(state.x, state.y);
+      if (isPetMomentumSettled(state, Math.min(now - startedAt, PET_MOMENTUM_MAX_MS))) {
+        cancelMotion();
+        snapToNearestZone();
+      }
+    }, PET_MOMENTUM_TICK_MS);
+    stopMotion = () => clearInterval(timer);
+  };
+
+  /** 显示器增删/分辨率变化或宠物大小变化：按新工作区重算落点（吸附态重新吸附，自由态夹回可见区）。 */
+  const reflow = () => {
+    if (!win || win.isDestroyed() || drag) return;
+    cancelMotion();
+    const size = currentSize();
+    const bounds = win.getBounds();
+    const restored = restorePetPlacement({
+      placement: placement ?? { x: bounds.x, y: bounds.y },
+      size,
+      displays: listDisplays(),
+      primaryDisplayId: deps.screen.getPrimaryDisplay().id,
+    });
+    if (!restored) return;
+    win.setBounds({ x: restored.x, y: restored.y, ...size });
+    if (
+      !placement ||
+      placement.x !== restored.x ||
+      placement.y !== restored.y ||
+      placement.displayId !== restored.displayId
+    ) {
+      commit(restored);
+    }
+  };
+
+  const attachDisplayListeners = () => {
+    if (displayListenersAttached) return;
+    displayListenersAttached = true;
+    deps.screen.on("display-added", reflow);
+    deps.screen.on("display-removed", reflow);
+    deps.screen.on("display-metrics-changed", reflow);
+  };
+
+  const detachDisplayListeners = () => {
+    if (!displayListenersAttached) return;
+    displayListenersAttached = false;
+    deps.screen.removeListener("display-added", reflow);
+    deps.screen.removeListener("display-removed", reflow);
+    deps.screen.removeListener("display-metrics-changed", reflow);
+  };
+
+  const ensureWindow = (state: PetWindowState): BrowserWindow => {
     if (win && !win.isDestroyed()) return win;
 
-    const bounds = defaultBounds(deps.screen);
+    const size = petWindowSize(state.sizePx);
+    const restored = restorePetPlacement({
+      placement: state.placement,
+      size,
+      displays: listDisplays(),
+      primaryDisplayId: deps.screen.getPrimaryDisplay().id,
+    });
+    placement = restored ?? state.placement;
+
     const created = new deps.BrowserWindow({
-      x: position?.x ?? bounds.x,
-      y: position?.y ?? bounds.y,
-      width: bounds.width,
-      height: bounds.height,
+      x: restored?.x ?? 0,
+      y: restored?.y ?? 0,
+      ...size,
       frame: false,
       transparent: true,
       hasShadow: false,
@@ -102,25 +257,37 @@ export function createPetWindowController(deps: PetWindowDeps): PetWindowControl
 
     created.on("closed", () => {
       win = null;
+      drag = null;
+      cancelMotion();
+      detachDisplayListeners();
     });
 
+    attachDisplayListeners();
     win = created;
     return created;
   };
 
+  const destroyWindow = () => {
+    cancelMotion();
+    drag = null;
+    detachDisplayListeners();
+    if (win && !win.isDestroyed()) win.destroy();
+    win = null;
+  };
+
   return {
     syncState(state) {
+      const previousSize = lastState?.sizePx;
       lastState = state;
       if (!state) {
-        if (win && !win.isDestroyed()) {
-          win.destroy();
-        }
-        win = null;
+        destroyWindow();
         return;
       }
-      const target = ensureWindow(state.position);
+      const target = ensureWindow(state);
       if (target.isDestroyed()) return;
-      // 位置仅在建窗时应用；运行中位置以用户拖拽为准（避免状态推送把窗口拽回去）。
+      if (previousSize !== undefined && previousSize !== state.sizePx) {
+        reflow();
+      }
       if (!target.webContents.isLoading()) {
         target.webContents.send(PlatformChannels.PetWindowState, state);
       } else {
@@ -131,43 +298,54 @@ export function createPetWindowController(deps: PetWindowDeps): PetWindowControl
         });
       }
     },
-    destroy() {
-      if (win && !win.isDestroyed()) win.destroy();
-      win = null;
+    handleDragAction(action) {
+      if (!win || win.isDestroyed()) return;
+      if (action.kind === "drag-start") {
+        cancelMotion();
+        const bounds = win.getBounds();
+        drag = { offsetX: action.pointerX - bounds.x, offsetY: action.pointerY - bounds.y };
+        return;
+      }
+      if (!drag) return;
+      setWindowPosition(action.pointerX - drag.offsetX, action.pointerY - drag.offsetY);
+      if (action.kind === "drag-move") return;
+      drag = null;
+      if (action.altKey) {
+        placeFreely();
+      } else if (action.velocity) {
+        startMomentum(action.velocity);
+      } else {
+        snapToNearestZone();
+      }
     },
+    destroy: destroyWindow,
     isActive() {
       return Boolean(win && !win.isDestroyed());
     },
     ownsWindow(candidate) {
       return Boolean(win && !win.isDestroyed() && win === candidate);
     },
-    moveTo(x, y) {
-      if (win && !win.isDestroyed()) {
-        win.setPosition(Math.round(x), Math.round(y));
-      }
-    },
   };
 }
 
-/** 注册 pet-window → main 的动作通道（点击聚焦 / 拖拽跟随 / 落定持久化）。 */
+/** 注册 pet-window → main 的动作通道（载荷经 zod 校验，非法动作丢弃）。 */
 export function registerPetWindowActionHandler(deps: {
   ipcMain: typeof import("electron").ipcMain;
   focusPrimaryWindow: () => void;
   getPetWindowController: () => PetWindowController | null;
-  onPositionPersist: (position: { x: number; y: number }) => void;
 }): void {
-  deps.ipcMain.on(PlatformChannels.PetWindowAction, (_event, action: PetWindowAction) => {
+  deps.ipcMain.on(PlatformChannels.PetWindowAction, (_event, payload: unknown) => {
+    const parsed = petWindowActionSchema.safeParse(payload);
+    if (!parsed.success) {
+      logger.warn("[pets] 丢弃非法的 pet window 动作");
+      return;
+    }
+    const action = parsed.data;
     if (action.kind === "focus-main-window") {
       deps.focusPrimaryWindow();
       return;
     }
-    if (action.kind === "drag-move") {
-      deps.getPetWindowController()?.moveTo(action.x, action.y);
-      return;
-    }
-    if (action.kind === "moved") {
-      deps.onPositionPersist({ x: action.x, y: action.y });
-    }
+    deps.getPetWindowController()?.handleDragAction(action);
   });
   logger.info("[pets] pet window action channel registered");
 }

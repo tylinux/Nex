@@ -5,7 +5,15 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, RefreshCw } from "lucide-react";
-import type { PetListResult, PetSummary } from "@nex/shared";
+import {
+  PET_SIZE_DEFAULT_PX,
+  PET_SIZE_MAX_PX,
+  PET_SIZE_MIN_PX,
+  clampPetSize,
+  mergePetSettings,
+  type PetListResult,
+  type PetSummary,
+} from "@nex/shared";
 import { Button } from "@/components/ui/button.js";
 import { Switch } from "@/components/ui/switch.js";
 import { usePlatform } from "@/hooks/usePlatform.js";
@@ -44,6 +52,7 @@ function PetCard({
         <PetSprite
           spriteUrl={spriteUrl}
           manifest={pet.manifest}
+          spriteRows={pet.spriteRows}
           animationName="idle"
           heightPx={72}
         />
@@ -126,20 +135,35 @@ export function PetsSettingsSection({ isDesktop }: PetsSettingsSectionProps) {
   const handleToggle = useCallback(
     (next: boolean) => {
       void update({
-        pet: {
+        pet: mergePetSettings(petSettings, {
           enabled: next,
           petId: selectedPetId ?? catalog.pets[0]?.id ?? null,
-        },
+        }),
       });
     },
-    [update, selectedPetId, catalog.pets],
+    [update, petSettings, selectedPetId, catalog.pets],
   );
 
   const handleSelect = useCallback(
     (petId: string) => {
-      void update({ pet: { enabled: true, petId } });
+      void update({ pet: mergePetSettings(petSettings, { enabled: true, petId }) });
     },
-    [update],
+    [update, petSettings],
+  );
+
+  const size = clampPetSize(petSettings?.size);
+  // 滑杆拖动期间只改本地值，松手再落盘，避免每个像素都触发设置广播与悬浮窗重排。
+  const [draftSize, setDraftSize] = useState<number | null>(null);
+  const commitSize = useCallback(
+    (next: number) => {
+      setDraftSize(null);
+      void update({
+        pet: mergePetSettings(petSettings, {
+          size: next === PET_SIZE_DEFAULT_PX ? undefined : next,
+        }),
+      });
+    },
+    [update, petSettings],
   );
 
   return (
@@ -156,6 +180,37 @@ export function PetsSettingsSection({ isDesktop }: PetsSettingsSectionProps) {
             />
           }
         />
+        <SettingsRow
+          label={intl.formatMessage({ id: "settings.pets.size" })}
+          description={intl.formatMessage({ id: "settings.pets.sizeDescription" })}
+          control={
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min={PET_SIZE_MIN_PX}
+                max={PET_SIZE_MAX_PX}
+                step={4}
+                value={draftSize ?? size}
+                onChange={(event) => setDraftSize(Number(event.target.value))}
+                onPointerUp={(event) => commitSize(Number(event.currentTarget.value))}
+                onKeyUp={(event) => commitSize(Number(event.currentTarget.value))}
+                aria-label={intl.formatMessage({ id: "settings.pets.size" })}
+                className="w-32"
+              />
+              <span className="w-12 text-right text-ui-sm text-foreground-subtle">
+                {draftSize ?? size}px
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={size === PET_SIZE_DEFAULT_PX && draftSize === null}
+                onClick={() => commitSize(PET_SIZE_DEFAULT_PX)}
+              >
+                {intl.formatMessage({ id: "settings.pets.sizeReset" })}
+              </Button>
+            </div>
+          }
+        />
       </SettingsGroupCard>
 
       {selectedPet ? (
@@ -164,6 +219,7 @@ export function PetsSettingsSection({ isDesktop }: PetsSettingsSectionProps) {
             <PetSprite
               spriteUrl={spriteUrls[selectedPet.id] ?? ""}
               manifest={selectedPet.manifest}
+              spriteRows={selectedPet.spriteRows}
               animationName="idle"
               heightPx={104}
             />

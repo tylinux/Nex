@@ -4187,6 +4187,9 @@ const enUS: Record<string, string> = {
   "settings.pets.enable": "Desktop pet",
   "settings.pets.enableDescription":
     "Show a little companion on your desktop that reacts to what Nex is doing — it stays on top even when the window is closed, and you can click it to come back.",
+  "settings.pets.size": "Size",
+  "settings.pets.sizeDescription": "Adjust how large the pet appears on your desktop.",
+  "settings.pets.sizeReset": "Reset",
   "settings.pets.myPets": "My pets",
   "settings.pets.refresh": "Refresh",
   "settings.pets.create": "Create pet",

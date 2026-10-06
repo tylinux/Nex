@@ -3911,6 +3911,9 @@ const zhCN: Record<string, string> = {
   "settings.pets.enable": "桌面宠物",
   "settings.pets.enableDescription":
     "在桌面上显示一只小伙伴，跟随 Nex 的工作状态变化——即使窗口关闭它也会留在桌面上，点一下就能回到 Nex。",
+  "settings.pets.size": "大小",
+  "settings.pets.sizeDescription": "调整宠物在桌面上的显示大小。",
+  "settings.pets.sizeReset": "重置",
   "settings.pets.myPets": "我的宠物",
   "settings.pets.refresh": "刷新",
   "settings.pets.create": "创建宠物",

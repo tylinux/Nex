@@ -6,8 +6,8 @@ Related: `packages/shared/src/nex-protocol-v4/sessions-index.ts`（状态数据�
 
 ## 产品规则
 
-- 宠物是 agent 工作状态的氛围挂件：一张动画精灵图，跟随**当前活跃 workspace** 的会话状态变化。本期不做全局跨 workspace 聚合。
-- 兼容 Codex 宠物资产格式：目录 `<petId>/` 内含 `pet.json`（manifest）+ 精灵图（默认 `spritesheet.webp`），固定网格 8 列 × 9 行 = 72 帧，帧尺寸 192×208（整图 1536×1872）；动画靠**行约定**（第 0 行 idle、1/2 行左右移动、3 行挥手、4 行跳跃、5 行 failed、6 行 waiting、7 行 running、8 行 review），manifest 可选覆盖 `frame` 网格与 `animations` 帧序列。
+- 宠物是 agent 工作状态的桌面级伴侣：一张动画精灵图，聚合当前窗口**所有 workspace** 的会话状态（任一 workspace 有待处理审批即整体 waiting），不随单个 workspace 切换重置。
+- 兼容 Codex 宠物资产格式：目录 `<petId>/` 内含 `pet.json`（manifest）+ 精灵图（默认 `spritesheet.webp`），固定 8 列、帧尺寸 192×208。v1 为 9 行（整图 1536×1872），v2 为 11 行（1536×2288，官方内置宠物全是 v2；社区宠物按整图高度判定）。动画靠**行约定**（第 0 行 idle、1/2 行左右移动、3 行挥手、4 行跳跃、5 行 failed、6 行 waiting、7 行 running、8 行 review；v2 另有 9/10 行共 16 帧的「看向光标」环），manifest 可选覆盖 `frame` 网格与 `animations` 帧序列。
 - 宠物目录统一放 **`~/.nex/pets/`**（即 `{getNexDataRootDir()}/pets/`，尊重 `NEX_DATA_BASE_DIR` 与自定义数据根）。**不读** `~/.codex/pets/`。
 - 本期**不提供官方内置宠物**、不接任何 CDN。首次进入为空态，设置页引导用户自行把社区宠物目录放入 `~/.nex/pets/` 后点「刷新」。
 - 语义状态四档（优先级从高到低）：`waiting`（有待处理审批/用户输入）> `failed`（会话出错，1 小时回落）> `review`（有后台完成未读会话，7 天回落）> `running`（有会话运行中，3 分钟回落）> 默认 `idle`。
@@ -17,7 +17,16 @@ Related: `packages/shared/src/nex-protocol-v4/sessions-index.ts`（状态数据�
 - 设置页新增独立分区「宠物」（`agentCapabilities` 组）：顶部当前宠物预览卡 + 开/关、宠物网格选择、刷新、「创建宠物」按钮本期禁用占位（等图片生成能力）。
 - 「无可用宠物」或「开关关闭」时，挂件与悬浮窗完全静默（不渲染任何占位 UI）。
 - 尊重系统 reduce-motion：命中时只渲染动画首帧静止图。
-- 本期不做：宠物互动/游戏化行为、跨 workspace 状态聚合、`~/.codex` 目录读取、官方宠物分发、创建宠物 skill。
+- 播放语义（对齐 Codex）：`idle` 循环，逐帧时长 ×6（缓慢呼吸）；其余状态动画播放 3 遍后落回 idle 循环。
+- 交互动画（优先级从高到低）：拖拽中 `running-left/right`（按水平位移方向）> 悬停：v2 宠物且语义状态为 idle 时「看向光标」，其余情况 `jumping` > 语义状态。
+- 看向光标：以宠物中心为原点，`angle = atan2(dx, -dy)`，16 个 22.5° 扇区，`sector = round(angle/22.5) % 16`，`column = sector % 8`、`row = 9 + floor(sector/8)`；距中心 < 1px 时忽略。仅 v2 精灵图（≥11 行）启用。
+- 宠物大小：`pet.size`（宽度 px，80–224，默认 112），高度按 192:208 推导；设置页提供滑杆与重置。
+- 桌面悬浮窗拖拽（main 持有拖拽状态机，renderer 只上报指针事件）：
+  - renderer 用 pointer capture + 4px 死区区分点击与拖拽，上报 `drag-start/move/end`（屏幕坐标）；拖拽期间窗口跟手，指针移出窗口不丢拖拽。
+  - 松手速度取最近 ≤160ms 的采样，低于 320px/s 视为抖动丢弃，上限 1600px/s，发送时 ×3；有速度则进入动量（16ms tick，摩擦 `0.88^(dt/16)`，边缘碰撞弹性 0.7，速度 <65px/s 或 900ms 结束）。
+  - 动量结束或无速度松手后，吸附到最近的 6 个边缘区（左/中/右 × 上/下，边距 16px，160ms 缓动）；按住 Alt 松手则自由放置，不吸附。
+  - 位置按显示器持久化（`pet.windowPosition` + `windowDisplayId` + `windowSnapZone`）。吸附态在显示器分辨率变化后按新工作区重算；显示器被拔除或指标变化时窗口夹回可见区域。
+- 本期不做：宠物游戏化行为、`~/.codex` 目录读取、官方宠物分发、创建宠物 skill、通知托盘 / Quick Chat / 听写复用、deep-link 安装、macOS 私有 AppKit 桥与原生拖拽（悬浮窗紧贴精灵，无需 input shape 命中测试）。
 
 ## 状态所有者与数据流
 
@@ -51,8 +60,9 @@ Related: `packages/shared/src/nex-protocol-v4/sessions-index.ts`（状态数据�
   - `listPets(): Promise<{ pets: PetSummary[]; errors: PetLoadError[] }>`
   - `getPetSpritesheetPath(params: { petId: string }): Promise<{ path: string } | null>`
   - `refreshPets(): Promise<{ pets: PetSummary[]; errors: PetLoadError[] }>`（清缓存后重扫）
-- `PetSummary = { id, displayName, description, dirPath, spritesheetFileName }`（`@nex/shared`）。
+- `PetSummary = { id, displayName, description, dirPath, spritesheetFileName, manifest, spriteRows }`（`@nex/shared`）；`spriteRows` = 图高 / 帧高，≥ 11 表示带看向光标环。
 - `PetLoadError = { dirName, reason }`：单个目录非法不阻塞其他宠物。
+- `PetWindowAction`（pet-window → main，经 zod 校验）：`focus-main-window`、`drag-start`、`drag-move`、`drag-end`（含 `altKey` 与可选 `velocity`），指针坐标均为屏幕坐标。
 - `IPlatformService` 新增（可选方法）：
   - `syncPetState?(state: PetWindowState | null): void`——`null` 表示销毁/隐藏悬浮窗。
   - `onPetWindowAction?(handler: (action: PetWindowAction) => void): () => void`——pet window 点击等动作回传。
@@ -60,7 +70,7 @@ Related: `packages/shared/src/nex-protocol-v4/sessions-index.ts`（状态数据�
 
 ## 不变量
 
-- 精灵图网格必须精确铺满（`frameWidth × columns == 图宽`，`frameHeight × rows == 图高`）；默认 192×208 / 8×9 / 1536×1872。
+- 精灵图网格必须铺满：`frameWidth × columns == 图宽`，图高为 `frameHeight` 整数倍且不少于声明行数；默认 192×208 / 8×9，官方 v1 1536×1872、v2 1536×2288。
 - `pet.json` 中 `spritesheetPath` 只允许**目录内相对路径**；绝对路径与任何 `..` 段一律拒绝。
 - manifest `animations` 覆盖时：帧索引 `< columns × rows`、帧总数 ≤ 256、`fps ∈ (0, 60]`、`fallback` 必须指向已定义动画。
 - 单个宠物目录非法只计入 `errors[]`，不影响其他宠物加载；设置页展示错误列表。
