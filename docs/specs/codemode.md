@@ -235,7 +235,7 @@ Exposure is configured on the MCP server entry, at two levels (modelled on pi's 
   (not the `mcp__server__tool` form), or patterns where `*` matches any characters. An exact
   name wins over patterns; among patterns the first match in object order wins.
 - Resolution for one tool: `toolExposure` match → server `exposure` → session default.
-- **Session default** (when neither is set): `deferred` if Settings → General → "Tool calling" → "On-demand MCP tools"
+- **Session default** (when neither is set): `deferred` if Settings → General → "On-demand MCP tools"
   is on, otherwise `direct`. So existing configs behave exactly as before.
 - `hidden` tools are never registered, so they cannot be declared, searched or called, from a
   script or from a subagent. They are not registered at all (not "registered but unreachable"),
@@ -462,10 +462,11 @@ script in sandbox (P3)                    ├─ execution data → script
 
 ## Implementation status and verification
 
-P1, P2 and P3 are implemented behind two opt-in switches (Settings → General → "Tool calling" →
-"On-demand MCP tools", "Codemode"), both default off. The two switches live in their own
-"Tool calling" section, separate from the general preferences above it. Not implemented: the `models` global (`classify`,
-`generateImages`) and the model-type prerequisite it needs; see "Non-chat model operations".
+P1, P2 and P3 are implemented behind two opt-in switches (Settings → General →
+"On-demand MCP tools", "Codemode"), both default off. The two switches sit in their own card, separate from the general preferences
+above it; like the other cards on that page, it has no heading. Not implemented: the `models`
+global (`classify`, `generateImages`) and the model-type prerequisite it needs; see "Non-chat model
+operations".
 
 | Acceptance scenario                                                    | Status           | Evidence                                                                                                                                                                                                                               |
 | ---------------------------------------------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
