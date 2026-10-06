@@ -1,4 +1,5 @@
 import { querySessionDebug } from "./session-debug.js";
+import { querySessionSystemPrompt } from "./session-system-prompt.js";
 import {
   nexPluginsCancelOperationParamsSchema,
   nexProtocolMethods,
@@ -711,6 +712,8 @@ export class NexProtocolAgentServer {
         return await getUsageStats(this.context, request.params);
       case nexProtocolMethods.sessionDebug:
         return querySessionDebug(this.context, request.params);
+      case nexProtocolMethods.sessionSystemPrompt:
+        return querySessionSystemPrompt(this.context, request.params);
       case nexProtocolMethods.sessionUsage:
         return await getTaskTokenUsage(this.context, request.params);
       default:

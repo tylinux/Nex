@@ -1,4 +1,8 @@
-import type { BackgroundBashOutputResult, SessionDebugSnapshot } from "@nex/shared";
+import type {
+  BackgroundBashOutputResult,
+  SessionDebugSnapshot,
+  SessionSystemPromptSnapshot,
+} from "@nex/shared";
 /* eslint-disable max-lines -- Nex agent service 接口集中声明 protocol/session/workspace 方法，拆分会增加 service descriptor 迁移成本。 */
 import type { Event, IDisposable } from "@nex/rpc";
 import { ServiceChannels } from "@nex/shared";
@@ -596,6 +600,7 @@ export interface INexAgentService {
     params: NexAgentReadSessionMessagesParams,
   ): Promise<NexMessageWithParts[]>;
   readSessionDebug(params: NexAgentSessionTarget): Promise<SessionDebugSnapshot>;
+  readSessionSystemPrompt(params: NexAgentSessionTarget): Promise<SessionSystemPromptSnapshot>;
   readSessionEvents(params: NexAgentReadSessionEventsParams): Promise<NexSessionEvent[]>;
   readWorkspacePresentation(
     params: NexAgentReadWorkspacePresentationParams,

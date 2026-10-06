@@ -15,6 +15,7 @@ import type {
   ToolExecutor,
   ToolRegistry,
   ContextBuilder,
+  ContextSection,
 } from "../deps.js";
 import { isInspectablePermissionBroker, projectIdFromDirectory } from "../helpers/index.js";
 import {
@@ -255,6 +256,19 @@ export function getPendingPermissionRequests(
 
 export async function getProjection(this: AgentRuntimeInternal): Promise<SessionProjection> {
   return this.rebuildProjection();
+}
+
+/**
+ * 只读返回最近一次构建的 system prompt 分段：与 context-usage 的 "System prompt"
+ * 分类使用同一过滤口径（system 注入目标，且不含 skills / tools）。
+ */
+export function getSystemPromptSections(this: AgentRuntimeInternal): ContextSection[] {
+  return (this.latestContextBuildResult?.sections ?? []).filter(
+    (section) =>
+      section.injectionTarget === "system" &&
+      section.source !== "skills" &&
+      section.source !== "tools",
+  );
 }
 
 export function getSessionId(this: AgentRuntimeInternal): SessionId {

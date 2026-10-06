@@ -116,6 +116,7 @@ export interface V4ComposerToolbarProps {
 function V4ComposerModelControlsImpl({
   workspacePath,
   workspaceIdentity,
+  sessionId,
   modelSelectionView = null,
   modelSelectionState = MODEL_SELECTION_LOADING_STATE,
   modelSelectionReload,
@@ -472,6 +473,9 @@ function V4ComposerModelControlsImpl({
         className="hidden"
       />
       <ChatContextUsage
+        workspacePath={workspacePath}
+        workspaceIdentity={workspaceIdentity}
+        sessionId={sessionId}
         taskUsage={taskUsage}
         selectedProvider={displayProvider}
         intl={intl}

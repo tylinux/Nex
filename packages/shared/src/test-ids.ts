@@ -489,6 +489,14 @@ export const TID_CHAT_MODE_SELECT_TRIGGER = "chat-mode-select-trigger";
 export const TID_CHAT_MODE_SELECT_ITEM = "chat-mode-select-item";
 /** 聊天工具栏 context 消耗按钮 */
 export const TID_CHAT_CONTEXT_USAGE_TRIGGER = "chat-context-usage-trigger";
+/** context 面板里“显示 system prompt”按钮 */
+export const TID_CHAT_SYSTEM_PROMPT_BUTTON = "chat-system-prompt-button";
+/** system prompt 对话框 */
+export const TID_CHAT_SYSTEM_PROMPT_DIALOG = "chat-system-prompt-dialog";
+/** system prompt 对话框内的分段 */
+export const TID_CHAT_SYSTEM_PROMPT_SECTION = "chat-system-prompt-section";
+/** system prompt 对话框内的复制按钮 */
+export const TID_CHAT_SYSTEM_PROMPT_COPY = "chat-system-prompt-copy";
 /** 思考块折叠触发按钮 */
 export const TID_CHAT_REASONING_TRIGGER = "chat-reasoning-trigger";
 /** 思考块折叠内容容器 */

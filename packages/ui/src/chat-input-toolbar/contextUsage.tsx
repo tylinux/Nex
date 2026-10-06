@@ -1,6 +1,7 @@
 import { useMemo, useState, type CSSProperties } from "react";
 import {
   TID_CHAT_CONTEXT_USAGE_TRIGGER,
+  TID_CHAT_SYSTEM_PROMPT_BUTTON,
   type NexContextUsageBreakdownItem,
   type NexProvider,
 } from "@nex/shared";
@@ -11,7 +12,9 @@ import {
   ContextTrigger,
 } from "@/components/ai-elements/context.js";
 import { cn } from "@/components/lib/utils.js";
+import { Button } from "@/components/ui/button.js";
 import { Progress } from "@/components/ui/progress.js";
+import { SystemPromptDialog } from "./SystemPromptDialog.js";
 import { useNexIntl } from "@/i18n/IntlProvider.js";
 import { formatCompactTokenNumber } from "@/lib/tokenNumberFormat.js";
 
@@ -180,7 +183,13 @@ export function ChatContextUsage({
   taskUsage,
   intl,
   locale,
+  workspacePath,
+  workspaceIdentity,
+  sessionId,
 }: {
+  workspacePath?: string;
+  workspaceIdentity?: string;
+  sessionId?: string | null;
   taskUsage: {
     used: number;
     size: number;
@@ -194,6 +203,8 @@ export function ChatContextUsage({
   compressionDisabled?: boolean;
 }) {
   const [contextOpen, setContextOpen] = useState(false);
+  const [systemPromptOpen, setSystemPromptOpen] = useState(false);
+  const canShowSystemPrompt = Boolean(sessionId && workspacePath !== undefined);
   const renderableTaskUsage = getRenderableTaskUsage(taskUsage);
   const numberFormatter = useMemo(() => new Intl.NumberFormat(locale), [locale]);
   const contextUsageLabel = useMemo(() => {
@@ -343,8 +354,32 @@ export function ChatContextUsage({
               ) : null}
             </>
           ) : null}
+          {canShowSystemPrompt ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full"
+              data-testid={TID_CHAT_SYSTEM_PROMPT_BUTTON}
+              onClick={() => {
+                setContextOpen(false);
+                setSystemPromptOpen(true);
+              }}
+            >
+              {intl.formatMessage({ id: "chat.systemPrompt.button" })}
+            </Button>
+          ) : null}
         </ContextContentBody>
       </ContextContent>
+      {canShowSystemPrompt ? (
+        <SystemPromptDialog
+          open={systemPromptOpen}
+          onOpenChange={setSystemPromptOpen}
+          workspacePath={workspacePath ?? ""}
+          workspaceIdentity={workspaceIdentity}
+          sessionId={sessionId ?? null}
+        />
+      ) : null}
     </Context>
   );
 }

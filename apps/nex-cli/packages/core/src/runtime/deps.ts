@@ -279,6 +279,7 @@ export type {
   ContextBuilder,
   ContextBuilderConfig,
   ContextBuildResult,
+  ContextSection,
   OutputStylePromptConfig,
 } from "../context/index.js";
 export { createContextBuilder, estimateTokens } from "../context/index.js";

@@ -61,6 +61,7 @@ import type {
   ToolRegistry,
   ContextBuilder,
   ContextBuildResult,
+  ContextSection,
   ContextSourceSnapshot,
   ExecutionShellSelection,
   HookRunner,
@@ -584,6 +585,7 @@ export interface AgentRuntime {
   resolvePermission(toolCallId: ToolCallId, decision: PermissionDecisionResult): Promise<void>;
   getPendingPermissionRequests(): PermissionBrokerRequest[];
   getProjection(): Promise<SessionProjection>;
+  getSystemPromptSections(): ContextSection[];
   readBackgroundBashOutput(workId: string, sessionId?: string): Promise<BackgroundBashOutputResult>;
   cancelBackgroundTask(
     taskId: string,

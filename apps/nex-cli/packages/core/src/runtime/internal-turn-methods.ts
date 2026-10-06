@@ -42,6 +42,7 @@ import type {
   TurnState,
   ToolSchedule,
   ToolExecutionResult,
+  ContextSection,
 } from "./deps.js";
 import type {
   ActiveTurnStartReservation,
@@ -246,6 +247,7 @@ export interface AgentRuntimeTurnMethods {
   resolvePermission(toolCallId: ToolCallId, decision: PermissionDecisionResult): Promise<void>;
   getPendingPermissionRequests(): PermissionBrokerRequest[];
   getProjection(): Promise<SessionProjection>;
+  getSystemPromptSections(): ContextSection[];
   readBackgroundBashOutput(workId: string, sessionId?: string): Promise<BackgroundBashOutputResult>;
   cancelBackgroundTask(
     taskId: string,
