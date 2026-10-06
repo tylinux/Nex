@@ -27,7 +27,7 @@ import { trackResumedDynamicWorkflowRun } from "./dynamic-workflow-run-track.js"
 import { startSavedWorkflowRun } from "./dynamic-workflow-run-start.js";
 import { amendWorkflowRunSettings } from "./dynamic-workflow-run-settings.js";
 import { getProjection } from "./config.js";
-import { getSystemPromptSections } from "./config.js";
+import { getPromptContextEntries } from "./prompt-context.js";
 import { getSessionId } from "./config.js";
 import { enqueueDeferredInput } from "./steering.js";
 import { steerTurn } from "./steering.js";
@@ -234,7 +234,7 @@ export function installAgentRuntimeMethods(ctor: AgentRuntimeConstructor): void 
   proto.startSavedWorkflowRun = startSavedWorkflowRun;
   proto.amendWorkflowRunSettings = amendWorkflowRunSettings;
   proto.getProjection = getProjection;
-  proto.getSystemPromptSections = getSystemPromptSections;
+  proto.getPromptContextEntries = getPromptContextEntries;
   proto.getSessionId = getSessionId;
   proto.enqueueDeferredInput = enqueueDeferredInput;
   proto.steerTurn = steerTurn;

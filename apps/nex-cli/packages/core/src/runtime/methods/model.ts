@@ -134,6 +134,8 @@ export async function runModelTextRequest(
       traceContext: projectedOptions.traceContext,
     }),
   );
+  // 记录实际发给 provider 的工具集（含 declared set 过滤结果），供 prompt context 只读查询。
+  this.latestRequestTools = projectedOptions.tools;
   const contextUsageSnapshot = this.buildContextUsageSnapshot(projectedOptions);
   const contextUsageBreakdown = this.buildContextUsageBreakdownFromSnapshot(contextUsageSnapshot);
   this.logContextUsageSnapshot(projectedOptions, contextUsageSnapshot);

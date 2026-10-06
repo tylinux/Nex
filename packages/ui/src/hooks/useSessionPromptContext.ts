@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import type { SessionSystemPromptSection } from "@nex/shared";
+import type { SessionPromptContextEntry } from "@nex/shared";
 import { useServices } from "@/hooks/useServices.js";
 
-export type SessionSystemPromptState =
+export type SessionPromptContextState =
   | { status: "loading" }
-  | { status: "ready"; sections: SessionSystemPromptSection[] }
+  | { status: "ready"; entries: SessionPromptContextEntry[] }
   | { status: "error" };
 
-/** 仅在对话框打开时拉取一次；system prompt 不随事件流推送。 */
-export function useSessionSystemPrompt({
+/** 仅在对话框打开时拉取一次；prompt context 不随事件流推送。 */
+export function useSessionPromptContext({
   workspacePath,
   workspaceIdentity,
   sessionId,
@@ -18,22 +18,22 @@ export function useSessionSystemPrompt({
   workspaceIdentity?: string;
   sessionId: string | null;
   enabled: boolean;
-}): SessionSystemPromptState {
+}): SessionPromptContextState {
   const { nexAgentService } = useServices();
   const scopeKey = JSON.stringify([workspaceIdentity?.trim() || workspacePath, sessionId]);
   const [result, setResult] = useState<{
     key: string;
-    state: SessionSystemPromptState;
+    state: SessionPromptContextState;
   } | null>(null);
 
   useEffect(() => {
     if (!enabled || !sessionId) return;
     let disposed = false;
     nexAgentService
-      .readSessionSystemPrompt({ workspacePath, workspaceIdentity, sessionId })
+      .readSessionPromptContext({ workspacePath, workspaceIdentity, sessionId })
       .then((snapshot) => {
         if (!disposed)
-          setResult({ key: scopeKey, state: { status: "ready", sections: snapshot.sections } });
+          setResult({ key: scopeKey, state: { status: "ready", entries: snapshot.entries } });
       })
       .catch(() => {
         if (!disposed) setResult({ key: scopeKey, state: { status: "error" } });

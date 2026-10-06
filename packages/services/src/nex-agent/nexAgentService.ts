@@ -2,7 +2,7 @@ import { requestPluginReferenceCatalog } from "#src/nex-agent/pluginReferenceCat
 import {
   localTtftFactsSchema,
   sessionDebugSnapshotSchema,
-  sessionSystemPromptSnapshotSchema,
+  sessionPromptContextSnapshotSchema,
   type LocalTtftFacts,
 } from "@nex/shared";
 /* oxlint-disable eslint(max-lines) -- Nex Protocol transport、通知 wiring 和 app-facing session 方法必须共享同一个 client/emitter 上下文。 */
@@ -2985,12 +2985,12 @@ export function createNexAgentService(
       );
     },
 
-    async readSessionSystemPrompt(params) {
+    async readSessionPromptContext(params) {
       const client = await getReadOnlyClient(params, "existing-only");
       return client.request(
-        nexProtocolMethods.sessionSystemPrompt,
+        nexProtocolMethods.sessionPromptContext,
         { sessionId: params.sessionId },
-        sessionSystemPromptSnapshotSchema,
+        sessionPromptContextSnapshotSchema,
       );
     },
 

@@ -90,6 +90,7 @@ export interface AgentRuntimeInternal
   contextInitialized: boolean;
   contextSourceSnapshot?: ContextSourceSnapshot;
   latestContextBuildResult?: ContextBuildResult;
+  latestRequestTools: ModelToolContract[];
   memoryRoot?: string;
   memoryIndexContent?: string;
   memoryExtractionScheduler?: ProjectMemoryExtractionScheduler;

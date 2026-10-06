@@ -14,7 +14,7 @@ import {
 import { cn } from "@/components/lib/utils.js";
 import { Button } from "@/components/ui/button.js";
 import { Progress } from "@/components/ui/progress.js";
-import { SystemPromptDialog } from "./SystemPromptDialog.js";
+import { PromptContextDialog } from "./PromptContextDialog.js";
 import { useNexIntl } from "@/i18n/IntlProvider.js";
 import { formatCompactTokenNumber } from "@/lib/tokenNumberFormat.js";
 
@@ -372,7 +372,7 @@ export function ChatContextUsage({
         </ContextContentBody>
       </ContextContent>
       {canShowSystemPrompt ? (
-        <SystemPromptDialog
+        <PromptContextDialog
           open={systemPromptOpen}
           onOpenChange={setSystemPromptOpen}
           workspacePath={workspacePath ?? ""}

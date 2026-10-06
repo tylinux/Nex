@@ -61,13 +61,13 @@ import type {
   ToolRegistry,
   ContextBuilder,
   ContextBuildResult,
-  ContextSection,
   ContextSourceSnapshot,
   ExecutionShellSelection,
   HookRunner,
   TurnId,
 } from "./deps.js";
 import { installAgentRuntimeMethods } from "./methods/index.js";
+import type { PromptContextEntry } from "./methods/prompt-context.js";
 import type { StartSavedWorkflowRunResult } from "./methods/dynamic-workflow-run-start.js";
 import type {
   AmendWorkflowRunSettingsInput,
@@ -163,6 +163,7 @@ export class AgentRuntime {
   private contextInitialized = false;
   private contextSourceSnapshot?: ContextSourceSnapshot;
   private latestContextBuildResult?: ContextBuildResult;
+  private latestRequestTools: ModelToolContract[] = [];
   private memoryRoot?: string;
   private memoryIndexContent?: string;
   private memoryExtractionScheduler?: ProjectMemoryExtractionScheduler;
@@ -585,7 +586,7 @@ export interface AgentRuntime {
   resolvePermission(toolCallId: ToolCallId, decision: PermissionDecisionResult): Promise<void>;
   getPendingPermissionRequests(): PermissionBrokerRequest[];
   getProjection(): Promise<SessionProjection>;
-  getSystemPromptSections(): ContextSection[];
+  getPromptContextEntries(): PromptContextEntry[];
   readBackgroundBashOutput(workId: string, sessionId?: string): Promise<BackgroundBashOutputResult>;
   cancelBackgroundTask(
     taskId: string,
