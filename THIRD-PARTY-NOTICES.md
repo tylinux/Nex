@@ -1794,6 +1794,8 @@ Original copyright, license and NOTICE text is retained below. Identical text is
 
 - quickjs-wasi@2.2.0 — MIT
 
+- quickjs-wasi@3.6.2 — MIT
+
 - radix-ui@1.4.3 — MIT
 
 - range-parser@1.2.1 — MIT
@@ -30082,6 +30084,52 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+````
+
+### Notice f7735da3b2531ddf451937117343cfadb853fd8054b499e7a70695dc57ffd184
+
+- quickjs-wasi@3.6.2: LICENSE
+
+
+
+````text
+MIT License
+
+Copyright (c) 2026 Vercel, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+````
+
+### Notice 44faefcb5cf66a9e461fded17be0a913e2430665ee1fc0fe659287a382ce20af
+
+- quickjs-wasi@3.6.2: README.md (license section)
+
+
+
+````text
+## License
+
+The quickjs-wasi wrapper is licensed under the [MIT License](./LICENSE), copyright (c) 2026 Vercel, Inc. The root `LICENSE` file contains the canonical copyright and permission notice and is included in the npm package.
+
+The bundled QuickJS-NG engine and other third-party components retain their own copyright and license notices. The wrapper's notice does not replace those upstream notices.
 
 ````
 

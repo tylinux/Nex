@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "inputHashEncoding": "UTF-8 with CRLF normalized to LF; notice and source snapshot hashes remain byte-exact",
   "scope": "Production dependency union across current workspace projects, copied source/assets and native tools; not a per-installer SBOM or a certification of all licensing obligations.",
-  "noticesSha256": "7fdd1dd6a3dfacb6bf69c1892d881849ce635ac6c005291f858bb471ee759457",
+  "noticesSha256": "9b1de151f492c762edb3fc36bc9d3b2e3d3efd667430d5c11a9778be45307c63",
   "inputs": {
     ".agents/skills/agent-browser/references/authentication.md": "cf08f1b50c0e01a3c9c512745d61195cc46dede5bf1171b99e743a20ac163932",
     ".agents/skills/agent-browser/references/commands.md": "3e3a7956ec476be4fddfea843ed5db2ca62f9ea5dc749d5f369a52145202645c",
@@ -2677,7 +2677,7 @@
     "packages/web/public/material-icons/zip.svg": "dad79a45f756542d37abd422502ecfbea15720b92ea1c9d80ef0439ab6b9448a",
     "patches/@ai-sdk__anthropic@3.0.81.patch": "d3a7c381eba7f5157f765a0528003af17cf84544911dfb7412c7800168e01c18",
     "patches/@ai-sdk__openai-compatible@2.0.60.patch": "9632fe9d821b3dc20939ae509cc35b968d90d018bbd1d812390718898182a38b",
-    "pnpm-lock.yaml": "6255a51d14fd32a758088eaf0ebea946360b4bbb8ff2670c23479275c9c01737",
+    "pnpm-lock.yaml": "fe0644ff0b52eb8321a71fe2c3e75dac612397167fdda99cd029ee2fe53ee991",
     "pnpm-workspace.yaml": "770297fab757203c0c122932827bff4c98b8a1103bebfc3b680715e79f7eed66",
     "scripts/license-texts/Apache-2.0.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
     "scripts/native-search-tools-config.mjs": "c9eee03dccb8d1cc083de4946663e6a41ef4b29c185887fcd8949b0b2a783b3b",
@@ -14933,6 +14933,22 @@
         {
           "member": "https://registry.npmjs.org/quickjs-wasi/2.2.0",
           "sha256": "f29b60ea39a2132e3baa98927c2d473b349a54143da44a0c6762b243e6459452"
+        }
+      ]
+    },
+    {
+      "name": "quickjs-wasi",
+      "version": "3.6.2",
+      "license": "MIT",
+      "repository": "git://github.com/vercel-labs/quickjs-wasi.git",
+      "notices": [
+        {
+          "member": "LICENSE",
+          "sha256": "f7735da3b2531ddf451937117343cfadb853fd8054b499e7a70695dc57ffd184"
+        },
+        {
+          "member": "README.md (license section)",
+          "sha256": "44faefcb5cf66a9e461fded17be0a913e2430665ee1fc0fe659287a382ce20af"
         }
       ]
     },
