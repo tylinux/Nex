@@ -5,6 +5,24 @@ All notable changes to Nex are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] - 2026-10-06
+
+### Added
+
+- Codemode: a sandboxed `Codemode` tool that lets the model run a short
+  JavaScript program (QuickJS-WASM) which calls other tools in parallel and
+  returns only a budgeted summary to the model
+- On-demand tool declarations: `ToolSearch` (BM25) and a history-derived
+  declared set, so deferred tool schemas are sent only after they are found
+- Per-server `exposure` and per-tool `toolExposure` (`direct` / `deferred` /
+  `hidden`) for MCP servers, with a settings editor that has a per-tool
+  dropdown list and search
+- Settings switches for Tool Search and Codemode (both off by default)
+
+### Fixed
+
+- The web build can now save MCP server settings (via the `mcp-sync` RPC)
+
 ## [1.1.1] - 2026-10-05
 
 ### Added
