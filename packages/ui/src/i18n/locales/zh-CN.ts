@@ -1951,6 +1951,7 @@ const zhCN: Record<string, string> = {
   "settings.nativeSearchEnhancements": "增强 Find 和 Grep",
   "settings.nativeSearchEnhancementsDescription":
     "在新建会话或应用重启后恢复的会话中使用增强 Find 和 Grep。当前会话保持现有设置；Windows 的 Find 保持不变。",
+  "settings.toolCalling": "工具调用",
   "settings.toolSearch": "按需加载 MCP 工具",
   "settings.toolSearchDescription":
     "不再把 MCP 工具定义放进每次请求，模型需要时通过 ToolSearch 查找。仅对新会话和应用重启后恢复的会话生效。",

@@ -325,6 +325,8 @@ export const TID_SETTINGS_SECTION_NAV = "settings-section-nav";
 export const TID_SETTINGS_NATIVE_SEARCH_SWITCH = "settings-native-search-switch";
 export const TID_SETTINGS_TOOL_SEARCH_SWITCH = "settings-tool-search-switch";
 export const TID_SETTINGS_CODEMODE_SWITCH = "settings-codemode-switch";
+/** 设置页「工具调用」独立分组 */
+export const TID_SETTINGS_TOOL_CALLING_SECTION = "settings-tool-calling-section";
 export const TID_SETTINGS_MCP_EXPOSURE_SELECT = "settings-mcp-exposure-select";
 export const TID_SETTINGS_MCP_TOOL_EXPOSURE_ROW = "settings-mcp-tool-exposure-row";
 export const TID_SETTINGS_MCP_TOOL_EXPOSURE_SEARCH = "settings-mcp-tool-exposure-search";
