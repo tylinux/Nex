@@ -130,6 +130,7 @@ const petSettingsSchema = z.object({
     .enum(["top-left", "top-center", "top-right", "bottom-left", "bottom-center", "bottom-right"])
     .optional(),
   size: z.number().int().min(80).max(224).optional(),
+  visibility: z.enum(["always", "on-demand"]).optional(),
 });
 
 const nexEndpointOriginSchema = z.preprocess((value) => {

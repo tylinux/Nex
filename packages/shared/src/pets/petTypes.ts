@@ -40,6 +40,8 @@ export interface PetSettings {
   windowSnapZone?: PetSnapZone;
   /** 宠物宽度（px，80–224，缺省 112）。 */
   size?: number;
+  /** 悬浮窗可见性；缺省 always。 */
+  visibility?: import("./petFormat.js").PetVisibility;
 }
 
 /** 设置页网格条目。 */
@@ -80,6 +82,8 @@ export interface PetWindowState {
   spriteRows: number;
   /** 宠物宽度（px）。 */
   sizePx: number;
+  /** 悬浮窗可见性；on-demand 时由 main 注册全局快捷键控制显隐。 */
+  visibility: import("./petFormat.js").PetVisibility;
   /** 建窗/显示器变化时还原的落点；窗口存在期间以用户拖拽为准。 */
   placement?: PetWindowPlacement;
 }

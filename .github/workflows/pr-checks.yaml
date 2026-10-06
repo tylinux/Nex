@@ -59,6 +59,9 @@ jobs:
       - name: Unit tests (ui)
         run: pnpm --dir packages/ui exec tsx --tsconfig tsconfig.json --test test/*.test.ts
 
+      - name: Unit tests (desktop)
+        run: pnpm exec tsx --test packages/desktop/test/*.test.ts
+
   # apps/nex-cli is a separate pnpm workspace not covered by the root typecheck.
   cli-checks:
     runs-on: ubuntu-latest

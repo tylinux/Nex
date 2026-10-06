@@ -4190,6 +4190,11 @@ const enUS: Record<string, string> = {
   "settings.pets.size": "Size",
   "settings.pets.sizeDescription": "Adjust how large the pet appears on your desktop.",
   "settings.pets.sizeReset": "Reset",
+  "settings.pets.visibility": "Visibility",
+  "settings.pets.visibilityDescription":
+    "Choose whether the pet is always shown, or only appears when you press {shortcut} and hides when you click elsewhere.",
+  "settings.pets.visibilityAlways": "Always visible",
+  "settings.pets.visibilityOnDemand": "On demand",
   "settings.pets.myPets": "My pets",
   "settings.pets.refresh": "Refresh",
   "settings.pets.create": "Create pet",

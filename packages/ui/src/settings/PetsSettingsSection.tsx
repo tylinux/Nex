@@ -7,6 +7,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, RefreshCw } from "lucide-react";
 import {
   PET_SIZE_DEFAULT_PX,
+  PET_TOGGLE_ACCELERATOR,
+  type PetVisibility,
   PET_SIZE_MAX_PX,
   PET_SIZE_MIN_PX,
   clampPetSize,
@@ -16,7 +18,6 @@ import {
 } from "@nex/shared";
 import { Button } from "@/components/ui/button.js";
 import { Switch } from "@/components/ui/switch.js";
-import { usePlatform } from "@/hooks/usePlatform.js";
 import { useServices } from "@/hooks/useServices.js";
 import { useSettings } from "@/hooks/useSettingService.js";
 import { useNexIntl } from "@/i18n/IntlProvider.js";
@@ -151,6 +152,16 @@ export function PetsSettingsSection({ isDesktop }: PetsSettingsSectionProps) {
     [update, petSettings],
   );
 
+  const visibility: PetVisibility = petSettings?.visibility ?? "always";
+  const handleVisibilityChange = useCallback(
+    (next: PetVisibility) => {
+      void update({
+        pet: mergePetSettings(petSettings, { visibility: next === "always" ? undefined : next }),
+      });
+    },
+    [update, petSettings],
+  );
+
   const size = clampPetSize(petSettings?.size);
   // 滑杆拖动期间只改本地值，松手再落盘，避免每个像素都触发设置广播与悬浮窗重排。
   const [draftSize, setDraftSize] = useState<number | null>(null);
@@ -180,6 +191,30 @@ export function PetsSettingsSection({ isDesktop }: PetsSettingsSectionProps) {
             />
           }
         />
+        {isDesktop ? (
+          <SettingsRow
+            label={intl.formatMessage({ id: "settings.pets.visibility" })}
+            description={intl.formatMessage(
+              { id: "settings.pets.visibilityDescription" },
+              { shortcut: PET_TOGGLE_ACCELERATOR.replace("CommandOrControl", "Ctrl/⌘") },
+            )}
+            control={
+              <select
+                value={visibility}
+                onChange={(event) => handleVisibilityChange(event.target.value as PetVisibility)}
+                aria-label={intl.formatMessage({ id: "settings.pets.visibility" })}
+                className="h-8 rounded-md border border-border bg-card px-2 text-ui-sm text-foreground"
+              >
+                <option value="always">
+                  {intl.formatMessage({ id: "settings.pets.visibilityAlways" })}
+                </option>
+                <option value="on-demand">
+                  {intl.formatMessage({ id: "settings.pets.visibilityOnDemand" })}
+                </option>
+              </select>
+            }
+          />
+        ) : null}
         <SettingsRow
           label={intl.formatMessage({ id: "settings.pets.size" })}
           description={intl.formatMessage({ id: "settings.pets.sizeDescription" })}

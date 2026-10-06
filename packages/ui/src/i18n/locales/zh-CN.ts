@@ -3914,6 +3914,11 @@ const zhCN: Record<string, string> = {
   "settings.pets.size": "大小",
   "settings.pets.sizeDescription": "调整宠物在桌面上的显示大小。",
   "settings.pets.sizeReset": "重置",
+  "settings.pets.visibility": "显示方式",
+  "settings.pets.visibilityDescription":
+    "选择宠物常驻桌面，或仅在按下 {shortcut} 时出现、点击其他位置后隐藏。",
+  "settings.pets.visibilityAlways": "始终显示",
+  "settings.pets.visibilityOnDemand": "按需显示",
   "settings.pets.myPets": "我的宠物",
   "settings.pets.refresh": "刷新",
   "settings.pets.create": "创建宠物",

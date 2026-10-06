@@ -32,6 +32,7 @@ import {
 import {
   app,
   BrowserWindow,
+  globalShortcut,
   dialog,
   ipcMain,
   nativeImage,
@@ -719,6 +720,7 @@ function getPetWindowController() {
       BrowserWindow,
       screen,
       app,
+      globalShortcut,
       preloadPath: join(import.meta.dirname, "../preload/petWindow.cjs"),
       rendererDir: join(import.meta.dirname, "../renderer"),
       rendererDevUrl: process.env["ELECTRON_RENDERER_URL"],

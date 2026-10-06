@@ -18,6 +18,7 @@ import {
   PET_MOMENTUM_MAX_MS,
   PET_MOMENTUM_TICK_MS,
   PET_SNAP_ANIMATION_MS,
+  PET_TOGGLE_ACCELERATOR,
   PlatformChannels,
   classifyPetSnapZone,
   clampPetToWorkArea,
@@ -36,6 +37,8 @@ interface PetWindowDeps {
   BrowserWindow: typeof import("electron").BrowserWindow;
   screen: typeof ElectronScreen;
   app: Pick<typeof import("electron").app, "isPackaged">;
+  /** on-demand 模式注册显隐快捷键；测试可注入。 */
+  globalShortcut?: Pick<typeof import("electron").globalShortcut, "register" | "unregister">;
   preloadPath: string;
   rendererDir: string;
   rendererDevUrl?: string | undefined;
@@ -75,6 +78,10 @@ export function createPetWindowController(deps: PetWindowDeps): PetWindowControl
   let drag: { offsetX: number; offsetY: number } | null = null;
   let stopMotion: (() => void) | null = null;
   let displayListenersAttached = false;
+  let shortcutRegistered = false;
+  /** on-demand 模式下窗口是否被用户唤出；always 模式恒为 true。 */
+  let revealed = true;
+  let revealedAt = 0;
 
   const listDisplays = () => deps.screen.getAllDisplays().map(toDisplayInfo);
 
@@ -206,6 +213,59 @@ export function createPetWindowController(deps: PetWindowDeps): PetWindowControl
     deps.screen.removeListener("display-metrics-changed", reflow);
   };
 
+  const showWindow = (target: BrowserWindow) => {
+    if (target.isDestroyed()) return;
+    target.showInactive();
+    target.setAlwaysOnTop(true, "screen-saver");
+    target.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  };
+
+  const toggleRevealed = () => {
+    if (!win || win.isDestroyed()) return;
+    if (revealed) {
+      revealed = false;
+      win.hide();
+      return;
+    }
+    revealed = true;
+    revealedAt = Date.now();
+    // on-demand 的「点击窗口外隐藏」依赖 blur，窗口必须真正拿到焦点才会在失焦时触发。
+    win.show();
+    win.focus();
+  };
+
+  const syncShortcut = (visibility: PetWindowState["visibility"]) => {
+    const register = deps.globalShortcut;
+    if (!register) return;
+    if (visibility === "on-demand" && !shortcutRegistered) {
+      shortcutRegistered = register.register(PET_TOGGLE_ACCELERATOR, toggleRevealed);
+      if (shortcutRegistered) {
+        logger.info(`[pets] 已注册全局快捷键 ${PET_TOGGLE_ACCELERATOR}`);
+      } else {
+        logger.warn(`[pets] 全局快捷键 ${PET_TOGGLE_ACCELERATOR} 注册失败（可能被占用）`);
+      }
+    } else if (visibility !== "on-demand" && shortcutRegistered) {
+      register.unregister(PET_TOGGLE_ACCELERATOR);
+      shortcutRegistered = false;
+    }
+  };
+
+  const applyVisibility = (target: BrowserWindow, state: PetWindowState) => {
+    syncShortcut(state.visibility);
+    if (state.visibility === "always") {
+      if (!revealed || !target.isVisible()) {
+        revealed = true;
+        showWindow(target);
+      }
+      return;
+    }
+    // 快捷键注册失败时回退为常显，避免宠物永远无法唤出。
+    if (!shortcutRegistered && deps.globalShortcut) {
+      revealed = true;
+      if (!target.isVisible()) showWindow(target);
+    }
+  };
+
   const ensureWindow = (state: PetWindowState): BrowserWindow => {
     if (win && !win.isDestroyed()) return win;
 
@@ -248,11 +308,24 @@ export function createPetWindowController(deps: PetWindowDeps): PetWindowControl
       void created.loadFile(`${deps.rendererDir}/pet-window.html`);
     }
 
+    revealed = state.visibility === "always";
     created.once("ready-to-show", () => {
-      if (created.isDestroyed()) return;
-      created.showInactive();
-      created.setAlwaysOnTop(true, "screen-saver");
-      created.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+      if (created.isDestroyed() || !lastState) return;
+      if (
+        lastState.visibility === "always" ||
+        (lastState.visibility === "on-demand" && !shortcutRegistered)
+      ) {
+        revealed = true;
+        showWindow(created);
+      }
+    });
+
+    // on-demand：窗口失焦（点击窗口外）即隐藏；刚唤出的 300ms 内忽略，避免焦点交接误触发。
+    created.on("blur", () => {
+      if (lastState?.visibility !== "on-demand" || !revealed) return;
+      if (Date.now() - revealedAt < 300) return;
+      revealed = false;
+      if (!created.isDestroyed()) created.hide();
     });
 
     created.on("closed", () => {
@@ -260,6 +333,7 @@ export function createPetWindowController(deps: PetWindowDeps): PetWindowControl
       drag = null;
       cancelMotion();
       detachDisplayListeners();
+      syncShortcut("always");
     });
 
     attachDisplayListeners();
@@ -271,6 +345,7 @@ export function createPetWindowController(deps: PetWindowDeps): PetWindowControl
     cancelMotion();
     drag = null;
     detachDisplayListeners();
+    syncShortcut("always");
     if (win && !win.isDestroyed()) win.destroy();
     win = null;
   };
@@ -288,6 +363,7 @@ export function createPetWindowController(deps: PetWindowDeps): PetWindowControl
       if (previousSize !== undefined && previousSize !== state.sizePx) {
         reflow();
       }
+      applyVisibility(target, state);
       if (!target.webContents.isLoading()) {
         target.webContents.send(PlatformChannels.PetWindowState, state);
       } else {

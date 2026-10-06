@@ -124,6 +124,7 @@ export function PetRuntime({ isDesktop }: PetRuntimeProps) {
       manifest: selectedPet.manifest,
       spriteRows: selectedPet.spriteRows,
       sizePx: clampPetSize(petSettings?.size),
+      visibility: petSettings?.visibility ?? "always",
       ...(petSettings?.windowPosition
         ? {
             placement: {
@@ -151,6 +152,7 @@ export function PetRuntime({ isDesktop }: PetRuntimeProps) {
     petSettings?.windowDisplayId,
     petSettings?.windowSnapZone,
     petSettings?.size,
+    petSettings?.visibility,
   ]);
 
   const handleWidgetAnchorChange = useCallback(

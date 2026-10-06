@@ -107,3 +107,9 @@ export const PET_STATE_LIFETIMES_MS = {
 
 /** 宠物展示尺寸（px）：挂件/悬浮窗中的目标高度。帧高 208 → 缩放比例由此推导。 */
 export const PET_DISPLAY_HEIGHT_PX = 96;
+
+/** 桌面悬浮窗可见性：始终显示，或仅在按下全局快捷键时显示（点击窗口外隐藏）。 */
+export type PetVisibility = "always" | "on-demand";
+export const PET_DEFAULT_VISIBILITY: PetVisibility = "always";
+/** on-demand 模式的全局快捷键（Electron accelerator）。 */
+export const PET_TOGGLE_ACCELERATOR = "CommandOrControl+Alt+P";

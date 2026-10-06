@@ -26,6 +26,8 @@ Related: `packages/shared/src/nex-protocol-v4/sessions-index.ts`（状态数据�
   - 松手速度取最近 ≤160ms 的采样，低于 320px/s 视为抖动丢弃，上限 1600px/s，发送时 ×3；有速度则进入动量（16ms tick，摩擦 `0.88^(dt/16)`，边缘碰撞弹性 0.7，速度 <65px/s 或 900ms 结束）。
   - 动量结束或无速度松手后，吸附到最近的 6 个边缘区（左/中/右 × 上/下，边距 16px，160ms 缓动）；按住 Alt 松手则自由放置，不吸附。
   - 位置按显示器持久化（`pet.windowPosition` + `windowDisplayId` + `windowSnapZone`）。吸附态在显示器分辨率变化后按新工作区重算；显示器被拔除或指标变化时窗口夹回可见区域。
+- 显示方式（`pet.visibility`，仅 Desktop）：`always`（默认，常驻）或 `on-demand`——悬浮窗默认隐藏，按全局快捷键 `CommandOrControl+Alt+P` 唤出并获得焦点，再按一次或点击窗口外（失焦，唤出后 300ms 内忽略）隐藏。快捷键注册失败（被占用）时回退为常显。快捷键固定，本期不可自定义。
+- 明确不做（研究报告第 8 节取舍）：`setInputShape` 命中测试（窗口与精灵等大，无透明死区）、macOS 私有 AppKit 桥与 `sky.node` 原生拖拽（私有 API，JS 拖拽已足够流畅）、通知托盘 / Quick Chat / 听写复用（属 Codex Mini 悬浮层，另立功能）、`codex://` deep-link 安装（引入下载与安全面，用户手动放置目录即可）。
 - 本期不做：宠物游戏化行为、`~/.codex` 目录读取、官方宠物分发、创建宠物 skill、通知托盘 / Quick Chat / 听写复用、deep-link 安装、macOS 私有 AppKit 桥与原生拖拽（悬浮窗紧贴精灵，无需 input shape 命中测试）。
 
 ## 状态所有者与数据流
