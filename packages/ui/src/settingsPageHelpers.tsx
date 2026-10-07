@@ -29,6 +29,7 @@ import { Switch } from "@/components/ui/switch.js";
 import { Input } from "@/components/ui/input.js";
 import { Button } from "@/components/ui/button.js";
 import { SettingsBadge, SettingsGroupCard, SettingsRow } from "@/settings/SettingsPageParts.js";
+import { TaskNotificationPermissionRow } from "@/settings/TaskNotificationPermissionRow.js";
 import { DataBaseDirControl } from "@/settings/DataBaseDirControl.js";
 import { useNexIntl } from "@/i18n/IntlProvider.js";
 import { useOptionalServices } from "@/hooks/useServices.js";
@@ -75,6 +76,7 @@ export function GeneralSectionContent({
   isDesktop,
   isWindowsDesktop,
   isMacDesktop,
+  platform,
   showIntegratedTerminalShell = false,
   setLocalePreference,
   setNotificationEnabled,
@@ -664,6 +666,7 @@ export function GeneralSectionContent({
             <Switch checked={notificationEnabled} onCheckedChange={setNotificationEnabled} />
           }
         />
+        {notificationEnabled ? <TaskNotificationPermissionRow platform={platform} /> : null}
         <SettingsRow
           label={intl.formatMessage({ id: "settings.notificationSound" })}
           description={intl.formatMessage({

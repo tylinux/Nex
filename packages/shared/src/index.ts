@@ -183,6 +183,7 @@ export type {
   RemoteServiceSession,
   SSHConfigAliasOption,
   TaskNotificationPayload,
+  TaskNotificationPermission,
   UpdateCheckResultPayload,
   UpdateStatePayload,
   WSLDistro,

@@ -26,6 +26,7 @@ import {
 } from "./share/conversationShareRoute.js";
 import type { IPlatformService, RemoteTarget, ServerRemoteInfo } from "@nex/shared";
 import { createWebMcpPlatform, type WebMcpSyncService } from "./webMcpPlatform.js";
+import { createWebTaskNotifier, type BrowserNotificationApi } from "./webTaskNotifier.js";
 import { WEB_DEFAULT_THEME, resolveWebInitialTheme } from "./webThemeSeed.js";
 
 function resolveWebThemePreference(defaultTheme: Theme = WEB_DEFAULT_THEME): Theme {
@@ -143,6 +144,17 @@ async function renderConversationSharePage(): Promise<void> {
 }
 
 function createWebPlatform(mcpSyncService: WebMcpSyncService): IPlatformService {
+  const taskNotifier = createWebTaskNotifier({
+    getNotificationApi: () =>
+      typeof window.Notification === "undefined"
+        ? undefined
+        : (window.Notification as unknown as BrowserNotificationApi),
+    hasFocus: () => document.hasFocus(),
+    focusWindow: () => window.focus(),
+    playSound: playTaskNotificationSound,
+    logger: console,
+  });
+
   return {
     canSelectFilePath: false,
     // Web 端无法打开系统目录选择框
@@ -209,28 +221,9 @@ function createWebPlatform(mcpSyncService: WebMcpSyncService): IPlatformService 
     onPaymentCallback: () => () => {},
     onShareImport: () => () => {},
     notifyRendererReady: () => {},
-    showTaskNotification: (payload) => {
-      if (document.hasFocus()) {
-        return;
-      }
-
-      if (
-        typeof window.Notification === "undefined" ||
-        window.Notification.permission !== "granted"
-      ) {
-        return;
-      }
-
-      try {
-        new window.Notification(payload.title, {
-          body: payload.body,
-          silent: true,
-        });
-        void playTaskNotificationSound();
-      } catch {
-        // 浏览器通知不可用时静默忽略，避免打断主流程
-      }
-    },
+    showTaskNotification: taskNotifier.show,
+    getTaskNotificationPermission: taskNotifier.getPermission,
+    requestTaskNotificationPermission: taskNotifier.requestPermission,
     // Web 端不需要跨窗口 tab 管理
     syncWindowTabs: () => {},
     // Web 端没有宿主层 Dock / 任务栏徽标，保持空实现以兼容统一平台接口
@@ -243,7 +236,7 @@ function createWebPlatform(mcpSyncService: WebMcpSyncService): IPlatformService 
     onNewTask: () => () => {},
     onOpenWorkspace: () => () => {},
     onWindowFullscreenChanged: () => () => {},
-    onTaskNotificationClick: () => () => {},
+    onTaskNotificationClick: taskNotifier.onClick,
     exportLogs: () => Promise.resolve({ success: false, error: "Not supported in web mode" }),
     captureWindowScreenshot: () => Promise.resolve(null),
     importChromeBrowserData: (_options) =>
