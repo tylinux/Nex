@@ -381,7 +381,13 @@ export function ProviderModelsSection({
   ) => void | Promise<void>;
   onDeleteModel: (modelId: string) => void;
   onModelEnabledChange?: (modelId: string, enabled: boolean) => void | Promise<void>;
-  onAddModel: (model: ProviderSettingsFormModel) => void | Promise<void>;
+  onAddModel: (
+    model: ProviderSettingsFormModel,
+    notification?: {
+      feedbackKey?: string;
+      aggregate?: { readonly count: number };
+    },
+  ) => void | Promise<void>;
   onReorderModelIds?: (modelIds: string[]) => void;
   settingsRevision?: number;
 }) {
@@ -413,19 +419,29 @@ export function ProviderModelsSection({
       // models.dev 查询互不依赖可并发；查询失败不阻断添加，落盘为空配置走内建基线。
       const lookups = await Promise.allSettled(modelIds.map(lookupModelInfo));
       const failures: string[] = [];
+      // 批量添加共用一个通知 key 与计数：逐个保存仍写入各自的模型，但提示只有一条。
+      const batchNotification = {
+        feedbackKey: `models-add:${providerId}`,
+        aggregate: { count: modelIds.length },
+      };
       // 添加会逐个写入供应商配置，保持串行以免并发写覆盖。
       for (const [index, modelId] of modelIds.entries()) {
         const lookup = lookups[index];
         const config =
           lookup?.status === "fulfilled" && lookup.value.found ? lookup.value.config : {};
         try {
-          await onAddModel({
-            ...createEmptyModel(),
-            modelId,
-            personalConfig: structuredClone(config) as ProviderSettingsFormModel["personalConfig"],
-            hasPersonalConfig: true,
-            useRecommendedConfig: true,
-          });
+          await onAddModel(
+            {
+              ...createEmptyModel(),
+              modelId,
+              personalConfig: structuredClone(
+                config,
+              ) as ProviderSettingsFormModel["personalConfig"],
+              hasPersonalConfig: true,
+              useRecommendedConfig: true,
+            },
+            batchNotification,
+          );
         } catch {
           failures.push(modelId);
         }
