@@ -42,9 +42,19 @@ else
   BIN_TARGET="/usr/local/bin/nex-server"
 fi
 
-# Web assets live in ./web next to this script inside the install tarball.
+# Web assets location inside the install tarball. The release tarball puts
+# `web/` at the bundle root alongside the binary, with this script in
+# `bundle/packaging/install.sh`; dev/local invocations may instead keep `web/`
+# next to the script. Probe both so a bare-metal install serves the version
+# aligned web UI regardless of layout. An explicit WEB_ASSETS_SRC still wins.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WEB_ASSETS_SRC="${WEB_ASSETS_SRC:-${SCRIPT_DIR}/web}"
+if [[ -n "${WEB_ASSETS_SRC:-}" ]]; then
+  : # honor caller override
+elif [[ -d "${SCRIPT_DIR}/../web" ]]; then
+  WEB_ASSETS_SRC="${SCRIPT_DIR}/../web"
+else
+  WEB_ASSETS_SRC="${SCRIPT_DIR}/web"
+fi
 
 if [[ $UNINSTALL -eq 1 ]]; then
   if [[ "$PLATFORM" == "linux" ]]; then
