@@ -2044,6 +2044,9 @@ const zhCN: Record<string, string> = {
   "settings.closeToTrayOnWindows": "关闭窗口时隐藏到托盘",
   "settings.closeToTrayOnWindowsDescription":
     "仅 Windows 生效。点击关闭按钮或关闭窗口快捷键时隐藏窗口，托盘中的退出仍会完全退出应用。",
+  "settings.showDockIcon": "在 Dock 中显示图标",
+  "settings.showDockIconDescription":
+    "仅 macOS 生效。关闭后 Dock 不再显示 Nex 图标，可通过菜单栏图标打开主窗口。",
   "settings.keepAwakeWhileRunning": "保持电脑运行",
   "settings.keepAwakeWhileRunningDescription":
     "打开后阻止系统因空闲进入休眠（仍可手动睡眠/合盖休眠）。桌面端全局生效。",

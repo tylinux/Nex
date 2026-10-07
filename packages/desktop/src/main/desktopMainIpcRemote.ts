@@ -44,6 +44,7 @@ function parseOpenExternalRequest(payload: unknown): OpenExternalRequest | null 
 }
 
 export function registerRemoteIpcHandlers(options: {
+  revealDockForForeground: () => void;
   logger: {
     info: (...args: unknown[]) => void;
     warn: (...args: unknown[]) => void;
@@ -116,10 +117,20 @@ export function registerRemoteIpcHandlers(options: {
   });
 
   ipcMain.on(PlatformChannels.ShowTaskNotification, (event, payload: unknown) => {
-    dispatchTaskNotification({ event, payload, logger: options.logger });
+    dispatchTaskNotification({
+      event,
+      payload,
+      revealDockForForeground: options.revealDockForForeground,
+      logger: options.logger,
+    });
   });
   ipcMain.handle(PlatformChannels.ShowTaskNotification, (event, payload: unknown) =>
-    dispatchTaskNotification({ event, payload, logger: options.logger }),
+    dispatchTaskNotification({
+      event,
+      payload,
+      revealDockForForeground: options.revealDockForForeground,
+      logger: options.logger,
+    }),
   );
 
   app.on("browser-window-created", (_, win) => {

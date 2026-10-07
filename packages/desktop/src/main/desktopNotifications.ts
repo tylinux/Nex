@@ -60,7 +60,10 @@ function releaseTaskNotification(notification: Notification) {
   activeTaskNotifications.delete(notification);
 }
 
-function focusTaskNotificationWindow(senderWindow: BrowserWindow) {
+function focusTaskNotificationWindow(
+  senderWindow: BrowserWindow,
+  revealDockForForeground: () => void,
+) {
   if (senderWindow.isMinimized()) {
     senderWindow.restore();
   }
@@ -72,7 +75,8 @@ function focusTaskNotificationWindow(senderWindow: BrowserWindow) {
   // macOS 点通知时如果窗口曾被隐藏/最小化，必须先恢复窗口，再激活 app，
   // 最后聚焦 BrowserWindow；否则 app.focus 抢到前台时没有可显示窗口，后续 focus 可能被系统忽略。
   if (process.platform === "darwin") {
-    app.dock?.show();
+    // 用户在设置里隐藏了 Dock 图标时，通知点击不能把它重新带回来。
+    revealDockForForeground();
     app.show();
     app.focus({ steal: true });
   }
@@ -83,6 +87,7 @@ function focusTaskNotificationWindow(senderWindow: BrowserWindow) {
 export function dispatchTaskNotification(options: {
   event: IpcMainEvent | IpcMainInvokeEvent;
   payload: unknown;
+  revealDockForForeground: () => void;
   logger: { info: (...args: unknown[]) => void; warn: (...args: unknown[]) => void };
 }): boolean {
   const result = taskNotificationPayloadSchema.safeParse(options.payload);
@@ -141,7 +146,7 @@ export function dispatchTaskNotification(options: {
       return;
     }
 
-    focusTaskNotificationWindow(senderWindow);
+    focusTaskNotificationWindow(senderWindow, options.revealDockForForeground);
     senderWindow.webContents.send(PlatformChannels.TaskNotificationClick, taskId);
     options.logger.info("[show-task-notification] notification click handled", {
       taskId,

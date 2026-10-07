@@ -54,6 +54,8 @@ export function GeneralSectionContent({
   notificationEnabled,
   notificationSoundEnabled,
   closeToTrayOnWindows,
+  showDockIcon = true,
+  onShowDockIconChange = () => {},
   keepAwakeWhileRunning = false,
   desktopChromiumHardwareAccelerationEnabled = true,
   receivePreviewUpdates,
@@ -72,6 +74,7 @@ export function GeneralSectionContent({
   defaultHomeDir,
   isDesktop,
   isWindowsDesktop,
+  isMacDesktop,
   showIntegratedTerminalShell = false,
   setLocalePreference,
   setNotificationEnabled,
@@ -119,6 +122,8 @@ export function GeneralSectionContent({
   notificationEnabled: boolean;
   notificationSoundEnabled: boolean;
   closeToTrayOnWindows: boolean;
+  showDockIcon?: boolean;
+  onShowDockIconChange?: (enabled: boolean) => void | Promise<void>;
   keepAwakeWhileRunning?: boolean;
   desktopChromiumHardwareAccelerationEnabled?: boolean;
   receivePreviewUpdates: boolean;
@@ -137,6 +142,7 @@ export function GeneralSectionContent({
   defaultHomeDir: string;
   isDesktop?: boolean;
   isWindowsDesktop?: boolean;
+  isMacDesktop?: boolean;
   showIntegratedTerminalShell?: boolean;
   platform?: IPlatformService;
   setLocalePreference: (locale: LocalePreference) => void;
@@ -682,6 +688,21 @@ export function GeneralSectionContent({
                 checked={closeToTrayOnWindows}
                 onCheckedChange={(checked) => {
                   void onCloseToTrayOnWindowsChange(checked);
+                }}
+              />
+            }
+          />
+        ) : null}
+        {isMacDesktop ? (
+          <SettingsRow
+            label={intl.formatMessage({ id: "settings.showDockIcon" })}
+            description={intl.formatMessage({ id: "settings.showDockIconDescription" })}
+            control={
+              <Switch
+                aria-label={intl.formatMessage({ id: "settings.showDockIcon" })}
+                checked={showDockIcon}
+                onCheckedChange={(checked) => {
+                  void onShowDockIconChange(checked);
                 }}
               />
             }

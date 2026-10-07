@@ -2177,6 +2177,9 @@ const enUS: Record<string, string> = {
   "settings.closeToTrayOnWindows": "Hide to tray when closing window",
   "settings.closeToTrayOnWindowsDescription":
     "Windows only. The close button and close-window shortcut hide the window, while Quit from the tray still exits the app.",
+  "settings.showDockIcon": "Show icon in Dock",
+  "settings.showDockIconDescription":
+    "macOS only. When off, Nex hides its Dock icon and stays reachable from the menu bar icon.",
   "settings.keepAwakeWhileRunning": "Keep computer running",
   "settings.keepAwakeWhileRunningDescription":
     "Prevent the system from sleeping due to idle. You can still sleep manually or by closing the lid. Desktop only.",
