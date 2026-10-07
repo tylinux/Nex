@@ -128,15 +128,19 @@ function loadModelsDevCatalog(): Promise<ModelsDevCatalog | null> {
 
 /**
  * 命名空间感知查找，返回所有命中条目（聚合商与官方同名条目并存很常见）：
- * 同时匹配完整 ID 与 "ns/model" 去掉命名空间后的模型名，大小写不敏感。
+ * 同时匹配完整 ID 与逐层去掉命名空间前缀后的各个后缀，大小写不敏感。
  */
 export function findModelsDevModels(catalog: ModelsDevCatalog, modelId: string): ModelsDevMatch[] {
   const normalized = modelId.trim().toLowerCase();
   if (!normalized) return [];
+  // 命名空间可能有多层（"cst/claude/claude-sonnet-5-5"），目录键本身也可能带斜杠
+  // （"anthropic/claude-..."），所以逐层剥掉前缀，把每个后缀都作为候选。
   const candidates = new Set([normalized]);
-  const separatorIndex = normalized.indexOf("/");
-  if (separatorIndex > 0 && separatorIndex < normalized.length - 1) {
-    candidates.add(normalized.slice(separatorIndex + 1));
+  let separatorIndex = normalized.indexOf("/");
+  while (separatorIndex >= 0) {
+    const suffix = normalized.slice(separatorIndex + 1);
+    if (suffix) candidates.add(suffix);
+    separatorIndex = normalized.indexOf("/", separatorIndex + 1);
   }
   const matches: ModelsDevMatch[] = [];
   for (const [providerId, provider] of Object.entries(catalog)) {

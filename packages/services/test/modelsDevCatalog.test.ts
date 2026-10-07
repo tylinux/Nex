@@ -47,6 +47,17 @@ test("findModelsDevModels matches namespaced and differently-cased IDs across pr
   assert.deepEqual(findModelsDevModels(catalog, "   "), []);
 });
 
+test("findModelsDevModels strips any number of namespace prefixes", () => {
+  assert.equal(findModelsDevModels(catalog, "cst/openai/gpt-5.4").length, 3);
+  assert.equal(findModelsDevModels(catalog, "a/b/c/GPT-5.4").length, 3);
+  assert.deepEqual(findModelsDevModels(catalog, "cst/openai/"), []);
+
+  const slashKeyCatalog: ModelsDevCatalog = {
+    router: { models: { "anthropic/claude-sonnet-5-5": { limit: { context: 1 } } } },
+  };
+  assert.equal(findModelsDevModels(slashKeyCatalog, "cst/anthropic/claude-sonnet-5-5").length, 1);
+});
+
 test("modelConfigFromMatches aggregates by majority and ignores invalid values", () => {
   const config = modelConfigFromMatches(findModelsDevModels(catalog, "gpt-5.4"));
   assert.equal(config.properties?.contextWindow, 1_050_000);
