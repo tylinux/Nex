@@ -47,7 +47,10 @@ import { TECHNICAL_INPUT_ATTRIBUTES } from "@/lib/technicalInputAttributes.js";
 import { ApiKeyInput } from "./ApiKeyInput.js";
 import { ModelRowInput } from "./ProviderFormControls.js";
 import { PresetProviderApiKeyBanner } from "./PresetProviderApiKeyBanner.js";
-import { type ProviderModelDraftValues } from "@/settings/model-provider-section/ProviderModelMetadata.js";
+import {
+  type ProviderModelDraftInvalidField,
+  type ProviderModelDraftValues,
+} from "@/settings/model-provider-section/ProviderModelMetadata.js";
 import { ProviderModelMetadataDialog } from "@/settings/model-provider-section/ProviderModelMetadataDialog.js";
 import {
   ProviderApiFormatSelect,
@@ -390,15 +393,8 @@ export function ProviderModelsSection({
   const addSavingRef = useRef(false);
   const [addCommitError, setAddCommitError] = useState<string | null>(null);
   const [addModel] = useState(createEmptyModel);
-  const [addDraftErrorField, setAddDraftErrorField] = useState<
-    | "id"
-    | "contextWindow"
-    | "maxOutputTokens"
-    | "inputFormat"
-    | "reasoningLevelValues"
-    | "reasoningLevelMap"
-    | null
-  >(null);
+  const [addDraftErrorField, setAddDraftErrorField] =
+    useState<ProviderModelDraftInvalidField | null>(null);
   const resolveAddModelConfig = useCallback(
     (modelId: string) => providerSettingsService.resolveModelConfig({ providerId, modelId }),
     [providerId, providerSettingsService],

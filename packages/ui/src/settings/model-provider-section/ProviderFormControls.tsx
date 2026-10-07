@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button.js";
 import { ModelInputCapabilityBadge } from "@/components/ModelInputCapabilityBadge.js";
 import { Switch } from "@/components/ui/switch.js";
 import { useNexIntl } from "@/i18n/IntlProvider.js";
+import type { ProviderModelDraftInvalidField } from "@/settings/model-provider-section/ProviderModelMetadata.js";
 import { useProviderModelDraft } from "@/settings/model-provider-section/useProviderModelDraft.js";
 import { ProviderModelMetadataDialog } from "@/settings/model-provider-section/ProviderModelMetadataDialog.js";
 import { formatModelContextWindowLabel } from "@/lib/tokenNumberFormat.js";
@@ -65,15 +66,9 @@ export function ModelRowInput({
     resolve: onResolveDraft,
   });
   const { draft } = editor;
-  const [draftErrorField, setDraftErrorField] = useState<
-    | "id"
-    | "contextWindow"
-    | "maxOutputTokens"
-    | "inputFormat"
-    | "reasoningLevelValues"
-    | "reasoningLevelMap"
-    | null
-  >(null);
+  const [draftErrorField, setDraftErrorField] = useState<ProviderModelDraftInvalidField | null>(
+    null,
+  );
 
   const updateDraft = (patch: Parameters<typeof editor.change>[0]) => {
     editor.change(patch);
