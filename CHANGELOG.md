@@ -5,6 +5,29 @@ All notable changes to Nex are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.2] - 2026-10-07
+
+### Added
+
+- Model display name: an optional per-model alias set in the model editor
+  ("Model name") that the chat model picker shows as `Provider/Name`, so long
+  IDs like `magpie/cst/claude/claude-sonnet-5-5` can read as
+  `magpie/sonnet-5-5`. It defaults to the model ID, is display-only, and
+  requests keep using the model ID.
+
+### Fixed
+
+- "Fetch model info" now resolves model IDs with several namespace levels
+  (e.g. `cst/claude/claude-opus-5-5`), not just one.
+- Adding several models from the "fetch from /v1/models" dialog now shows a
+  single aggregated notification instead of one per model.
+
+### Upgrade note
+
+- A build that does not know about the model `name` field rejects a personal
+  provider config containing it. Upgrade every build sharing the same data root
+  (desktop app, `nex-server`) together; downgrading has the same effect.
+
 ## [1.2.1] - 2026-10-07
 
 ### Added
