@@ -38,8 +38,14 @@ class FakeWindow extends EventEmitter {
   isVisible() {
     return this.visible;
   }
-  setAlwaysOnTop() {}
-  setVisibleOnAllWorkspaces() {}
+  levelCalls: unknown[][] = [];
+  workspaceCalls: unknown[][] = [];
+  setAlwaysOnTop(...args: unknown[]) {
+    this.levelCalls.push(args);
+  }
+  setVisibleOnAllWorkspaces(...args: unknown[]) {
+    this.workspaceCalls.push(args);
+  }
   isDestroyed() {
     return this.destroyed;
   }
@@ -299,4 +305,17 @@ test("右键菜单：窗口不存在时退回默认弹出", () => {
   let called = 0;
   env.controller.popupMenu({ popup: () => void (called += 1) });
   assert.equal(called, 1);
+});
+
+test("悬浮窗不改变应用激活策略：floating 层级、跟随所有桌面但不设置 visibleOnFullScreen", () => {
+  const env = setup([D1]);
+  env.controller.syncState({ ...baseState });
+  env.ready();
+  const win = env.window();
+  assert.deepEqual(win.levelCalls.at(-1), [true, "floating"]);
+  assert.equal(win.workspaceCalls.length > 0, true);
+  for (const [visible, options] of win.workspaceCalls) {
+    assert.equal(visible, true);
+    assert.deepEqual(options, { skipTransformProcessType: true });
+  }
 });

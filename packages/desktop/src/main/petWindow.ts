@@ -223,8 +223,12 @@ export function createPetWindowController(deps: PetWindowDeps): PetWindowControl
   const showWindow = (target: BrowserWindow) => {
     if (target.isDestroyed()) return;
     target.showInactive();
-    target.setAlwaysOnTop(true, "screen-saver");
-    target.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    // 修复：visibleOnFullScreen: true 会让 Electron 调用 DockHide，把整个进程转成 accessory 应用，
+    // 导致 Dock 图标消失、Nex 窗口盖在全屏 app 上，并在从全屏 app 返回后丢失该屏幕的菜单栏
+    // （关闭宠物即恢复，已实测）。Codex 的悬浮窗也只是 floating 层级。
+    // skipTransformProcessType 保证无论如何都不改变应用激活策略。
+    target.setAlwaysOnTop(true, "floating");
+    target.setVisibleOnAllWorkspaces(true, { skipTransformProcessType: true });
   };
 
   const toggleRevealed = () => {

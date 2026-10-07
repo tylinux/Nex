@@ -74,6 +74,7 @@ Related: `packages/shared/src/nex-protocol-v4/sessions-index.ts`（状态数据�
 
 ## 不变量
 
+- 宠物悬浮窗**不得改变应用的激活策略**：窗口层级用 `floating`，用 `setVisibleOnAllWorkspaces(true, { skipTransformProcessType: true })` 跟随所有桌面空间，且**不**设置 `visibleOnFullScreen`。Electron 在 `visibleOnFullScreen: true` 时会把整个进程转成 accessory（UIElement）应用：Dock 图标消失（与「在 Dock 中显示图标」设置冲突）、Nex 窗口会盖在全屏 app 上，并且从全屏 app 返回 Nex 后该屏幕的菜单栏整条消失（用户实测：关闭宠物后恢复正常）。代价是宠物不会浮在全屏 app 之上，与 Codex 一致（`floating`，无全屏标志）。
 - 精灵图网格必须铺满：`frameWidth × columns == 图宽`，图高为 `frameHeight` 整数倍且不少于声明行数；默认 192×208 / 8×9，官方 v1 1536×1872、v2 1536×2288。
 - `pet.json` 中 `spritesheetPath` 只允许**目录内相对路径**；绝对路径与任何 `..` 段一律拒绝。
 - manifest `animations` 覆盖时：帧索引 `< columns × rows`、帧总数 ≤ 256、`fps ∈ (0, 60]`、`fallback` 必须指向已定义动画。
