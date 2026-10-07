@@ -7,10 +7,11 @@
 #   - v* tag push -> versioned assets on that tag's release
 #
 # Artifacts (binary + packaging/: install.sh, systemd unit, launchd plist +
-# web static assets):
-#   nex-server-darwin-arm64-alpha-<shortsha>.tar.gz
-#   nex-server-linux-x64-alpha-<shortsha>.tar.gz
-#   nex-server-linux-arm64-alpha-<shortsha>.tar.gz
+# web static assets). The suffix distinguishes a build of main (<shortsha>, kept
+# per-commit for rollback) from a released version (<version>, the pushed tag):
+#   nex-server-darwin-arm64-<version|shortsha>.tar.gz
+#   nex-server-linux-x64-<version|shortsha>.tar.gz
+#   nex-server-linux-arm64-<version|shortsha>.tar.gz
 #
 # The tarball also carries the matching web build (packages/web/dist). The
 # installer deploys it next to the data dir and points NEX_WEB_STATIC_ROOT at
@@ -78,9 +79,18 @@ jobs:
           # server serves a UI matching its own binary version.
           pnpm --filter @nex/web build
 
-      - name: Resolve short sha
+      # 版本发布用 tag 名（v1.2.2），main 的滚动构建用 short sha：两者的 Release 都由
+      # 本工作流创建，命名必须能区分版本与逐次构建，所以不是可选项。
+      - name: Resolve asset label
         id: meta
-        run: echo "shortsha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+        run: |
+          shortsha="${GITHUB_SHA::7}"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "label=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            echo "label=${shortsha}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "shortsha=${shortsha}" >> "$GITHUB_OUTPUT"
 
       - name: Build SEA binary (${{ matrix.target }})
         working-directory: packages/server
@@ -95,13 +105,13 @@ jobs:
           # Matching web build (index.html + hashed assets), served by the
           # server process itself via NEX_WEB_STATIC_ROOT.
           cp -r ../../../web/dist/. bundle/web/
-          tar -czf nex-server-${{ matrix.target }}-alpha-${{ steps.meta.outputs.shortsha }}.tar.gz -C bundle .
+          tar -czf nex-server-${{ matrix.target }}-${{ steps.meta.outputs.label }}.tar.gz -C bundle .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nex-server-${{ matrix.target }}-alpha-${{ steps.meta.outputs.shortsha }}
-          path: packages/server/dist/sea/nex-server-${{ matrix.target }}-alpha-${{ steps.meta.outputs.shortsha }}.tar.gz
+          name: nex-server-${{ matrix.target }}-${{ steps.meta.outputs.label }}
+          path: packages/server/dist/sea/nex-server-${{ matrix.target }}-${{ steps.meta.outputs.label }}.tar.gz
           retention-days: 7
 
   release:
@@ -139,4 +149,4 @@ jobs:
             --target "$GITHUB_SHA" \
             --title "Nex server (${tag})" \
             --notes "$notes" \
-            dist/nex-server-*-alpha-${shortsha}.tar.gz
+            dist/nex-server-*-${shortsha}.tar.gz
