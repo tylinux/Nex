@@ -11,11 +11,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Desktop pets (Codex-compatible format): an animated companion that lives on
   the desktop (transparent always-on-top window) and reflects the agent state
-  across all open workspaces (running / needs input / ready / blocked). Pet
-  folders (`pet.json` + `spritesheet.webp`) go in `~/.nex/pets/`, managed from
-  Settings → Pets; supports drag-to-move with directional running animations,
-  click-to-focus the main window, and position persistence. On web, the pet is
-  an in-app floating widget instead of a system window.
+  across all open workspaces. Pet folders (`pet.json` + `spritesheet.webp`) go
+  in `~/.nex/pets/`, managed from Settings → Pets. The pet can be dragged and
+  thrown anywhere on screen (hold Alt to snap to an edge), looks at the cursor,
+  has a right-click menu (Hide, Settings) and disabled placeholder buttons for
+  new chat and voice, and its size and visibility (always / on demand with
+  `Cmd/Ctrl+Alt+P`) are configurable. On web, the pet is an in-app floating
+  widget instead of a system window.
+- macOS menu bar icon: click it to show the main window (it is recreated if
+  every window was closed); right-click for the same menu as the Windows tray.
+- Settings → General → "Show icon in Dock" (macOS): turn it off to run Nex from
+  the menu bar only. The Dock icon is only hidden once the menu bar icon exists.
+
+### Changed
+
+- App, installer and web icons now use the neutral black-and-white N.
+
+### Fixed
+
+- Web task notifications never appeared because nothing requested the browser
+  permission. Settings now has a "Browser notifications" row with an Allow
+  button, and clicking a notification focuses the tab and opens the task.
+- `install.sh` finds `web/` in the release tarball layout, so a bare-metal
+  install serves the web UI.
 
 ## [1.2.0] - 2026-10-06
 
