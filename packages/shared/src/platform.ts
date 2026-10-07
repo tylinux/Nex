@@ -966,6 +966,9 @@ export interface IPlatformService {
    */
   syncPetState?(state: import("./pets/index.js").PetWindowState | null): void;
 
+  /** 订阅 main 要求打开某个设置分区的请求（如宠物右键「设置」），返回 disposer。仅 Desktop 实现。 */
+  onOpenSettingsSection?(handler: (section: string) => void): () => void;
+
   /** 订阅桌面宠物悬浮窗的用户动作（点击聚焦/拖拽移动），返回 disposer。仅 Desktop 实现。 */
   onPetWindowAction?(
     handler: (action: import("./pets/index.js").PetWindowAction) => void,

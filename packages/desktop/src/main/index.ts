@@ -35,6 +35,7 @@ import {
   globalShortcut,
   dialog,
   ipcMain,
+  Menu,
   nativeImage,
   protocol,
   screen,
@@ -56,6 +57,7 @@ import {
 } from "@nex/services/node";
 import {
   desktopMenuMessageIds,
+  getDesktopMenuMessage,
   type Locale,
   type AppSettings,
   PlatformChannels,
@@ -67,6 +69,7 @@ import {
   resolveNexEndpointOrigin,
   type UpdateStatePayload,
   HostMessageTypes,
+  mergePetPlacement,
   mergePetSettings,
 } from "@nex/shared";
 import { logger } from "./logger.js";
@@ -728,15 +731,11 @@ function getPetWindowController() {
         // 与设置页共用 mergePetSettings，避免互相抹掉对方字段。
         void mainSettingService
           .get()
-          .then((settings) =>
-            mainSettingService.update({
-              pet: mergePetSettings(settings.pet, {
-                windowPosition: { x: placement.x, y: placement.y },
-                windowDisplayId: placement.displayId,
-                windowSnapZone: placement.snapZone,
-              }),
-            }),
-          )
+          .then((settings) => {
+            const pet = mergePetPlacement(settings.pet, placement);
+            // 没有宠物设置时不写：落点持久化不能顺手创建/关闭宠物。
+            return pet ? mainSettingService.update({ pet }) : undefined;
+          })
           .catch((error: unknown) => {
             logger.warn(
               `[pets] 悬浮窗位置持久化失败: ${error instanceof Error ? error.message : String(error)}`,
@@ -746,6 +745,55 @@ function getPetWindowController() {
     });
   }
   return petWindowController;
+}
+
+/** 宠物右键菜单：隐藏（关闭宠物开关）/ 设置（打开主窗口的宠物设置）。 */
+function showPetContextMenu() {
+  logger.info("[pets] 弹出右键菜单");
+  const label = (id: (typeof desktopMenuMessageIds)[keyof typeof desktopMenuMessageIds]) =>
+    getDesktopMenuMessage(currentApplicationLocale, id);
+  const menu = Menu.buildFromTemplate([
+    {
+      label: label(desktopMenuMessageIds.petHide),
+      click: () => {
+        // 与设置页开关同一份 setting.json；落盘后广播让主窗口 renderer 刷新，
+        // 否则 renderer 里旧的 enabled=true 会在下一次状态推送时把宠物重新建出来。
+        void mainSettingService
+          .get()
+          .then((settings) =>
+            mainSettingService.update({
+              pet: mergePetSettings(settings.pet, { enabled: false }),
+            }),
+          )
+          .then(() => {
+            petWindowController?.destroy();
+            for (const win of getApplicationWindowsExcludingCuaIndicator()) {
+              if (!win.isDestroyed()) win.webContents.send(PlatformChannels.SettingsChanged);
+            }
+          })
+          .catch((error: unknown) => {
+            logger.warn(
+              `[pets] 隐藏宠物失败: ${error instanceof Error ? error.message : String(error)}`,
+            );
+          });
+      },
+    },
+    {
+      label: label(desktopMenuMessageIds.petSettings),
+      click: () => {
+        void primaryWindowCoordinator.ensurePrimaryWindow("pet-window-settings").then(() => {
+          for (const win of getMainApplicationWindows()) {
+            if (!win.isDestroyed()) {
+              win.webContents.send(PlatformChannels.OpenSettingsSection, "pets");
+            }
+          }
+        });
+      },
+    },
+  ]);
+  const controller = petWindowController;
+  if (controller) controller.popupMenu(menu);
+  else menu.popup();
 }
 
 const primaryWindowCoordinator = createPrimaryWindowCoordinator({
@@ -1992,6 +2040,7 @@ app.whenReady().then(async () => {
     focusPrimaryWindow: () => {
       void primaryWindowCoordinator.ensurePrimaryWindow("pet-window-click");
     },
+    showContextMenu: showPetContextMenu,
     getPetWindowController: () => petWindowController,
   });
 

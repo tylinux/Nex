@@ -5,6 +5,7 @@ import {
   PET_FRAME_HEIGHT,
   PET_ONE_SHOT_REPEAT_COUNT,
   clampPetSize,
+  mergePetPlacement,
   mergePetSettings,
   petWindowActionSchema,
 } from "@nex/shared";
@@ -148,5 +149,24 @@ test("pet window 动作 schema：拒绝非法载荷", () => {
     petWindowActionSchema.safeParse({ kind: "drag-move", pointerX: Infinity, pointerY: 2 }).success,
     false,
   );
+  assert.ok(petWindowActionSchema.safeParse({ kind: "show-context-menu" }).success);
   assert.equal(petWindowActionSchema.safeParse({ kind: "moved", x: 1, y: 2 }).success, false);
+});
+
+test("mergePetPlacement：只写落点字段，不改 enabled / petId", () => {
+  const merged = mergePetPlacement(
+    { enabled: true, petId: "bubu", size: 150 },
+    { x: 10, y: 20, displayId: 2 },
+  );
+  assert.deepEqual(merged, {
+    enabled: true,
+    petId: "bubu",
+    size: 150,
+    windowPosition: { x: 10, y: 20 },
+    windowDisplayId: 2,
+  });
+});
+
+test("mergePetPlacement：没有宠物设置时放弃写入，避免把宠物静默关掉", () => {
+  assert.equal(mergePetPlacement(undefined, { x: 1, y: 2 }), null);
 });

@@ -70,6 +70,12 @@ export interface PetListResult {
   errors: PetLoadError[];
 }
 
+export interface PetWindowLabels {
+  newChat: string;
+  voice: string;
+  comingSoon: string;
+}
+
 /** renderer → main：悬浮窗状态（null 表示销毁/隐藏）。 */
 export interface PetWindowState {
   petId: string;
@@ -84,6 +90,8 @@ export interface PetWindowState {
   sizePx: number;
   /** 悬浮窗可见性；on-demand 时由 main 注册全局快捷键控制显隐。 */
   visibility: import("./petFormat.js").PetVisibility;
+  /** 悬停控制行的本地化文案（pet window 没有 i18n 上下文，由主窗口 renderer 提供）。 */
+  labels: PetWindowLabels;
   /** 建窗/显示器变化时还原的落点；窗口存在期间以用户拖拽为准。 */
   placement?: PetWindowPlacement;
 }
@@ -97,6 +105,8 @@ export interface PetReleaseVelocity {
 /** pet-window → main：用户动作（指针坐标均为屏幕坐标）。 */
 export type PetWindowAction =
   | { kind: "focus-main-window" }
+  /** 右键：请求 main 弹出原生菜单（隐藏 / 设置）。 */
+  | { kind: "show-context-menu" }
   | { kind: "drag-start"; pointerX: number; pointerY: number }
   | { kind: "drag-move"; pointerX: number; pointerY: number }
   | {

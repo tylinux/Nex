@@ -3907,6 +3907,9 @@ const zhCN: Record<string, string> = {
   "settings.hooks.review.reason.host_unavailable": "当前连接不支持审核此 Hook",
   "settings.hooks.review.reason.rejected": "操作被拒绝",
   "settings.hooks.title": "钩子",
+  "pets.controls.newChat": "新对话",
+  "pets.controls.voice": "语音",
+  "pets.controls.comingSoon": "即将推出",
   "settings.pets.title": "宠物",
   "settings.pets.enable": "桌面宠物",
   "settings.pets.enableDescription":

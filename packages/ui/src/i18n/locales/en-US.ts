@@ -4183,6 +4183,9 @@ const enUS: Record<string, string> = {
   "settings.hooks.review.reason.host_unavailable": "This connection cannot review this Hook",
   "settings.hooks.review.reason.rejected": "Request rejected",
   "settings.hooks.title": "Hooks",
+  "pets.controls.newChat": "New chat",
+  "pets.controls.voice": "Voice",
+  "pets.controls.comingSoon": "Coming soon",
   "settings.pets.title": "Pets",
   "settings.pets.enable": "Desktop pet",
   "settings.pets.enableDescription":

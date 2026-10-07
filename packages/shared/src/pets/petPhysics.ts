@@ -193,7 +193,7 @@ export function pickPetDisplay(
  * 还原悬浮窗落点（建窗、改大小、显示器增删/分辨率变化共用）：
  * - 吸附态：在原显示器（已被拔除则取重叠最多者）的当前工作区重新计算吸附位置；
  * - 自由态：夹回可见工作区；
- * - 无历史落点：主显示器右下角。
+ * - 无历史落点：主显示器右下角（自由态）。
  */
 export function restorePetPlacement(input: {
   placement: PetWindowPlacement | undefined;
@@ -207,11 +207,10 @@ export function restorePetPlacement(input: {
   if (!placement) {
     const primary = displays.find((display) => display.id === primaryDisplayId) ?? displays[0];
     if (!primary) return null;
-    const zone: PetSnapZone = "bottom-right";
+    // 默认落在右下角，但不记吸附区：宠物默认可放在屏幕任意位置。
     return {
-      ...computePetSnapPosition(zone, primary.workArea, size),
+      ...computePetSnapPosition("bottom-right", primary.workArea, size),
       displayId: primary.id,
-      snapZone: zone,
     };
   }
 

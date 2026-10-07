@@ -16,6 +16,9 @@ import {
 import { usePlatform } from "@/hooks/usePlatform.js";
 import { useServices } from "@/hooks/useServices.js";
 import { useSettings } from "@/hooks/useSettingService.js";
+import { useNexIntl } from "@/i18n/IntlProvider.js";
+import { setPendingSettingsSection } from "@/lib/settingsNavigation.js";
+import { useTabStore } from "@/store/TabStoreProvider.js";
 import { logger } from "@/logger.js";
 import { PetFloatingWidget } from "./PetFloatingWidget.js";
 import { usePetState } from "./usePetState.js";
@@ -93,6 +96,8 @@ function usePetSpriteUrl(pet: PetSummary | null, isDesktop: boolean): string | n
 
 export function PetRuntime({ isDesktop }: PetRuntimeProps) {
   const platform = usePlatform();
+  const { intl } = useNexIntl();
+  const openSettingsTab = useTabStore((state) => state.openSettingsTab);
   const { settings, update } = useSettings();
   const petSettings = settings?.pet;
   const enabled = Boolean(petSettings?.enabled && petSettings.petId);
@@ -125,6 +130,11 @@ export function PetRuntime({ isDesktop }: PetRuntimeProps) {
       spriteRows: selectedPet.spriteRows,
       sizePx: clampPetSize(petSettings?.size),
       visibility: petSettings?.visibility ?? "always",
+      labels: {
+        newChat: intl.formatMessage({ id: "pets.controls.newChat" }),
+        voice: intl.formatMessage({ id: "pets.controls.voice" }),
+        comingSoon: intl.formatMessage({ id: "pets.controls.comingSoon" }),
+      },
       ...(petSettings?.windowPosition
         ? {
             placement: {
@@ -153,7 +163,18 @@ export function PetRuntime({ isDesktop }: PetRuntimeProps) {
     petSettings?.windowSnapZone,
     petSettings?.size,
     petSettings?.visibility,
+    intl,
   ]);
+
+  // 宠物右键「设置」：main 先把主窗口带到前台，再要求打开宠物设置分区。
+  useEffect(() => {
+    if (!platform.onOpenSettingsSection) return;
+    return platform.onOpenSettingsSection((section) => {
+      if (section !== "pets") return;
+      setPendingSettingsSection("pets");
+      openSettingsTab();
+    });
+  }, [platform, openSettingsTab]);
 
   const handleWidgetAnchorChange = useCallback(
     (anchor: PetAnchor) => {

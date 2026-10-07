@@ -408,6 +408,8 @@ export const PlatformChannels = {
   PetWindowState: "nex:pet-window-state",
   /** PetWindow → Main：宠物悬浮窗用户动作（点击聚焦/拖拽移动） */
   PetWindowAction: "nex:pet-window-action",
+  /** Main → Renderer：要求主窗口打开指定设置分区（宠物右键菜单「设置」） */
+  OpenSettingsSection: "nex:open-settings-section",
 } as const;
 
 export type PlatformChannelName = (typeof PlatformChannels)[keyof typeof PlatformChannels];

@@ -108,6 +108,11 @@ export const PET_STATE_LIFETIMES_MS = {
 /** 宠物展示尺寸（px）：挂件/悬浮窗中的目标高度。帧高 208 → 缩放比例由此推导。 */
 export const PET_DISPLAY_HEIGHT_PX = 96;
 
+/** 悬浮窗精灵下方的控制行高度（px）：悬停时显示「新对话 / 语音」按钮。 */
+export const PET_CONTROLS_HEIGHT_PX = 32;
+/** 悬浮窗最小宽度（px），保证控制条（两个 36px 图标按钮 + 边框）放得下。 */
+export const PET_CONTROLS_MIN_WIDTH_PX = 96;
+
 /** 桌面悬浮窗可见性：始终显示，或仅在按下全局快捷键时显示（点击窗口外隐藏）。 */
 export type PetVisibility = "always" | "on-demand";
 export const PET_DEFAULT_VISIBILITY: PetVisibility = "always";

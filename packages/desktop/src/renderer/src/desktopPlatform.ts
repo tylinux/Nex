@@ -81,6 +81,7 @@ export function createDesktopPlatform(options: {
       // 缺少该 bridge 时只禁用原生菜单回调，不影响应用继续打开。
       return window.nex.onOpenWorkspace?.(handler) ?? (() => {});
     },
+    onOpenSettingsSection: (handler) => window.nex.onOpenSettingsSection?.(handler) ?? (() => {}),
     onOpenWorkspacePath: (handler) => window.nex.onOpenWorkspacePath?.(handler) ?? (() => {}),
     onOpenFeedbackDialog: (handler) => window.nex.onOpenFeedbackDialog?.(handler) ?? (() => {}),
     onOpenTicketsPanel: (handler) => window.nex.onOpenTicketsPanel?.(handler) ?? (() => {}),

@@ -10,10 +10,9 @@
  * 拖拽状态机：drag-start → drag-move 跟手 → drag-end：Alt 自由放置 / 有速度则动量 / 吸附 6 边缘区。
  * 几何与物理常量见 @nex/shared 的 petPhysics，详见 docs/specs/desktop-pets.md。
  */
-import type { BrowserWindow, Display, screen as ElectronScreen } from "electron";
+import type { BrowserWindow, Display, Menu, screen as ElectronScreen } from "electron";
 import type { PetWindowAction, PetWindowPlacement, PetWindowState } from "@nex/shared";
 import {
-  PET_FRAME_HEIGHT,
   PET_FRAME_WIDTH,
   PET_MOMENTUM_MAX_MS,
   PET_MOMENTUM_TICK_MS,
@@ -32,6 +31,7 @@ import {
   type PetMomentumState,
 } from "@nex/shared";
 import { logger } from "./logger.js";
+import { petWindowSize, resolvePetMenuOffset } from "./petWindowLayout.js";
 
 interface PetWindowDeps {
   BrowserWindow: typeof import("electron").BrowserWindow;
@@ -46,7 +46,10 @@ interface PetWindowDeps {
   onPlacementPersist: (placement: PetWindowPlacement) => void;
 }
 
-export type PetDragAction = Exclude<PetWindowAction, { kind: "focus-main-window" }>;
+export type PetDragAction = Extract<
+  PetWindowAction,
+  { kind: "drag-start" | "drag-move" | "drag-end" }
+>;
 
 export interface PetWindowController {
   /** 同步状态；null 表示销毁窗口。 */
@@ -57,17 +60,15 @@ export interface PetWindowController {
   isActive(): boolean;
   /** 判断某窗口是否为宠物悬浮窗（用于应用窗口列表排除）。 */
   ownsWindow(candidate: BrowserWindow): boolean;
+  /**
+   * 在宠物旁弹出菜单。宠物窗处于更高的窗口层级，菜单若在光标处弹出会被宠物自己盖住一半，
+   * 所以固定贴着宠物窗口的左/右侧弹出（右侧放不下才放左侧）。
+   */
+  popupMenu(menu: Pick<Menu, "popup">): void;
 }
 
 function toDisplayInfo(display: Display): PetDisplayInfo {
   return { id: display.id, workArea: display.workArea };
-}
-
-function petWindowSize(sizePx: number): { width: number; height: number } {
-  return {
-    width: Math.round(sizePx),
-    height: Math.round((sizePx * PET_FRAME_HEIGHT) / PET_FRAME_WIDTH),
-  };
 }
 
 export function createPetWindowController(deps: PetWindowDeps): PetWindowController {
@@ -147,14 +148,20 @@ export function createPetWindowController(deps: PetWindowDeps): PetWindowControl
     animateTo(target, () => commit({ ...target, displayId: display.id }));
   };
 
-  const startMomentum = (velocity: { x: number; y: number }) => {
+  /** 落定：Alt 松手吸附到边缘区，默认自由放置（仅夹回可见区）。 */
+  const settle = (snap: boolean) => {
+    if (snap) snapToNearestZone();
+    else placeFreely();
+  };
+
+  const startMomentum = (velocity: { x: number; y: number }, snap: boolean) => {
     cancelMotion();
     if (!win || win.isDestroyed()) return;
     const size = currentSize();
     const bounds = win.getBounds();
     const display = pickPetDisplay({ ...bounds, ...size }, listDisplays());
     if (!display) {
-      snapToNearestZone();
+      settle(snap);
       return;
     }
     let state: PetMomentumState = { x: bounds.x, y: bounds.y, vx: velocity.x, vy: velocity.y };
@@ -167,7 +174,7 @@ export function createPetWindowController(deps: PetWindowDeps): PetWindowControl
       setWindowPosition(state.x, state.y);
       if (isPetMomentumSettled(state, Math.min(now - startedAt, PET_MOMENTUM_MAX_MS))) {
         cancelMotion();
-        snapToNearestZone();
+        settle(snap);
       }
     }, PET_MOMENTUM_TICK_MS);
     stopMotion = () => clearInterval(timer);
@@ -386,17 +393,28 @@ export function createPetWindowController(deps: PetWindowDeps): PetWindowControl
       setWindowPosition(action.pointerX - drag.offsetX, action.pointerY - drag.offsetY);
       if (action.kind === "drag-move") return;
       drag = null;
-      if (action.altKey) {
-        placeFreely();
-      } else if (action.velocity) {
-        startMomentum(action.velocity);
+      // 默认自由放置；按住 Alt 松手才吸附到 6 个边缘区。
+      if (action.velocity) {
+        startMomentum(action.velocity, action.altKey);
       } else {
-        snapToNearestZone();
+        settle(action.altKey);
       }
     },
     destroy: destroyWindow,
     isActive() {
       return Boolean(win && !win.isDestroyed());
+    },
+    popupMenu(menu) {
+      if (!win || win.isDestroyed()) {
+        menu.popup();
+        return;
+      }
+      const bounds = win.getBounds();
+      const offset = resolvePetMenuOffset(
+        bounds,
+        pickPetDisplay(bounds, listDisplays())?.workArea ?? null,
+      );
+      menu.popup({ window: win, ...offset });
     },
     ownsWindow(candidate) {
       return Boolean(win && !win.isDestroyed() && win === candidate);
@@ -408,6 +426,8 @@ export function createPetWindowController(deps: PetWindowDeps): PetWindowControl
 export function registerPetWindowActionHandler(deps: {
   ipcMain: typeof import("electron").ipcMain;
   focusPrimaryWindow: () => void;
+  /** 右键菜单（隐藏 / 设置）。 */
+  showContextMenu: () => void;
   getPetWindowController: () => PetWindowController | null;
 }): void {
   deps.ipcMain.on(PlatformChannels.PetWindowAction, (_event, payload: unknown) => {
@@ -419,6 +439,10 @@ export function registerPetWindowActionHandler(deps: {
     const action = parsed.data;
     if (action.kind === "focus-main-window") {
       deps.focusPrimaryWindow();
+      return;
+    }
+    if (action.kind === "show-context-menu") {
+      deps.showContextMenu();
       return;
     }
     deps.getPetWindowController()?.handleDragAction(action);

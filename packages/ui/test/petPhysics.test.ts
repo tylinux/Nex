@@ -101,14 +101,15 @@ test("选屏：取重叠面积最大的显示器，无重叠取最近", () => {
   assert.equal(pickPetDisplay({ x: 5000, y: 100, ...SIZE }, displays)?.id, 2);
 });
 
-test("落点还原：无历史落点时落主显示器右下角", () => {
+test("落点还原：无历史落点时落主显示器右下角（自由态，无吸附区）", () => {
   const restored = restorePetPlacement({
     placement: undefined,
     size: SIZE,
     displays: [{ id: 7, workArea: WORK }],
     primaryDisplayId: 7,
   });
-  assert.deepEqual(restored, { x: 1084, y: 676, displayId: 7, snapZone: "bottom-right" });
+  // 默认落右下角，但不记吸附区：宠物默认可被放在任意位置。
+  assert.deepEqual(restored, { x: 1084, y: 676, displayId: 7 });
 });
 
 test("落点还原：吸附态在分辨率变化后按新工作区重新吸附", () => {
