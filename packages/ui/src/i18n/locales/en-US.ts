@@ -2167,6 +2167,8 @@ const enUS: Record<string, string> = {
     "Notifications are blocked for this site. Allow them in your browser's site settings, then come back to this page.",
   "settings.notificationBrowserPermission.unsupported":
     "This browser or page cannot show notifications. They need a secure (HTTPS or localhost) page and a browser that supports them.",
+  "settings.notificationBrowserPermission.granted":
+    "Allowed. You will be notified when a task finishes while this tab is in the background.",
   "settings.notificationBrowserPermissionAllow": "Allow",
   "notification.permissionPrompt.title": "Get notified when tasks finish",
   "notification.permissionPrompt.body":

@@ -15,7 +15,7 @@
   - `default`：说明文案 + 「允许浏览器通知」按钮（用户点击即手势内调用 `Notification.requestPermission()`）。
   - `denied`：提示已被浏览器拦截，需要在浏览器站点设置中放开；不展示按钮。
   - `unsupported`（无 `Notification` API，例如非 HTTPS 页面或部分移动浏览器）：提示当前环境不支持。
-  - `granted`：整行不展示。
+  - `granted`：展示「已允许」状态，不展示按钮。
 - 首次引导：进入应用后，若总开关开着、平台提供权限接口且权限为 `default`，弹出一条不自动消失的提示（带「允许」按钮和关闭按钮）。点击「允许」即在用户手势内调用 `requestPermission()`。每个浏览器只提示一次（localStorage 记录已提示），之后不再打扰，仍可在设置页权限行授权。`denied`、`unsupported`、`granted`、总开关关闭、Desktop（无权限接口）下都不提示。
 - 展示条件不变：页面当前有焦点（`document.hasFocus()`）时不弹，避免打扰正在看的用户；通知声音只在通知真正弹出后播放。
 - 同一任务的同类通知用 `tag` 合并（`taskId` + `status` + 可选 `requestId`），重复事件不会堆叠。
@@ -52,6 +52,6 @@ settings 权限行 ──request/getPermission───────────�
 
 1. 单测覆盖：无焦点 + 已授权时展示且播放声音；有焦点、未授权、无 API 时不展示；`tag` 合并；点击聚焦并投递 `taskId`、处理器可注销、处理器抛错隔离；`requestPermission` 结果映射；构造通知抛错时不播放声音。
 2. 引导提示：`default` + 总开关开 + 未提示过时提示一次；点击允许后请求权限；其余状态与已提示过时不提示。
-3. 设置页权限行在 `default`/`denied`/`unsupported` 下分别展示对应内容，`granted` 与 Desktop 下不展示。
+3. 设置页权限行在 `default`/`denied`/`unsupported` 下分别展示对应内容，`granted` 展示已允许状态，Desktop 下整行不展示。
 4. 浏览器实测：授权后切到其它标签页，任务完成弹出通知，点击回到对应任务。
 5. `pnpm typecheck`、`pnpm lint`、`pnpm architecture:check --changed` 通过。
