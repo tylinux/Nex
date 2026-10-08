@@ -6307,6 +6307,16 @@ const zhCN: Record<string, string> = {
   "scheduledPreview.toast.running": "正在运行“{title}”…",
   "scheduledPreview.toast.view": "查看",
   "scheduledPreview.addSchedule": "添加计划",
+  "webLogin.title": "登录 Nex",
+  "webLogin.description": "输入此服务器配置的访问令牌。",
+  "webLogin.tokenLabel": "访问令牌",
+  "webLogin.tokenPlaceholder": "粘贴访问令牌",
+  "webLogin.submit": "登录",
+  "webLogin.submitting": "登录中…",
+  "webLogin.error.invalid": "令牌无效，请检查后重试。",
+  "webLogin.error.rateLimited": "尝试次数过多，请 {seconds} 秒后再试。",
+  "webLogin.error.rateLimitedGeneric": "尝试次数过多，请一分钟后再试。",
+  "webLogin.error.network": "无法连接服务器，请重试。",
 };
 
 export default zhCN;

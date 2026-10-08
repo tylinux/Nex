@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { createLocalServices, getAppConfigDir } from "@nex/services/node";
 import {
   materializeBundledNexBuiltinProviderConfig,
@@ -22,7 +23,13 @@ async function main(): Promise<void> {
   createHttpServer(services, port, {
     ...(host ? { host } : {}),
     ...(staticRoot ? { staticRoot, spaFallback: true } : {}),
-    ...(authToken ? { authToken, authRequired: true } : {}),
+    ...(authToken
+      ? {
+          authToken,
+          authRequired: true,
+          sessionsFilePath: join(getAppConfigDir(), "web-sessions.json"),
+        }
+      : {}),
   });
 }
 

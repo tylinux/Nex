@@ -59,6 +59,12 @@ jobs:
       - name: Unit tests (ui)
         run: pnpm --dir packages/ui exec tsx --tsconfig tsconfig.json --test test/*.test.ts
 
+      - name: Unit tests (server)
+        run: pnpm --dir packages/server exec tsx --test test/*.test.ts
+
+      - name: Unit tests (web)
+        run: pnpm --dir packages/web exec tsx --test test/*.test.ts
+
       - name: Unit tests (desktop)
         run: pnpm exec tsx --test packages/desktop/test/*.test.ts
 

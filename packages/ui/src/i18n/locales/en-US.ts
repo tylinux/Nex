@@ -6598,6 +6598,16 @@ const enUS: Record<string, string> = {
   "scheduledPreview.toast.running": "Running “{title}”…",
   "scheduledPreview.toast.view": "View",
   "scheduledPreview.addSchedule": "Add schedule",
+  "webLogin.title": "Sign in to Nex",
+  "webLogin.description": "Enter the access token configured for this server.",
+  "webLogin.tokenLabel": "Access token",
+  "webLogin.tokenPlaceholder": "Paste your access token",
+  "webLogin.submit": "Sign in",
+  "webLogin.submitting": "Signing in…",
+  "webLogin.error.invalid": "That token is not valid. Check it and try again.",
+  "webLogin.error.rateLimited": "Too many attempts. Try again in {seconds} seconds.",
+  "webLogin.error.rateLimitedGeneric": "Too many attempts. Try again in a minute.",
+  "webLogin.error.network": "Could not reach the server. Try again.",
 };
 
 export default enUS;

@@ -28,6 +28,15 @@ import type { IPlatformService, RemoteTarget, ServerRemoteInfo } from "@nex/shar
 import { createWebMcpPlatform, type WebMcpSyncService } from "./webMcpPlatform.js";
 import { createWebTaskNotifier, type BrowserNotificationApi } from "./webTaskNotifier.js";
 import { WEB_DEFAULT_THEME, resolveWebInitialTheme } from "./webThemeSeed.js";
+import { WebLoginPage } from "./WebLoginPage.js";
+import {
+  WEB_LOGIN_PATH,
+  decideWebAuthGate,
+  fetchWebAuthSession,
+  resolveWebAuthAfterDisconnect,
+  sanitizeNextPath,
+  stripTokenParam,
+} from "./webAuthSession.js";
 
 function resolveWebThemePreference(defaultTheme: Theme = WEB_DEFAULT_THEME): Theme {
   const saved = localStorage.getItem("nex-theme");
@@ -361,10 +370,57 @@ function renderWebBootstrapError(error: unknown): void {
   );
 }
 
+/**
+ * 登录门禁（docs/specs/web-token-login.md）：需要登录且当前浏览器没有有效会话时整页跳到登录页。
+ * 返回 true 表示已发起跳转，调用方应停止后续启动。
+ */
+async function redirectToLoginIfUnauthenticated(): Promise<boolean> {
+  const gate = decideWebAuthGate(await fetchWebAuthSession(), window.location);
+  if (gate.kind !== "redirect") return false;
+  window.location.replace(gate.to);
+  return true;
+}
+
+async function renderWebLoginPage(): Promise<void> {
+  const session = await fetchWebAuthSession();
+  const next = sanitizeNextPath(new URLSearchParams(window.location.search).get("next"));
+  if (session && (!session.authRequired || session.authenticated)) {
+    window.location.replace(next);
+    return;
+  }
+  document.title = "Nex - Sign in";
+  root.render(
+    <AppErrorBoundary>
+      <NexIntlProvider>
+        <WebLoginPage nextPath={next} />
+      </NexIntlProvider>
+    </AppErrorBoundary>,
+  );
+}
+
 async function bootstrapWebApp() {
   if (isConversationSharePath(window.location.pathname)) {
     await renderConversationSharePage();
     return;
+  }
+
+  if (window.location.pathname === WEB_LOGIN_PATH) {
+    await renderWebLoginPage();
+    return;
+  }
+
+  if (await redirectToLoginIfUnauthenticated()) {
+    return;
+  }
+
+  // `/?token=` 首次访问时服务端已把它换成会话 cookie；令牌不应继续留在地址栏与历史记录里。
+  if (new URLSearchParams(window.location.search).has("token")) {
+    const search = stripTokenParam(window.location.search);
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${search}${window.location.hash}`,
+    );
   }
 
   let bootstrap: WebBootstrapResult;
@@ -376,8 +432,22 @@ async function bootstrapWebApp() {
   }
 
   try {
+    let socketOpened = false;
     const services = await connectViaWebSocket(bootstrap.wsUrl, {
-      onClose: () => {},
+      onOpenSocket: () => {
+        socketOpened = true;
+      },
+      // 会话在应用运行中失效（过期、服务端 token 轮换）时回登录页。
+      // 只有服务端明确报告未登录才跳转，普通断线沿用原有处理，不把网络抖动当成登出；
+      // 启动阶段连接失败（socket 从未打开）由下面的 catch 处理。
+      onClose: () => {
+        if (!socketOpened) return;
+        socketOpened = false;
+        void resolveWebAuthAfterDisconnect().then((session) => {
+          const gate = decideWebAuthGate(session, window.location);
+          if (gate.kind === "redirect") window.location.replace(gate.to);
+        });
+      },
     });
     const platform = createWebPlatform(services.mcpSyncService);
     document.title = "Nex - Web + Server";
@@ -404,6 +474,10 @@ async function bootstrapWebApp() {
       </AppErrorBoundary>,
     );
   } catch (error) {
+    // 连接在握手前被拒（401）时同样回到登录页，而不是停在通用启动失败页。
+    if (await redirectToLoginIfUnauthenticated()) {
+      return;
+    }
     renderWebBootstrapError(error);
   }
 }

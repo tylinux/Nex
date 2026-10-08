@@ -115,6 +115,8 @@ Web 模式默认工作目录为当前目录，监听 `127.0.0.1`，默认不启�
 
 直接启动通用 Web 服务的 HTTP 入口时，通过 `NEX_SERVER_AUTH_TOKEN` 配置 API／WebSocket 认证；通过程序接口创建服务时，使用 `authToken` 选项。
 
+配置令牌后，浏览器在输入该令牌前会被带到登录页（`/login`），登录成功后回到原来请求的页面。浏览器只保存一个随机会话 cookie（30 天、`HttpOnly`）；会话以哈希形式保存在 Nex 配置目录的 `web-sessions.json` 中，令牌变更后全部失效。直接打开 `http://host:3030/?token=<令牌>` 仍可直接登录。同一地址连续 5 次失败会锁定登录 1 分钟。详见 `docs/specs/web-token-login.md`。
+
 构建方式见下方打包章节。`pnpm build:nex` 只生成发行包，不会替换 `PATH` 中已有的 `nex`。如果命令仍指向旧安装或其他源码目录，macOS / Linux 可用 `command -v nex` 检查，Windows 可用 `where.exe nex` 检查。
 
 ### CLI 源码开发

@@ -42,6 +42,7 @@ import {
 } from "@nex/shared";
 import { connectRemote, createRemoteBackend, type RemoteConnection } from "./remote/index.js";
 import { createHostCapabilityStore } from "./hostCapability.js";
+import { createWebAuth, isTokenProtectedPath } from "./webAuth.js";
 import { createServerWindowController, type ServerWindowController } from "./windowController.js";
 
 function wrapWebSocket(ws: WebSocket): ISocket {
@@ -147,6 +148,8 @@ interface HttpServerOptions {
   host?: string;
   authRequired?: boolean;
   authToken?: string;
+  /** Web 登录会话的持久化文件；缺省仅保存在内存。 */
+  sessionsFilePath?: string;
   spaFallback?: boolean;
   staticRoot?: string;
   workspaces?: ServerRemoteWorkspaceInfo[];
@@ -200,8 +203,6 @@ function createServerInfo(options: HttpServerOptions): ServerRemoteInfo {
   };
 }
 
-const nexLiteTokenCookieName = "nex_lite_token";
-
 const staticMimeTypes: Record<string, string> = {
   ".css": "text/css; charset=utf-8",
   ".gif": "image/gif",
@@ -220,41 +221,6 @@ const staticMimeTypes: Record<string, string> = {
   ".woff": "font/woff",
   ".woff2": "font/woff2",
 };
-
-function parseCookieHeader(header: string | undefined): Map<string, string> {
-  const cookies = new Map<string, string>();
-  if (!header) {
-    return cookies;
-  }
-  for (const part of header.split(";")) {
-    const separator = part.indexOf("=");
-    if (separator <= 0) {
-      continue;
-    }
-    const name = part.slice(0, separator).trim();
-    const value = part.slice(separator + 1).trim();
-    if (name) {
-      cookies.set(name, value);
-    }
-  }
-  return cookies;
-}
-
-function liteTokenCookieValue(token: string): string {
-  return `${nexLiteTokenCookieName}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax`;
-}
-
-function hasValidLiteToken(c: Context, token: string): boolean {
-  const url = new URL(c.req.url);
-  if (url.searchParams.get("token") === token) {
-    return true;
-  }
-  return parseCookieHeader(c.req.header("cookie")).get(nexLiteTokenCookieName) === token;
-}
-
-function isTokenProtectedPath(pathname: string): boolean {
-  return pathname === "/ws" || pathname.startsWith("/ws/") || pathname.startsWith("/api/");
-}
 
 function isStaticFallbackAllowed(pathname: string): boolean {
   return !isTokenProtectedPath(pathname);
@@ -321,25 +287,15 @@ export function createHttpServer(
   const hostCapabilities = createHostCapabilityStore();
   const windowController = createServerWindowController(services);
 
-  const authToken = options.authToken?.trim();
-  if (authToken) {
-    app.use("*", async (c, next) => {
-      const url = new URL(c.req.url);
-      const validToken = hasValidLiteToken(c, authToken);
-      if (!isTokenProtectedPath(url.pathname) || validToken) {
-        await next();
-        // next 之后再补 Set-Cookie：静态文件等直接返回 Response 的 handler
-        // 不会带上 middleware 里 c.header() 设置的头。任何路径带 ?token= 都
-        // 种 cookie（含静态首页）——`/?token=` 是文档化的首次访问方式，页面
-        // 本身不走鉴权，不在这里种 cookie，后续 /api 与 /ws 将永远 401。
-        if (url.searchParams.get("token") === authToken) {
-          c.res.headers.append("Set-Cookie", liteTokenCookieValue(authToken));
-        }
-        return;
-      }
-      return c.json({ error: "Unauthorized" }, 401);
-    });
+  const webAuth = createWebAuth({
+    token: options.authToken,
+    sessionsFilePath: options.sessionsFilePath,
+    logger: { warn: (...args) => log(...args) },
+  });
+  if (webAuth.enabled) {
+    app.use("*", webAuth.middleware());
   }
+  webAuth.mountRoutes(app);
 
   app.get("/api/server-info", (c) => c.json(createServerInfo(options)));
   app.post("/api/rpc-host-capability", (c) => c.json(hostCapabilities.issue()));

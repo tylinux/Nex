@@ -50,6 +50,12 @@ jobs:
       - name: Unit tests (ui)
         run: pnpm --dir packages/ui exec tsx --tsconfig tsconfig.json --test test/*.test.ts
 
+      - name: Unit tests (server)
+        run: pnpm --dir packages/server exec tsx --test test/*.test.ts
+
+      - name: Unit tests (web)
+        run: pnpm --dir packages/web exec tsx --test test/*.test.ts
+
   # apps/nex-cli 是独立 pnpm workspace，不在根 typecheck 覆盖范围内，必须单独检查。
   cli-checks:
     runs-on: linux-amd64
