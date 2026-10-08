@@ -7,16 +7,15 @@ import type {
   WindowHostTaskAddress,
 } from "@nex/shared/nex-protocol-v4";
 import { matchesTaskListMembershipKind } from "@nex/shared/nex-protocol-v4";
+import type { INexAgentService } from "#src/nex-agent/nexAgent.js";
+import type { INexTaskService } from "#src/session/nexTaskService.js";
+import type { NexTaskListQuery, NexTaskListWorkspaceScope } from "#src/session/nexTaskListTypes.js";
 import type {
   IWindowControllerService,
-  INexAgentService,
-  INexTaskService,
   WindowHostControllerFrame,
   WindowHostControllerTaskListItem,
   WindowHostControllerTaskListResult,
-  NexTaskListQuery,
-  NexTaskListWorkspaceScope,
-} from "@nex/services";
+} from "./windowController.js";
 import {
   createWindowHostControllerProjection,
   type WindowHostControllerMutation,
@@ -44,10 +43,7 @@ function taskKey(task: Pick<NexTaskMeta, "taskId" | "workspacePath" | "workspace
   return `${task.workspaceIdentity?.trim() || task.workspacePath}\0${task.taskId}`;
 }
 
-function normalizeTaskMeta(
-  meta: NexTaskMeta,
-  scope: WindowHostControllerSourceScope,
-): NexTaskMeta {
+function normalizeTaskMeta(meta: NexTaskMeta, scope: WindowHostControllerSourceScope): NexTaskMeta {
   return {
     ...meta,
     workspacePath: scope.workspacePath,

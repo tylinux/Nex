@@ -26,6 +26,7 @@ import {
   IBotsService,
   IPetService,
   IProviderProvisioningTargetService,
+  IWindowControllerService,
 } from "@nex/services";
 import {
   botProviders,
@@ -41,6 +42,7 @@ import {
 } from "@nex/shared";
 import { connectRemote, createRemoteBackend, type RemoteConnection } from "./remote/index.js";
 import { createHostCapabilityStore } from "./hostCapability.js";
+import { createServerWindowController, type ServerWindowController } from "./windowController.js";
 
 function wrapWebSocket(ws: WebSocket): ISocket {
   const onData = new Emitter<VSBuffer>();
@@ -88,6 +90,7 @@ function setupChannelServer(
   ws: WebSocket,
   services: ServiceCollection,
   clientMode: "desktop-continuous" | "web-remote-replayable",
+  windowController?: ServerWindowController,
 ) {
   const socket = wrapWebSocket(ws);
   const protocol = new SocketProtocol(socket);
@@ -118,9 +121,15 @@ function setupChannelServer(
       },
     });
   }
+  // 侧栏列表 Controller：每条连接独立 attachment，关闭时一并回收订阅。
+  const controllerAttachment = windowController?.attach();
+  if (controllerAttachment) {
+    overrides.set(IWindowControllerService.channelName, controllerAttachment.service);
+  }
   services.exposeOnChannelServer(server, overrides);
   socket.onClose(() => {
     void connectionScope?.dispose();
+    controllerAttachment?.dispose();
     rawServer.dispose();
   });
 }
@@ -310,6 +319,7 @@ export function createHttpServer(
   const app = new Hono();
   const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
   const hostCapabilities = createHostCapabilityStore();
+  const windowController = createServerWindowController(services);
 
   const authToken = options.authToken?.trim();
   if (authToken) {
@@ -367,14 +377,19 @@ export function createHttpServer(
     "/ws",
     upgradeWebSocket(() => ({
       onOpen(_event, ws) {
-        setupChannelServer(ws.raw as WebSocket, services, "web-remote-replayable");
+        setupChannelServer(
+          ws.raw as WebSocket,
+          services,
+          "web-remote-replayable",
+          windowController,
+        );
       },
     })),
   );
 
   const upgradeTrustedHostWebSocket = upgradeWebSocket(() => ({
     onOpen(_event, ws) {
-      setupChannelServer(ws.raw as WebSocket, services, "desktop-continuous");
+      setupChannelServer(ws.raw as WebSocket, services, "desktop-continuous", windowController);
     },
   }));
   app.use("/ws/host", async (c, next) => {
@@ -512,6 +527,7 @@ export function createHttpServer(
   });
 
   injectWebSocket(server);
+  server.on("close", () => windowController.dispose());
 
   return server;
 }

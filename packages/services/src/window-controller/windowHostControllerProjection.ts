@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- 投影状态、V4 帧与离线替换属于同一个一致性边界。 */
 import { isDeepStrictEqual } from "node:util";
 import type { NexTaskMeta } from "@nex/shared";
-import type { NexArchivedTaskDeletionResult } from "@nex/services";
+import type { NexArchivedTaskDeletionResult } from "#src/session/nexTaskService.js";
 import {
   CONTROLLER_TASKS_INDEX_TOPIC,
   CONTROLLER_WORKSPACES_TOPIC,

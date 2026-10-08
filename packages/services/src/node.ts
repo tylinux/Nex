@@ -22,6 +22,7 @@ export {
   NEX_BUILTIN_PROVIDER_CONFIG_FILE_ENV,
 } from "@nex/provider-node";
 
+export { createWindowHostControllerRuntime } from "./window-controller/windowHostControllerService.js";
 export { createFileService } from "./file/fileService.js";
 export {
   attributeHostProcessTree,

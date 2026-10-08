@@ -43,6 +43,7 @@ import {
 } from "@nex/services";
 import {
   createLocalServices,
+  createWindowHostControllerRuntime,
   disposeServiceResources,
   disposeServiceResourcesAndWait,
   AutomationRepo,
@@ -128,7 +129,6 @@ import {
   type WindowRemoteConnectionCloseEvent,
   type WindowRemoteConnectionHandle,
 } from "./windowRemoteConnectionRegistry.js";
-import { createWindowHostControllerRuntime } from "./windowHostControllerService.js";
 import { resolveAutomationSubmissionModelSelection } from "./automationModelSelection.js";
 import { createRemoteConnectionProgressContext } from "@nex/server/remote/remoteConnectionProgressContext.js";
 import { startHostMemoryDiagnosticsLog } from "./hostMemoryDiagnosticsLog.js";

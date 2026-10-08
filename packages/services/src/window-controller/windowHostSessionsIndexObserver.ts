@@ -1,5 +1,8 @@
 import type { IDisposable } from "@nex/rpc";
-import { NEX_AGENT_RUNTIME_UNAVAILABLE_CODE, type INexAgentService } from "@nex/services";
+import {
+  NEX_AGENT_RUNTIME_UNAVAILABLE_CODE,
+  type INexAgentService,
+} from "#src/nex-agent/nexAgent.js";
 import {
   PROTOCOL_V4_LIMITS,
   sessionsIndexTopic,
