@@ -43,6 +43,7 @@ import { useModelSelectionServiceView } from "@/hooks/useModelSelectionView.js";
 import { useRootProviderSettingsSnapshot } from "@/root/useRootProviderSettingsSnapshot.js";
 import { useDesktopNativeThemeSync } from "@/root/useDesktopNativeThemeSync.js";
 import { useRootPlatformEffects } from "@/root/useRootPlatformEffects.js";
+import { useTaskNotificationPermissionPrompt } from "@/hooks/useTaskNotificationPermissionPrompt.js";
 import { useRootWorkspaceActions } from "@/root/useRootWorkspaceActions.js";
 import { useBotBroadcastEffects } from "@/root/useBotBroadcastEffects.js";
 import { registerBaseWorkspaceServices } from "@/store/remoteWorkspaceSessionStore.js";
@@ -444,6 +445,7 @@ function RootInner({
     isBootstrappingInitialWorkspace: isBootstrappingInitialWorkspace || isCreatingFallbackWorkspace,
   });
 
+  useTaskNotificationPermissionPrompt(platform);
   useRootPlatformEffects({
     initialWorkspaceAbsPath,
     initialWorkspaceIdentity,
