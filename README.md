@@ -12,7 +12,7 @@ Nex is an AI coding workbench with a desktop app, a browser UI, and a terminal a
 
 ## Origin & Version
 
-- Current Nex version: **v1.1.0**.
+- Current Nex version: **v1.2.3**.
 - Nex is a fork of [ZCode](https://github.com/zai-org/ZCode) **v3.14.3** (Apache-2.0), deeply customized:
   rebranding, telemetry and account-system removal, UI simplification, etc. See [CHANGELOG.md](CHANGELOG.md).
 - Credits to the original ZCode team. Apache-2.0 license and attribution: [LICENSE](LICENSE), [NOTICE.md](NOTICE.md).
@@ -99,6 +99,8 @@ In Web mode, it uses the current directory as the workspace, listens on `127.0.0
 When starting the general Web service's HTTP entry directly, configure API/WebSocket authentication with `NEX_SERVER_AUTH_TOKEN`. When creating the service programmatically, use the `authToken` option.
 
 When a token is configured, the browser is sent to a sign-in page (`/login`) until it enters that token; after that it returns to the page it asked for. The browser keeps only a random session cookie (30 days, `HttpOnly`); sessions are stored hashed in `web-sessions.json` under the Nex config directory and are discarded when the token changes. Opening `http://host:3030/?token=<token>` still signs in directly. Five failed attempts from one address lock sign-in for a minute. See `docs/specs/web-token-login.md`.
+
+On the first visit (after signing in, when a token is set) the Web UI offers to allow browser notifications so you hear about finished, failed or blocked tasks while the tab is in the background. The prompt is shown once per browser; afterwards use Settings → Browser notifications, which shows the current state. If the browser has blocked notifications, re-enable them in the browser's site settings (pages cannot reopen a denied permission dialog). Notifications need HTTPS or `localhost`. See `docs/specs/web-task-notifications.md`.
 
 See Packaging below for build instructions. `pnpm build:nex` only creates the distribution; it does not replace an existing `nex` on `PATH`. If the command still points to an older installation or another checkout, check it with `command -v nex` on macOS / Linux or `where.exe nex` on Windows.
 

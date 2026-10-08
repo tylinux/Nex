@@ -12,7 +12,7 @@ Nex 是 AI 编程工作台，提供桌面应用、浏览器界面和终端 Agent
 
 ## 项目来源与版本
 
-- Nex 当前版本 **v1.1.0**。
+- Nex 当前版本 **v1.2.3**。
 - Nex 基于 [ZCode](https://github.com/zai-org/ZCode) **v3.14.3**（Apache-2.0 开源版本）二次开发而来，
   在其基础上做了品牌重命名、遥测与账号体系裁剪、UI 精简等深度定制，
   详见 [CHANGELOG.md](CHANGELOG.md)。
@@ -116,6 +116,8 @@ Web 模式默认工作目录为当前目录，监听 `127.0.0.1`，默认不启�
 直接启动通用 Web 服务的 HTTP 入口时，通过 `NEX_SERVER_AUTH_TOKEN` 配置 API／WebSocket 认证；通过程序接口创建服务时，使用 `authToken` 选项。
 
 配置令牌后，浏览器在输入该令牌前会被带到登录页（`/login`），登录成功后回到原来请求的页面。浏览器只保存一个随机会话 cookie（30 天、`HttpOnly`）；会话以哈希形式保存在 Nex 配置目录的 `web-sessions.json` 中，令牌变更后全部失效。直接打开 `http://host:3030/?token=<令牌>` 仍可直接登录。同一地址连续 5 次失败会锁定登录 1 分钟。详见 `docs/specs/web-token-login.md`。
+
+首次打开 Web（设置了令牌时为登录后）会提示是否允许浏览器通知，用于在页面处于后台时收到任务完成、失败或需要确认的提醒。该提示每个浏览器只出现一次；之后可在「设置 → 浏览器通知」查看当前状态并授权。若浏览器已拦截通知，需要在浏览器的站点设置中重新允许（页面无法再次弹出已被拒绝的授权框）。通知需要 HTTPS 或 `localhost`。详见 `docs/specs/web-task-notifications.md`。
 
 构建方式见下方打包章节。`pnpm build:nex` 只生成发行包，不会替换 `PATH` 中已有的 `nex`。如果命令仍指向旧安装或其他源码目录，macOS / Linux 可用 `command -v nex` 检查，Windows 可用 `where.exe nex` 检查。
 

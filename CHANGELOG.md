@@ -5,6 +5,40 @@ All notable changes to Nex are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.3] - 2026-10-08
+
+### Added
+
+- Web sign-in page: when `nex-server` has an access token, the browser is sent
+  to `/login` until the token is entered, then returns to the page it asked
+  for. The browser keeps only a random `HttpOnly` session cookie (30 days);
+  sessions are stored hashed in `web-sessions.json` in the Nex config
+  directory, survive a server restart, and are discarded when the token
+  changes. Five failed attempts from one address lock sign-in for a minute.
+  Opening `/?token=<token>` still signs in directly, and `?token=` keeps
+  working for programmatic `/ws` and `/api` clients.
+- Web: the first time you sign in, a one-time prompt offers to allow browser
+  notifications for finished, failed or blocked tasks. Settings → Browser
+  notifications now always shows the current state (Allow button, Allowed,
+  blocked by the browser, or unsupported).
+
+### Fixed
+
+- Web: Pinned and Timeline tasks now appear in the sidebar. `nex-server` did
+  not serve the window-controller channel, so pinned tasks vanished from the
+  normal list without showing up under Pinned.
+- Model settings: deleting a model no longer shows a notification, and adding
+  models shows readable text ("2 models added to <provider>") instead of raw
+  `{count, plural, ...}` markup.
+- Server release assets are named with the version (`nex-server-<target>-vX.Y.Z`)
+  instead of `alpha-<shortsha>`; `main` builds keep the short sha.
+
+### Upgrade note
+
+- A web client opened with a stale cookie from before this version is sent to
+  the sign-in page once; entering the token again is enough. The old
+  `nex_lite_token` cookie is no longer accepted.
+
 ## [1.2.2] - 2026-10-07
 
 ### Added

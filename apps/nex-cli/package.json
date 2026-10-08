@@ -1,6 +1,6 @@
 {
   "name": "nex-cli",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "private": true,
   "description": "A cross-platform TypeScript Node.js CLI with a small TUI and optional SEA packaging.",
   "type": "module",
