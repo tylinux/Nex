@@ -5,6 +5,29 @@ All notable changes to Nex are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- Docker: the image is now a single `nex-server` container that serves the API,
+  WebSocket and Web UI from one process. It packages the prebuilt SEA binary
+  and the matching web build on `debian:bookworm-slim` instead of copying the
+  whole monorepo build tree, so it no longer carries `node_modules`, sources or
+  build tooling (about 0.8 GB instead of 4.3 GB). The Dockerfile no longer
+  compiles anything; `scripts/stage-docker-context.sh` prepares its input.
+
+### Removed
+
+- The `nex-web` (nginx) image, `docker/web-nginx.conf` and the `web` service in
+  `docker-compose.yml`. `ghcr.io/tylinux/nex-web` is no longer updated; old tags
+  stay available.
+
+### Upgrade note
+
+- `docker compose` users: the UI is now on port `3030` (was `8080`) and there
+  is no `web` service. Behind a reverse proxy, forward `/ws` (with `Upgrade`)
+  and `/api` to port 3030. Static assets are no longer gzip-compressed by nginx.
+
 ## [1.2.3] - 2026-10-08
 
 ### Added

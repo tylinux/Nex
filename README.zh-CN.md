@@ -18,17 +18,26 @@ Nex 是 AI 编程工作台，提供桌面应用、浏览器界面和终端 Agent
   详见 [CHANGELOG.md](CHANGELOG.md)。
 - 感谢 ZCode 原团队的优秀工作，原项目的 Apache-2.0 许可与归属声明见 [LICENSE](LICENSE) 与 [NOTICE.md](NOTICE.md)。
 
-## Docker（server + web）
+## Docker（单镜像 server）
 
-不带 Electron 的 server 与 web 分别构建为两个镜像，由 docker compose 编排：
+镜像只有一个：`nex-server`（SEA 单文件二进制 + 同一次构建的 Web 静态资源，不含 Electron 和 monorepo 源码）。同一个进程提供 API、WebSocket 与 Web UI，不再需要 nginx / `nex-web`。
+
+拉取发布的镜像 `ghcr.io/tylinux/nex-server`，或在本机先构建 SEA 与 Web，再装配镜像（Dockerfile 不负责编译，产物准备见 `scripts/stage-docker-context.sh`）：
 
 ```bash
+pnpm --filter @nex/web build
+(cd packages/server && node scripts/build-sea.mjs --target linux-x64)   # arm64 主机用 linux-arm64
+scripts/stage-docker-context.sh linux-x64
 NEX_SERVER_AUTH_TOKEN=$(openssl rand -hex 32) docker compose up -d --build
 ```
 
-- web：`http://<host>:8080/?token=<同上>`（nginx 托管静态资源，/api 与 /ws 反代到 server）
-- server：容器内 3030 端口；`nex-data` 卷持久化 `~/.nex` 状态，`nex-workspace` 卷是默认工作区
-- 目标架构：构建机器是什么架构就出什么包（linux/amd64、linux/arm64 均可）
+SEA 构建前还需要完成 typecheck、agent bundle 等步骤，完整顺序与 `.github/workflows/release-server.yaml` 相同。
+
+- 浏览器打开 `http://<host>:3030/`，在登录页输入上面的令牌（会话行为见「Web 登录」一节）
+- `nex-data` 卷持久化 `~/.nex` 状态，`nex-workspace` 卷是默认工作区
+- 需要 TLS 或域名时在前面放反向代理，并转发 `/ws`（带 `Upgrade`）与 `/api`；服务端识别 `X-Forwarded-Proto: https` 来设置会话 cookie 的 `Secure`
+- 架构：CI 只发布 `linux/amd64` 镜像；arm64 主机用 `stage-docker-context.sh linux-arm64` 在本机构建
+- 从 1.2.2 及更早的 compose 升级：访问端口由 `8080` 改为 `3030`，不再有 `web` 服务；`ghcr.io/tylinux/nex-web` 不再更新。详见 `docs/specs/docker-single-image.md`
 
 ## 初始化
 

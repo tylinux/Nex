@@ -1,43 +1,18 @@
 # syntax=docker/dockerfile:1
-# Nex server + web 镜像（无 Electron）。
-#   server：Node 运行 packages/server（HTTP/WS），agent 子进程由 monorepo 内
-#           apps/nex-cli/packages/cli/dist/nex.cjs 提供（findUpward 命中）。
-#   web：   nginx 托管 packages/web/dist，并把 /api、/ws 反代到 server。
+# Nex server 镜像（无 Electron、无 nginx）：预先构建好的 SEA 二进制 + 同一次构建的 Web 静态资源。
+#   server 进程自己托管 Web UI（NEX_WEB_STATIC_ROOT）并提供 /api、/ws，登录页与会话由 server 处理。
+#   构建上下文只有 dist-docker/，由 scripts/stage-docker-context.sh 从 SEA 与 web 产物准备；
+#   SEA 的构建步骤与 .github/workflows/release-server.yaml 一致，不在镜像里重复构建。
+#   规格：docs/specs/docker-single-image.md
+FROM debian:bookworm-slim
 
-FROM node:24-bookworm AS builder
-WORKDIR /app
-
-# 不需要 Electron 二进制；husky 在无 .git 的构建上下文里要关掉。
-ENV ELECTRON_SKIP_BINARY_DOWNLOAD=1 \
-    HUSKY=0 \
-    NEX_ENV=production \
-    NODE_OPTIONS=--max-old-space-size=4096
-
-RUN corepack enable && corepack prepare pnpm@10.33.2 --activate
-
-# 先拷 lockfile 利用层缓存（link: 依赖指向根 packages，路径必须在拷贝后一致）。
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY apps/nex-cli/pnpm-lock.yaml apps/nex-cli/pnpm-workspace.yaml apps/nex-cli/package.json apps/nex-cli/
-COPY . .
-
-RUN pnpm install --frozen-lockfile
-
-# CLI 包们是根 workspace 成员；从根用拓扑序构建（apps/nex-cli 内跑 turbo 会因
-# link: 到根 packages 的越界路径报错）。CLI（agent 运行时）→ server（HTTP 入口）→ web（静态资源）。
-RUN pnpm -r --filter "@nex/cli..." build
-RUN pnpm --filter @nex/server build
-RUN pnpm --filter @nex/web build
-
-# ---- server 运行时 ----
-FROM node:24-bookworm-slim AS server
-
-# git：工作区/检查点功能；openssh-client：SSH 远程工作区（可选链路）。
+# git：工作区/检查点功能；openssh-client：SSH 远程工作区（可选链路）；curl：健康检查。
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git ca-certificates openssh-client \
+    && apt-get install -y --no-install-recommends git ca-certificates openssh-client curl \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-COPY --from=builder /app /app
+COPY dist-docker/nex-server /usr/local/bin/nex-server
+COPY dist-docker/web /app/web
 
 ENV NODE_ENV=production \
     NEX_ENV=production \
@@ -45,21 +20,14 @@ ENV NODE_ENV=production \
     NEX_SERVER_HOST=0.0.0.0 \
     NEX_DATA_BASE_DIR=/data \
     NEX_SERVER_WORKSPACE=/workspace \
-    # 让 server 能直接回 web 静态页（`/?token=` 种 cookie 依赖它）。
-    NEX_WEB_STATIC_ROOT=/app/packages/web/dist
+    NEX_WEB_STATIC_ROOT=/app/web
 
 VOLUME ["/data", "/workspace"]
+WORKDIR /workspace
 EXPOSE 3030
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s \
-  CMD node -e "fetch('http://127.0.0.1:3030/api/server-info?token='+process.env.NEX_SERVER_AUTH_TOKEN).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+# /api/auth/session 公开且有无令牌都返回 200，只用来判断进程是否在服务。
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
+  CMD curl -fsS "http://127.0.0.1:${PORT}/api/auth/session" >/dev/null || exit 1
 
-CMD ["node", "packages/server/dist/entry-http.js"]
-
-# ---- web 静态站点 ----
-FROM nginx:1.27-alpine AS web
-
-COPY --from=builder /app/packages/web/dist /usr/share/nginx/html
-COPY docker/web-nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
+CMD ["/usr/local/bin/nex-server"]

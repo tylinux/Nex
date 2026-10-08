@@ -80,3 +80,6 @@ scripts/deploy-server-local.sh
 output/
 # Nex 工作区文件搜索忽略规则：面向被搜索工作区的本地配置，每台机器各自生成
 .nexignore
+
+# Docker 构建上下文（scripts/stage-docker-context.sh 生成）
+dist-docker/

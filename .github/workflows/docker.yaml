@@ -1,4 +1,5 @@
-# ghcr.io 镜像发布：构建 server / web 两个镜像并推到 GitHub Container Registry。
+# ghcr.io 镜像发布：构建 nex-server 单镜像（server 进程同时托管 Web UI）并推到 GitHub Container Registry。
+# 规格：docs/specs/docker-single-image.md。nex-web（nginx）镜像已废弃，旧 tag 留在 ghcr 但不再更新。
 #
 # 触发与 tag 规则：
 #   - main 分支更新 / 手动 dispatch → 预览 tag：edge、main-<shortsha>（不动 latest）
@@ -6,10 +7,9 @@
 #
 # 产物（tag v1.0.2 为例）：
 #   ghcr.io/tylinux/nex-server:1.0.2 / :latest
-#   ghcr.io/tylinux/nex-web:1.0.2    / :latest
-# 已带 buildx + GHA 层缓存，重复构建很快。
+# 镜像只有两层产物（SEA 二进制 + web/dist），没有可缓存的编译层，所以不再使用 GHA 层缓存。
 #
-# 首次发布后建议把两个 package 的可见性改为 public（GitHub → Packages →
+# 首次发布后建议把 package 的可见性改为 public（GitHub → Packages →
 # Package settings → Danger Zone），部署机即可免登录拉取。
 name: Docker images (ghcr)
 
@@ -26,6 +26,8 @@ permissions:
 env:
   REGISTRY: ghcr.io
   OWNER: tylinux
+  # 必须与 third-party/runtime/sources.json 登记的 Node 版本一致（同 release-server.yaml）。
+  NODE_VERSION: "24.14.0"
 
 jobs:
   build-and-push:
@@ -34,11 +36,41 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+
+      # 与 release-server.yaml 相同的构建步骤：镜像只装配产物，不在镜像里重新构建。
+      - name: Build workspace packages, agent bundle and web
+        run: |
+          pnpm typecheck
+          pnpm --filter @nex/model-option-map build
+          pnpm exec turbo --skip-infer --cwd apps/nex-cli run build --filter='!@nex/cli' --force
+          pnpm -r --filter "@nex/cli..." build
+          pnpm --filter @nex/web build
+
+      - name: Build SEA binary (linux-x64)
+        working-directory: packages/server
+        run: node scripts/build-sea.mjs --target linux-x64
+
+      - name: Stage Docker context
+        run: scripts/stage-docker-context.sh linux-x64
+
       - name: Resolve image tags
         id: meta
         env:
           IMAGE_SERVER: ${{ env.REGISTRY }}/${{ env.OWNER }}/nex-server
-          IMAGE_WEB: ${{ env.REGISTRY }}/${{ env.OWNER }}/nex-web
         run: |
           set -euo pipefail
           write_tags() {
@@ -56,7 +88,6 @@ jobs:
             } >> "$GITHUB_OUTPUT"
           }
           write_tags server-tags "$IMAGE_SERVER"
-          write_tags web-tags "$IMAGE_WEB"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -72,18 +103,5 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          target: server
           push: true
           tags: ${{ steps.meta.outputs.server-tags }}
-          cache-from: type=gha,scope=server
-          cache-to: type=gha,scope=server,mode=max
-
-      - name: Build and push web image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: web
-          push: true
-          tags: ${{ steps.meta.outputs.web-tags }}
-          cache-from: type=gha,scope=web
-          cache-to: type=gha,scope=web,mode=max
