@@ -285,11 +285,13 @@ export function InlineEditableProviderCard({
         model: target.modelId ?? "",
         ...(aggregateValues ? { count: aggregateValues.count } : {}),
       };
+      // formatMessage 不解析 ICU plural，单复数由独立的 .one/.other 文案 key 表达。
+      const pluralSuffix = aggregateValues?.count === 1 ? "one" : "other";
       const messageIds = target.aggregate
         ? {
-            pending: "settings.modelProvider.modelsAdding",
-            success: "settings.modelProvider.modelsAddSuccess",
-            failure: "settings.modelProvider.modelsAddFailure",
+            pending: `settings.modelProvider.modelsAdding.${pluralSuffix}`,
+            success: `settings.modelProvider.modelsAddSuccess.${pluralSuffix}`,
+            failure: `settings.modelProvider.modelsAddFailure.${pluralSuffix}`,
           }
         : target.modelId
           ? target.operation === "delete"
@@ -308,20 +310,28 @@ export function InlineEditableProviderCard({
               success: "settings.modelProvider.providerSaveSuccess",
               failure: "settings.modelProvider.providerSaveFailure",
             };
-      notification.showFeedback({
-        key: dedupeKey,
-        message: notification.formatMessage(
-          {
-            id: messageIds.pending,
-          },
-          messageValues,
-        ),
-        state: "pending",
-        durationMs: 0,
-      });
+      // 删除是用户刚点下的显式动作，结果从列表消失即可见；只在失败时提示，不弹进行中/成功通知。
+      const silentOnSuccess = target.operation === "delete";
+      if (!silentOnSuccess) {
+        notification.showFeedback({
+          key: dedupeKey,
+          message: notification.formatMessage(
+            {
+              id: messageIds.pending,
+            },
+            messageValues,
+          ),
+          state: "pending",
+          durationMs: 0,
+        });
+      }
       try {
         await operation();
         if (!shouldApplyProviderSaveCompletion(draftRevisionRef.current, revision)) return;
+        if (silentOnSuccess) {
+          notification.dismissFeedback(dedupeKey);
+          return;
+        }
         notification.showFeedback({
           key: dedupeKey,
           message: notification.formatMessage(

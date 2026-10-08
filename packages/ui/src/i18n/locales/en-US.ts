@@ -2716,12 +2716,14 @@ const enUS: Record<string, string> = {
   "settings.modelProvider.modelDeleteSuccess": "{provider} / {model} deleted",
   "settings.modelProvider.modelDeleteFailure": "Failed to delete {provider} / {model}: {error}",
   "settings.modelProvider.modelSaveFailure": "Failed to save {provider} / {model}: {error}",
-  "settings.modelProvider.modelsAdding":
-    "Adding {count, plural, one {# model} other {# models}} to {provider}",
-  "settings.modelProvider.modelsAddSuccess":
-    "{count, plural, one {# model} other {# models}} added to {provider}",
-  "settings.modelProvider.modelsAddFailure":
-    "Failed to add {count, plural, one {# model} other {# models}} to {provider}: {models}",
+  "settings.modelProvider.modelsAdding.one": "Adding {count} model to {provider}",
+  "settings.modelProvider.modelsAdding.other": "Adding {count} models to {provider}",
+  "settings.modelProvider.modelsAddSuccess.one": "{count} model added to {provider}",
+  "settings.modelProvider.modelsAddSuccess.other": "{count} models added to {provider}",
+  "settings.modelProvider.modelsAddFailure.one":
+    "Failed to add {count} model to {provider}: {models}",
+  "settings.modelProvider.modelsAddFailure.other":
+    "Failed to add {count} models to {provider}: {models}",
   "settings.modelProvider.cancel": "Cancel",
   "settings.modelProvider.name": "Name",
   "settings.modelProvider.namePlaceholder": "e.g. DeepSeek",
